@@ -49,7 +49,7 @@ Opciones habituales:
 - **Dispositivo físico:** app **Expo Go** + escanear QR.
 - **Android:** `npm run android`
 - **iOS (macOS):** `npm run ios`
-- **Web (opcional):** `npm run web`
+- **Web (opcional):** `npm run web` (requiere `react-dom` y `react-native-web`, ya en el proyecto tras `npm install`; si Expo avisa que faltan: `npx expo install react-dom react-native-web`).
 
 Limpieza de caché si hace falta:
 

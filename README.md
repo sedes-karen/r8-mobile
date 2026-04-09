@@ -60,7 +60,7 @@ npm install
 
 ## Ejecutar la app
 
-El proyecto usa Expo. Tenés 3 formas típicas de correrla.
+El proyecto usa Expo. Tenés varias formas típicas de correrla.
 
 ### Opción A: Dispositivo físico (Expo Go) (recomendado)
 
@@ -94,6 +94,20 @@ npm run android
 
 ```bash
 npm run ios
+```
+
+### Opción D: Navegador (web)
+
+Sirve para pruebas rápidas de UI. Las dependencias **`react-dom`** y **`react-native-web`** están declaradas en el proyecto (instalación: `npm install`). Si en un entorno viejo falta alguna y Expo lo indica al correr web:
+
+```bash
+npx expo install react-dom react-native-web
+```
+
+Luego:
+
+```bash
+npm run web
 ```
 
 ## Scripts disponibles
