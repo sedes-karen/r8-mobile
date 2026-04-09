@@ -39,3 +39,7 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Temporary directory at project root (ignore contents but keep directory)
+tmp/*
+!tmp/.gitkeep
