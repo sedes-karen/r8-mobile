@@ -4,6 +4,8 @@ Documento para célula de diseño (UX/UI). Ordenado por prioridad de impacto en 
 
 Objetivo: entregar primero los diseños que desbloquean más pantallas y equipos.
 
+Las pantallas listadas corresponden a los flujos del front de referencia **r8-site**; el alcance técnico de datos y navegación debe mantenerse alineado con [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md) y con los cuerpos HTTP en [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md).
+
 ---
 
 ## Prioridad P0 (inmediata)
@@ -25,7 +27,7 @@ Razón: desbloquea inicio de app, autenticación y prioridad funcional de artist
 2. Dashboard (label)
 3. Analytics (label)
 4. Liked Tracks (favoritos del player)
-5. Feedback simple legacy
+5. Formulario de feedback del destinatario (pantalla asociada a una promo, p. ej. ruta web `/promo/:id/feedback`)
 
 Razón: cubre visualización de valor para ambos roles y pantallas de uso frecuente.
 
@@ -90,4 +92,6 @@ Cada entrega de diseño debe incluir:
 - Casos borde visuales.
 - Nota de accesibilidad básica (contraste, tamaño táctil, jerarquía textual).
 
-<!-- Documento creado en colaboración con Cursor -->
+---
+
+*Documento creado en colaboración con Cursor.*

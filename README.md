@@ -4,7 +4,12 @@ Proyecto base para desarrollar la app móvil del sistema **R8** en React Native 
 
 ## Estado actual del proyecto
 
-El proyecto viene con un **template inicial** (archivo principal `App.tsx`). Al ejecutar la app verás un texto de bienvenida y `StatusBar`.
+El proyecto viene con un **template inicial** en **TypeScript** (archivo principal `App.tsx`). Al ejecutar la app verás un texto de bienvenida y `StatusBar`.
+
+### Alineación con el ecosistema R8
+
+- **Objetivo funcional:** la app móvil debe cubrir los mismos flujos que el front **r8-site** (React), consumiendo la misma API **r8-api** (Express).
+- **Contrato HTTP:** la API organiza rutas por **dominio** (`/releases`, `/promos`, `/recipient-lists`, `/feedback`, …) y el contexto de label/usuario lo resuelve el **JWT**, no rutas anidadas del estilo `/labels/:labelId/releases`. La referencia para el curso está en `docs/REFERENCIA_API_R8.md`.
 
 ## Requisitos previos
 
@@ -116,6 +121,14 @@ Plan de trabajo y distribución por equipos:
 
 - `docs/PLAN_TRABAJO_ALUMNOS_RN.md`
 
+Referencia HTTP (paridad con r8-site / r8-api):
+
+- `docs/REFERENCIA_API_R8.md`
+
+DTOs y cuerpos de cada petición (para consumo en stage sin código de API):
+
+- `docs/DTOs_Y_CUERPOS_HTTP.md`
+
 Guía de inicio (incluye explicaciones generales):
 
 - `docs/_INIT.md`
@@ -132,5 +145,8 @@ Backlog para diseño:
 
 - `docs/PANTALLAS_PARA_DISENO_PRIORIZADAS.md`
 
-<!-- Documento creado en colaboración con Cursor -->
+Índice conceptual de API (rutas + glosario): `docs/REFERENCIA_API_R8.md`. Cuerpos de petición: `docs/DTOs_Y_CUERPOS_HTTP.md`.
 
+---
+
+*Documento creado en colaboración con Cursor.*

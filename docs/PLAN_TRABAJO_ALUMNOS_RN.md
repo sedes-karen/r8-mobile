@@ -10,6 +10,7 @@ Objetivos centrales:
 - Priorizar primero el perfil de Artista.
 - Avanzar en Perfil de Label priorizando visualización de datos antes del CRUD completo.
 - Dejar pendientes preparados para continuidad sin romper la base integrada.
+- **Paridad con r8-site:** las capacidades de la app deben mapearse a las rutas y flujos del front web (`r8-site`) y al contrato documentado de **r8-api**. Ver [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md) (sustituye supuestos REST antiguos con rutas bajo `/labels/:labelId/...`). Los **DTOs por request** (sin leer código de la API) están en [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md).
 
 ---
 
@@ -62,21 +63,23 @@ Principio: primero entregar lectura robusta y estable; después CRUD avanzado.
 
 ## 4. Roadmap por fases (sin bloqueos)
 
-## Fase 0 (2-3 días) — Base común
+### Fase 0 (2-3 días) — Base común
 
 Objetivo: habilitar trabajo paralelo inmediato en todos los equipos.
 
 Entregables:
 
 - Estructura de navegación principal (stacks por rol).
-- Capa API común (`apiClient`, auth token, refresh).
+- Capa API común (`apiClient`, **accessToken** en `Authorization`, estrategia de **refresh** alineada con `POST /auth/refresh` y cookies — ver [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)).
 - Base de diseño (tokens de color, spacing, tipografías).
 - Modelos/contratos compartidos mínimos.
 - Mocks funcionales por pantalla para desarrollo desacoplado.
 
 Regla: cualquier pantalla debe poder iniciarse con mocks aunque el backend final no esté disponible.
 
-## Fase 1 (Semana 1) — Perfil de Artista (máxima prioridad)
+Regla de integración: los contratos de endpoints se congelan según **r8-site** (`src/api/`) y **r8-api** (`docs/MODULES.md`), no según listados antiguos anidados por `labelId` en el path.
+
+### Fase 1 (Semana 1) — Perfil de Artista (máxima prioridad)
 
 Entregables mínimos:
 
@@ -88,7 +91,7 @@ Entregables mínimos:
 
 Resultado esperado: módulo usable end-to-end.
 
-## Fase 2 (Semana 2) — Perfil de Label (lectura primero)
+### Fase 2 (Semana 2) — Perfil de Label (lectura primero)
 
 Entregables escalonados:
 
@@ -98,15 +101,17 @@ Entregables escalonados:
 
 Resultado esperado: primero visualización estable con datos reales; CRUD completo solo si no compromete estabilidad.
 
-## Fase 3 (Semanas 3-4) — Desarrollo paralelo de dominios
+### Fase 3 (Semanas 3-4) — Desarrollo paralelo de dominios
 
-Trabajo por equipos para acelerar cobertura:
+Trabajo por equipos para acelerar cobertura (letras **A–E** = paralelismo en la fase; los documentos funcionales están numerados **1–5**):
 
-- Equipo A: Auth + Splash + navegación final.
-- Equipo B: Promos Player (inbox, detalle básico, estados).
-- Equipo C: Dashboard + Analytics (lectura y métricas base).
-- Equipo D: Releases (lista + detalle; create/edit parcial si alcanza).
-- Equipo E: Recipients + Audience Lists (lectura y operaciones básicas).
+| Letra (fase 3) | Área | Documento funcional |
+|----------------|------|----------------------|
+| A | Auth + Splash + navegación final | [EQUIPO_1_FUNCIONAL.md](./EQUIPO_1_FUNCIONAL.md) |
+| B | Promos Player (inbox, detalle, estados) | [EQUIPO_3_FUNCIONAL.md](./EQUIPO_3_FUNCIONAL.md) |
+| C | Dashboard + Analytics | [EQUIPO_2_FUNCIONAL.md](./EQUIPO_2_FUNCIONAL.md) |
+| D | Releases + Promos (label) | [EQUIPO_4_FUNCIONAL.md](./EQUIPO_4_FUNCIONAL.md) |
+| E | Recipients + Audience Lists + Feedback label | [EQUIPO_5_FUNCIONAL.md](./EQUIPO_5_FUNCIONAL.md) |
 
 ---
 
@@ -121,6 +126,7 @@ Estructura recomendada:
 - `src/screens/` -> pantallas finales por dominio.
 - `src/features/<dominio>/` -> lógica del dominio, hooks y mapeos.
 - `src/services/api/` -> cliente HTTP y endpoints.
+- `src/types/` (o tipos junto a servicios) -> DTOs / interfaces alineadas a la API.
 - `src/navigation/` -> stack/tab navigators y guards por rol.
 
 Reglas de arquitectura:
@@ -250,7 +256,7 @@ El plan propone 5 equipos equilibrados y trabajo por fases para:
 - Pantallas:
   - Promos Player (inbox + detalle)
   - Liked Tracks
-  - Feedback simple legacy
+  - Formulario de feedback del destinatario (p. ej. ruta web `/promo/:id/feedback`)
   - Feedback/dismiss desde player
 - Se espera:
   - experiencia de consumo/reproducción estable,
@@ -288,4 +294,6 @@ El plan propone 5 equipos equilibrados y trabajo por fases para:
   - luego Label lectura y resto de dominios con consistencia Atomic Design.
 - Documento: [PANTALLAS_PARA_DISENO_PRIORIZADAS.md](./PANTALLAS_PARA_DISENO_PRIORIZADAS.md)
 
-<!-- Documento creado en colaboración con Cursor -->
+---
+
+*Documento creado en colaboración con Cursor.*

@@ -4,62 +4,64 @@ Foco de equipo: Promos Player, Liked Tracks y feedback de receptor/artista.
 
 Objetivo: consolidar experiencia core del usuario receptor/artista.
 
+**Contrato HTTP actual:** ver [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md). El feedback de release vive bajo **`/releases/:releaseId/feedback`**, no bajo `/labels/...`. **DTOs:** [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md).
+
 ---
 
 ## 1. Orden de pantallas (lectura -> escritura/edición)
 
 1. Promos Player (inbox + detalle reproducción) — lectura
 2. Liked Tracks (favoritos del player) — lectura
-3. Feedback simple legacy — lectura/carga
+3. Formulario de feedback del destinatario (ruta web `/promo/:id/feedback`) — lectura/carga
 4. Promos Player — acciones de feedback/dismiss
-5. Feedback simple legacy — envío
+5. Formulario de feedback del destinatario — envío
 
 ---
 
 ## 2. Detalle técnico por pantalla
 
-## 2.1 Promos Player (lectura)
+### 2.1 Promos Player (lectura)
 
 - Ruta web origen: `/promos-player`
 - Requests:
-  - `GET /promos/inbox`
+  - `GET /promos/inbox` (query `token=` si el usuario entra sin sesión Bearer)
   - `GET /promos/inbox/pending-count`
-  - `GET /promos/:id`
-  - `GET /labels/:labelId/releases/:releaseId`
+  - `GET /promos/:id` — detalle con release embebido (URLs de audio/artwork firmadas)
+  - Detalle de release (si hace falta fuera del payload de la promo): `GET /releases/:releaseId` (mismo criterio de `token` en query que el web)
 - Criterio:
   - lista inbox, detalle promo y reproducción básica funcionando.
 
-## 2.2 Liked Tracks
+### 2.2 Liked Tracks
 
 - Ruta web origen: funcionalidad dentro de player
 - Requests:
-  - `GET /feedback/liked-tracks`
+  - `GET /feedback/liked-tracks` (con `?token=` si aplica)
 - Criterio:
   - listado de favoritos visible y navegable.
 
-## 2.3 Feedback simple legacy (lectura)
+### 2.3 Formulario de feedback del destinatario (lectura)
 
 - Ruta web origen: `/promo/:id/feedback`
 - Requests:
-  - `GET /promos/:id`
+  - `GET /promos/:id` (carga promo y contexto)
 - Criterio:
   - pantalla carga promo y formulario.
 
-## 2.4 Promos Player (feedback/dismiss)
+### 2.4 Promos Player (feedback/dismiss)
 
 - Requests:
-  - `POST /labels/:labelId/releases/:releaseId/feedback`
-  - `PATCH /labels/.../feedback/:feedbackId`
-  - `PATCH /labels/.../feedback/:feedbackId/track-stats`
-  - `PATCH /labels/.../feedback/:feedbackId/track-stats/liked`
-  - `POST /promos/:id/dismiss`
+  - Asegurar feedback: `POST /releases/:releaseId/feedback` (body mínimo `{ userId }` para idempotencia)
+  - Formulario: `PATCH /releases/:releaseId/feedback/:feedbackId`
+  - Stats de escucha: `PATCH /releases/:releaseId/feedback/:feedbackId/track-stats`
+  - Like de track: `PATCH /releases/:releaseId/feedback/:feedbackId/track-stats/liked`
+  - Descartar del inbox: `POST /promos/:id/dismiss` (con `?token=` si aplica; respuesta típica 204)
 - Criterio:
   - feedback incremental y dismiss estables.
 
-## 2.5 Feedback simple legacy (envío)
+### 2.5 Formulario de feedback del destinatario (envío)
 
 - Requests:
-  - `POST /labels/:labelId/releases/:releaseId/feedback`
+  - Mismas rutas bajo `/releases/:releaseId/feedback` que en la sección 2.4 de este documento (create/ensure + PATCH formulario).
 - Criterio:
   - submit funcional con confirmación al usuario.
 
@@ -75,7 +77,9 @@ Objetivo: consolidar experiencia core del usuario receptor/artista.
 ## 4. Entregables
 
 - Flujo de reproducción + favoritos operativo.
-- Captura de feedback sin regressions.
+- Captura de feedback sin regresiones.
 - Casos de prueba de token y sin token.
 
-<!-- Documento creado en colaboración con Cursor -->
+---
+
+*Documento creado en colaboración con Cursor.*

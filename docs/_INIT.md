@@ -1,256 +1,102 @@
-Perfecto, te armo un documento claro, didáctico y listo para compartir con tus alumnos 👇
+# Guía de inicio — Proyecto **R8 Mobile**
+
+Documento para el cursado de **Programación de dispositivos móviles**. El repo **`r8-mobile`** ya está creado: **Expo** + **React Native** + **TypeScript** (archivo de entrada `App.tsx`).
+
+## Información general
+
+- **Objetivo:** App móvil multiplataforma (Android + iOS) con **paridad funcional** respecto al front web **r8-site** (mismos flujos y mismos endpoints HTTP contra **r8-api**).
+- **Contrato API:** no usar documentación que anide recursos bajo `/labels/:labelId/...` para releases o promos; mapa de rutas en [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md). **Cuerpos JSON, query y enums por endpoint** (para quienes solo usan la API en stage): [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md). Opcionalmente el código de `r8-site` (`src/api/`) como segunda referencia.
+
+**Términos útiles:** **JWT** = token en `Authorization: Bearer`; **DTO** = forma del JSON de entrada/salida; **stage** = entorno de pruebas de la API. Tabla extendida en [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md#glosario-breve).
 
 ---
 
-# 📱 Guía de Inicio — Proyecto **R8 Mobile**
+## 1. Requisitos previos
 
-## 📌 Información general
+- **Node.js** (LTS recomendada; compatible con la versión del `package.json` del proyecto).
+- **Git**
+- **macOS:** Xcode para simulador iOS; opcional **Watchman** (`brew install watchman`).
+- **Android:** Android Studio + emulador.
 
-- **Nombre del proyecto:** `R8`
-- **Repositorio:** `r8-mobile`
-- **Tecnología:** React Native
-- **Objetivo:** Crear una aplicación móvil multiplataforma (Android + iOS)
-
----
-
-# 🧰 1. Requisitos previos
-
-Antes de comenzar, es necesario instalar las siguientes herramientas:
-
-## 🔹 Node.js
-
-- Descargar desde: [https://nodejs.org/](https://nodejs.org/)
-- Verificar instalación:
+Verificar:
 
 ```bash
 node -v
 npm -v
-```
-
-## 🔹 Git
-
-- Descargar desde: [https://git-scm.com/](https://git-scm.com/)
-- Verificar:
-
-```bash
 git --version
-```
-
-## 🔹 Watchman (solo macOS recomendado)
-
-```bash
-brew install watchman
-```
-
-## 🔹 Expo CLI (recomendado para comenzar)
-
-Vamos a usar **Expo** porque simplifica muchísimo el desarrollo inicial.
-
-```bash
-npm install -g create-expo-app
 ```
 
 ---
 
-# 🚀 2. Crear el proyecto
+## 2. Instalación y ejecución
 
-## 📁 Crear la app
-
-```bash
-npx create-expo-app r8-mobile
-```
-
-Durante el proceso:
-
-- Elegir template: **blank (JavaScript)** (ya que no usan TypeScript)
-
-## 📂 Entrar al proyecto
+Desde la raíz del repo `r8-mobile`:
 
 ```bash
-cd r8-mobile
+npm ci
 ```
 
-## ▶️ Ejecutar el proyecto
+(si no hay lockfile alineado en tu entorno, `npm install`).
+
+Ejecutar:
 
 ```bash
 npm start
 ```
 
-Esto abrirá el panel de Expo en el navegador.
+Opciones habituales:
 
----
+- **Dispositivo físico:** app **Expo Go** + escanear QR.
+- **Android:** `npm run android`
+- **iOS (macOS):** `npm run ios`
+- **Web (opcional):** `npm run web`
 
-# 📱 3. Ejecutar en dispositivos
-
-## Opción 1: Teléfono físico (recomendado para alumnos)
-
-1. Instalar la app **Expo Go**
-2. Escanear el QR que aparece en la terminal o navegador
-
----
-
-## Opción 2: Emuladores
-
-### Android (Windows / Linux / macOS)
-
-- Instalar Android Studio
-- Crear un emulador
-- Ejecutar:
+Limpieza de caché si hace falta:
 
 ```bash
-npm run android
-```
-
-### iOS (solo macOS)
-
-- Instalar Xcode
-- Ejecutar:
-
-```bash
-npm run ios
+npx expo start --clear
 ```
 
 ---
 
-# 🗂️ 4. Estructura inicial del proyecto
+## 3. Estructura esperada del código (evolución del proyecto)
 
-```
-r8-mobile/
-├── App.js
-├── package.json
-├── assets/
-└── node_modules/
-```
+El template inicial es mínimo. El plan de la cátedra propone organizar así (ver [PLAN_TRABAJO_ALUMNOS_RN.md](./PLAN_TRABAJO_ALUMNOS_RN.md)):
 
-### 📌 Archivo principal: `App.js`
-
-Ejemplo inicial:
-
-```javascript
-import { Text, View } from "react-native";
-
-export default function App() {
-  return (
-    <View>
-      <Text>Bienvenidos a R8 🚀</Text>
-    </View>
-  );
-}
-```
+- `src/components/` — Atomic Design (atoms / molecules / organisms)
+- `src/screens/` — pantallas por flujo
+- `src/services/api/` — cliente HTTP y llamadas al backend
+- `src/types/` o tipos junto al servicio — formas de datos (**DTOs** / interfaces TypeScript) alineadas a [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md)
+- `src/navigation/` — stacks y guards por rol
+- `src/features/<dominio>/` — hooks y lógica de dominio
 
 ---
 
-# 🔧 5. Inicializar repositorio Git
+## 4. Conceptos a cubrir en el cursado
 
-## Crear repo local
-
-```bash
-git init
-git add .
-git commit -m "Initial commit - R8 project setup"
-```
-
-## Crear repositorio remoto (GitHub)
-
-Nombre: `r8-mobile`
-
-Luego vincular:
-
-```bash
-git remote add origin https://github.com/TU_USUARIO/r8-mobile.git
-git branch -M main
-git push -u origin main
-```
+- Componentes, JSX, estado (`useState`, etc.)
+- Estilos (`StyleSheet` o el sistema que adopte el equipo)
+- Navegación (p. ej. React Navigation)
+- Consumo de **r8-api** con el mismo contrato que **r8-site** (Bearer + refresh; ver referencia API)
+- Manejo de errores y estados vacíos/carga
 
 ---
 
-# 📦 6. Scripts importantes
+## 5. Documentación relacionada
 
-En `package.json`:
-
-```json
-"scripts": {
-  "start": "expo start",
-  "android": "expo start --android",
-  "ios": "expo start --ios",
-  "web": "expo start --web"
-}
-```
+- Plan por equipos y fases: [PLAN_TRABAJO_ALUMNOS_RN.md](./PLAN_TRABAJO_ALUMNOS_RN.md)
+- Endpoints y alineación con el web: [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)
+- DTOs y cuerpos por petición (stage): [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md)
+- Especificaciones por equipo: `EQUIPO_1_FUNCIONAL.md` … `EQUIPO_5_FUNCIONAL.md`
+- Backlog de diseño: [PANTALLAS_PARA_DISENO_PRIORIZADAS.md](./PANTALLAS_PARA_DISENO_PRIORIZADAS.md)
 
 ---
 
-# 🧪 7. Primer cambio de prueba
+## 6. Notas
 
-Modificar `App.js`:
-
-```javascript
-<Text>R8 App funcionando correctamente ✅</Text>
-```
-
-Guardar y ver cómo se actualiza automáticamente en el dispositivo.
+- iOS requiere macOS para simulador local (salvo build en la nube).
+- La integración con cookies de refresh en móvil debe definirse con cuidado (cliente HTTP / almacenamiento). Quien no tenga el repo **r8-api** debe basarse en [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md) y en pruebas contra stage.
 
 ---
 
-# 📚 8. Conceptos clave a introducir a los alumnos
-
-- Componentes (`View`, `Text`, `Button`)
-- JSX
-- Props
-- Estado (`useState`)
-- Estilos con `StyleSheet`
-- Navegación (más adelante con React Navigation)
-
----
-
-# 🧱 9. Buenas prácticas desde el inicio
-
-Crear estructura básica:
-
-```bash
-mkdir src
-mkdir src/components
-mkdir src/screens
-mkdir src/services
-```
-
----
-
-# 📌 10. Próximos pasos sugeridos para la cátedra
-
-1. Crear pantalla de login
-2. Navegación entre pantallas
-3. Consumo de API
-4. Manejo de estado
-5. Persistencia local
-6. Publicación de la app
-
----
-
-# ⚠️ Notas importantes
-
-- Expo simplifica el desarrollo, pero más adelante se puede migrar a **React Native CLI** si necesitan más control.
-- iOS solo puede compilarse en macOS (salvo usando servicios en la nube como Expo EAS).
-
----
-
-# 🎯 Objetivo de esta primera etapa
-
-Que el alumno logre:
-
-- Tener el entorno funcionando
-- Ejecutar la app en su dispositivo
-- Entender la estructura base
-- Hacer sus primeras modificaciones
-
----
-
-Si querés, en el siguiente paso puedo armarte:
-
-- 📚 **Clase 1 completa (teórica + práctica)**
-- 🧪 **Primer TP guiado**
-- 🧱 **Arquitectura base recomendada para escalar el proyecto**
-- 🔌 Integración con backend (ideal si querés conectarlo con algo tipo Node como lo que ya trabajás)
-
-Solo decime 👍
-
-<!-- Documento creado en colaboración con Cursor -->
+*Documento creado en colaboración con Cursor.*
