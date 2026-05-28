@@ -9,7 +9,7 @@
 
 - Promos: Es posible que este grupo de pantallas pueda accederse sin estar autenticado. Requiere clarificación
   - Player: Lista las promos recibidas (inbox), incluyendo el contador de pendientes
-  - PromoDetail(promo-id): Detalle de una promo, reproductor de audio, botones de feedback/dismiss
+  - Details(promo-id): Detalle de una promo, reproductor de audio, botones de feedback/dismiss
   - Feedback(promo-id): Formulario para enviar retroalimentación sobre una promo específica
   - LikedTracks: Lista de canciones favoritas
 - Profile: Perfil del artista
