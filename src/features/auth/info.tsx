@@ -32,3 +32,13 @@ export function useIsAuthenticated() {
 export function useIsNotAuthenticated() {
   return !useContext(AuthInfo).isAuthenticated;
 }
+
+export function useIsArtist() {
+  const info = useContext(AuthInfo);
+  return info.isAuthenticated && info.role === 'artist';
+}
+
+export function useIsLabel() {
+  const info = useContext(AuthInfo);
+  return info.isAuthenticated && info.role === 'label';
+}
