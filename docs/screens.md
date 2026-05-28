@@ -1,13 +1,13 @@
-# Común para todos
+# Común para todos los roles
 
 - Auth: Autenticación en general
   - Login: Inicio de sesión
   - Signup: Registro
   - PasswordReset: Recuperación de contraseña
 
-# Rutas solo del artista
+# Pantallas solo del artista
 
-- Promos: Es posible que este grupo pueda accederse sin estar autenticado. Requiere clarificación
+- Promos: Es posible que este grupo de pantallas pueda accederse sin estar autenticado. Requiere clarificación
   - Player: Lista las promos recibidas (inbox), incluyendo el contador de pendientes
   - PromoDetail(promo-id): Detalle de una promo, reproductor de audio, botones de feedback/dismiss
   - Feedback(promo-id): Formulario para enviar retroalimentación sobre una promo específica
@@ -16,25 +16,26 @@
   - View
   - Edit
 
-# Rutas solo del label
+# Pantallas solo del label
 
 - Dashboard: dashboard del label
 - Profile: Perfil del label
+- Analytics: Información agregada por release, por fecha, etc
 - Releases: CRUD de releases
   - List
   - New
   - Details
   - Edit
-  - Promos: CRUD de promos
+  - Promos: CRUD de promos (están atadas a un release particular)
     - List(release-id)
     - New(release-id): Crea una promo en una release específica
     - Details(promo-id)
     - Edit(promo-id)
-- AudienceLists
+- RecipientLists
   - List
   - New
   - Details
   - Edit
-  - Feedback / Analytics
+  - Feedback
   - BulkUpload
   - alta de destinatario en lista
