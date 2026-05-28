@@ -34,8 +34,8 @@
 - RecipientLists
   - List
   - New
-  - Details
-  - Edit
+  - Details(recipient-list-id)
+  - Edit(recipient-list-id)
   - Feedback
   - BulkUpload
   - alta de destinatario en lista
