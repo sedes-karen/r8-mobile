@@ -103,33 +103,40 @@ const LabelRecipientListsStack = createNativeStackNavigator({
   }
 } as const);
 
-const RootStack = createNativeStackNavigator({
+const ArtistStack = createNativeStackNavigator({
+  initialRouteName: 'Promos',
+  screens: {
+    Promos: ArtistPromosStack,
+    Profile: ArtistProfileStack,
+  }
+} as const);
+
+const LabelStack = createNativeStackNavigator({
   initialRouteName: 'Dashboard',
+  screens: {
+    Profile: LabelProfileStack,
+    Dashboard: LabelDashboardScreen,
+    Analytics: LabelAnalyticsScreen,
+    Releases: LabelReleasesStack,
+    RecipientLists: LabelRecipientListsStack,
+  }
+} as const);
+
+const RootStack = createNativeStackNavigator({
   screens: {
     Auth: {
       screen: AuthStack,
       if: useIsNotAuthenticated,
     },
-  },
-  groups: {
     Artist: {
       if: useIsArtist,
-      screens: {
-        Promos: ArtistPromosStack,
-        Profile: ArtistProfileStack,
-      },
+      screen: ArtistStack,
     },
     Label: {
       if: useIsLabel,
-      screens: {
-        Profile: LabelProfileStack,
-        Dashboard: LabelDashboardScreen,
-        Analytics: LabelAnalyticsScreen,
-        Releases: LabelReleasesStack,
-        RecipientLists: LabelRecipientListsStack,
-      },
+      screen: LabelStack,
     },
-  }
+  },
 } as const).
   // Todos los providers van acá abajo
   with(({ Navigator }) => (
