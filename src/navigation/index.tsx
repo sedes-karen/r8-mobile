@@ -44,81 +44,69 @@ const AuthStack = createNativeStackNavigator({
   }
 } as const);
 
-const ArtistPromosStack = createNativeStackNavigator({
-  initialRouteName: 'Player',
-  screens: {
-    Player: ArtistPromosPlayerScreen,
-    Detail: ArtistPromosDetailsScreen,
-    Feedback: ArtistPromosFeedbackScreen,
-    LikedTracks: ArtistPromosLikedTracksScreen,
-  },
-});
-
-const ArtistProfileStack = createNativeStackNavigator({
-  initialRouteName: 'View',
-  screens: {
-    View: ArtistProfileViewScreen,
-    Edit: ArtistProfileEditScreen,
-  },
-});
-
-const LabelProfileStack = createNativeStackNavigator({
-  initialRouteName: 'View',
-  screens: {
-    View: LabelProfileViewScreen,
-    Edit: LabelProfileEditScreen,
-  },
-});
-
-const LabelReleasesPromosStack = createNativeStackNavigator({
-  initialRouteName: 'List',
-  screens: {
-    List: LabelReleasesPromosListScreen,
-    New: LabelReleasesPromosNewScreen,
-    Details: LabelReleasesPromosDetailsScreen,
-    Edit: LabelReleasesPromosEditScreen,
-  },
-});
-
-const LabelReleasesStack = createNativeStackNavigator({
-  initialRouteName: 'List',
-  screens: {
-    List: LabelReleasesListScreen,
-    New: LabelReleasesNewScreen,
-    Details: LabelReleasesDetailsScreen,
-    Edit: LabelReleasesEditScreen,
-    Promos: LabelReleasesPromosStack,
-  }
-});
-
-const LabelRecipientListsStack = createNativeStackNavigator({
-  initialRouteName: 'List',
-  screens: {
-    List: LabelRecipientListsListScreen,
-    New: LabelRecipientListsNewScreen,
-    Details: LabelRecipientListsDetailsScreen,
-    Edit: LabelRecipientListsEditScreen,
-    Feedback: LabelRecipientListsFeedbackScreen,
-    BulkUpload: LabelRecipientListsBulkUploadScreen,
-  }
-} as const);
-
 const ArtistStack = createNativeStackNavigator({
   initialRouteName: 'Promos',
   screens: {
-    Promos: ArtistPromosStack,
-    Profile: ArtistProfileStack,
+    Promos: createNativeStackNavigator({
+      initialRouteName: 'Player',
+      screens: {
+        Player: ArtistPromosPlayerScreen,
+        Details: ArtistPromosDetailsScreen,
+        Feedback: ArtistPromosFeedbackScreen,
+        LikedTracks: ArtistPromosLikedTracksScreen,
+      },
+    }),
+    Profile: createNativeStackNavigator({
+      initialRouteName: 'View',
+      screens: {
+        View: ArtistProfileViewScreen,
+        Edit: ArtistProfileEditScreen,
+      },
+    }),
   }
 } as const);
 
 const LabelStack = createNativeStackNavigator({
   initialRouteName: 'Dashboard',
   screens: {
-    Profile: LabelProfileStack,
     Dashboard: LabelDashboardScreen,
     Analytics: LabelAnalyticsScreen,
-    Releases: LabelReleasesStack,
-    RecipientLists: LabelRecipientListsStack,
+    Profile: createNativeStackNavigator({
+      initialRouteName: 'View',
+      screens: {
+        View: LabelProfileViewScreen,
+        Edit: LabelProfileEditScreen,
+      },
+    }),
+    Releases: createNativeStackNavigator({
+      initialRouteName: 'List',
+      screens: {
+        List: LabelReleasesListScreen,
+        New: LabelReleasesNewScreen,
+        Details: LabelReleasesDetailsScreen,
+        Edit: LabelReleasesEditScreen,
+        Promos: createNativeStackNavigator({
+          initialRouteName: 'List',
+          screens: {
+            List: LabelReleasesPromosListScreen,
+            New: LabelReleasesPromosNewScreen,
+            Details: LabelReleasesPromosDetailsScreen,
+            Edit: LabelReleasesPromosEditScreen,
+          },
+        }),
+      }
+    }),
+    RecipientLists: createNativeStackNavigator({
+      initialRouteName: 'List',
+      screens: {
+        List: LabelRecipientListsListScreen,
+        New: LabelRecipientListsNewScreen,
+        Details: LabelRecipientListsDetailsScreen,
+        Edit: LabelRecipientListsEditScreen,
+        Feedback: LabelRecipientListsFeedbackScreen,
+        BulkUpload: LabelRecipientListsBulkUploadScreen,
+      }
+    }),
   }
 } as const);
 
