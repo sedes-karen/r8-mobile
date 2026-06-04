@@ -1,11 +1,11 @@
 import React from 'react';
 import { Text, Pressable, View } from 'react-native';
-import { styles } from './Checkbox.styles'; // Importación de los estilos independientes
+import { styles } from './Checkbox.styles'; 
 
 export type CheckboxStatus = 'marked' | 'unmarked' | 'disabledMarked' | 'disabledUnmarked';
 
 interface CheckboxProps {
-    id: string; // Se mantiene por tipado, aunque en Native no se usa htmlFor
+    id: string;
     label: string;
     status?: CheckboxStatus;
     onChange?: (newStatus: CheckboxStatus) => void;
@@ -18,7 +18,6 @@ export default function Checkbox({ label, status = 'unmarked', onChange }: Check
     const handlePress = () => {
         if (isDisabled || !onChange) return;
 
-        // Alterna entre los estados activos válidos
         const nextStatus: CheckboxStatus = isChecked ? 'unmarked' : 'marked';
         onChange(nextStatus);
     };
