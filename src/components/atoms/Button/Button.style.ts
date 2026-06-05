@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { colors } from '../../../constants/design';
+import { colors, spacing, fontSizes, fontWeights, borderRadius } from '../../../constants/design';
 
 export const styles = StyleSheet.create({
     btn: {
@@ -8,10 +8,10 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         borderWidth: 1,
         borderColor: 'transparent',
-        borderRadius: 6,
+        borderRadius: borderRadius.sm,
     },
     content: {
-        fontWeight: '600',
+        fontWeight: fontWeights.semibold,
         textTransform: 'uppercase',
         letterSpacing: 1.5,
     },
@@ -20,45 +20,45 @@ export const styles = StyleSheet.create({
     },
     secondary: {
         backgroundColor: colors.background,
-        borderColor: '#E5E7EB',
+        borderColor: colors.neutralLight,
     },
     danger: {
-        backgroundColor: colors.error || '#ef4444',
+        backgroundColor: colors.error,
     },
     success: {
-        backgroundColor: '#10b981',
+        backgroundColor: colors.success,
     },
     primaryText: {
-        color: '#ffffff',
+        color: colors.onPrimary,
     },
     secondaryText: {
         color: colors.text,
     },
     dangerText: {
-        color: '#ffffff',
+        color: colors.onError,
     },
     successText: {
-        color: '#ffffff',
+        color: colors.onPrimary,
     },
     sm: {
-        paddingVertical: 6,
-        paddingHorizontal: 12,
+        paddingVertical: spacing.xs + spacing.px * 2,
+        paddingHorizontal: spacing.s3,
     },
     md: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.md,
     },
     lg: {
-        paddingVertical: 12,
-        paddingHorizontal: 24,
+        paddingVertical: spacing.s3,
+        paddingHorizontal: spacing.lg,
     },
     smText: {
         fontSize: 11,
     },
     mdText: {
-        fontSize: 12,
+        fontSize: fontSizes.xs,
     },
     lgText: {
-        fontSize: 14,
+        fontSize: fontSizes.sm,
     },
 });
