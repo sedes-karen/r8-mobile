@@ -1,29 +1,56 @@
-import { createContext, PropsWithChildren, useContext } from "react";
+import { createContext, PropsWithChildren, useContext, useState} from "react";
+
 
 // Acá van los datos públicos que cambian al autenticarte (iniciar sesión / registrarse / cargar sesión)
 type AuthInfo =
   | { isAuthenticated: false }
-  | { isAuthenticated: true, role: 'artist' | 'label' };
+  | { isAuthenticated: true; role: 'artist' | 'label' };
 
 const defaultAuthInfo: AuthInfo = { isAuthenticated: false };
 
+interface AuthContextType {
+  authInfo: AuthInfo;
+  login: (role: "artist" | "label") => void;
+  logout: () => void;
+  switchRole: (role: "artist" | "label") => void;
+}
 //// Contexts
 
 // Utiliza los valores por defecto
-const AuthInfo = createContext<AuthInfo>(defaultAuthInfo);
+const AuthInfo = createContext<AuthContextType>({
+  authInfo:defaultAuthInfo,
+  login: () => {},
+  logout: () => {},
+  switchRole: () => {},
+});
 
 // Utiliza los valores por defecto
 // Este provider eventualmente se encargaría de hacer el login cuando uno entra
 //   a la aplicación, mostrando un spinner primero
 export function AuthInfoProvider(props: PropsWithChildren) {
+  const [authInfo, setAuthInfo] = useState<AuthInfo>(defaultAuthInfo);
+
+  const login = (role: "artist" | "label") =>
+    setAuthInfo({ isAuthenticated: true, role });
+
+  const logout = () => setAuthInfo({ isAuthenticated: false });
+
+  const switchRole = (role: "artist" | "label") =>
+    setAuthInfo({ isAuthenticated: true, role });
+
   return (
-    <AuthInfo.Provider value={defaultAuthInfo}>
+    <AuthInfo.Provider value={{ authInfo, login, logout, switchRole }}>
       {props.children}
     </AuthInfo.Provider>
   );
 }
-
+  
 //// Hooks
+
+
+export function useAuthInfo() {
+  return useContext(AuthInfo);
+}
 
 export function useIsAuthenticated() {
   return useContext(AuthInfo).isAuthenticated;
