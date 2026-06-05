@@ -4,12 +4,12 @@ import { colors, spacing, fontSizes, borderRadius } from '../../../constants/des
 export const styles = StyleSheet.create({
     input: {
         width: '100%',
-        paddingVertical: 10,
-        paddingHorizontal: 14,
+        paddingVertical: spacing.xs * 2.5,
+        paddingHorizontal: spacing.sm + spacing.xs * 1.5,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
-        borderRadius: 6,
-        fontSize: 14,
+        borderColor: colors.neutralLight,
+        borderRadius: borderRadius.md,
+        fontSize: fontSizes.sm,
         color: colors.text,
         backgroundColor: colors.background,
         marginBottom: spacing.sm,
@@ -18,11 +18,11 @@ export const styles = StyleSheet.create({
         borderColor: colors.primary,
     },
     disabled: {
-        backgroundColor: '#F3F4F6',
+        backgroundColor: colors.neutralLight,
         color: colors.textMuted,
         opacity: 0.7,
     },
     hasError: {
-        borderColor: colors.error || '#ef4444',
+        borderColor: colors.error,
     },
 });
