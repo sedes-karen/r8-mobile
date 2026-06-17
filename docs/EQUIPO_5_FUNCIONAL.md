@@ -1,5 +1,19 @@
 # Equipo 5 — Especificación funcional técnica
 
+## Integrantes
+
+| Rol | Nombre |
+|-----|--------|
+| **Team Lead (TL)** | Ferrari, Tomás |
+| Integrante | Argalas, Martín |
+| Integrante | Cabrera, Franco |
+| Integrante | Civetta, Francesco |
+| Integrante | Ferrari, Mateo |
+| Integrante | Lizzi Burlando, Tomás |
+| Integrante | Vitasse, Pablo Enrique |
+
+---
+
 Foco de equipo: Recipients, Audience Lists y Feedback (label).
 
 Objetivo: cubrir gestión de destinatarios/listas y explotación de feedback para label.

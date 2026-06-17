@@ -1,5 +1,19 @@
 # Equipo 4 — Especificación funcional técnica
 
+## Integrantes
+
+| Rol | Nombre |
+|-----|--------|
+| **Team Lead (TL)** | Figún, Valentín |
+| Integrante | Gallop, Román |
+| Integrante | Haunau, Paula Rocío |
+| Integrante | Morales, Matías Valentino |
+| Integrante | Ramos, Agustín |
+| Integrante | Ronconi, Francisca Mailen |
+| Integrante | Veronesi, Sofía |
+
+---
+
 Foco de equipo: Releases y Promos (lado label).
 
 Objetivo: cubrir lectura completa y luego creación/edición con mínima fricción.
