@@ -1,5 +1,19 @@
 # Equipo 3 — Especificación funcional técnica
 
+## Integrantes
+
+| Rol | Nombre |
+|-----|--------|
+| **Team Lead (TL)** | Crimella, Mateo Nahuel |
+| Integrante | Bianchi, Germán |
+| Integrante | Gutiérrez, Magalí |
+| Integrante | Mai, Jeremías |
+| Integrante | Peverelli, Enzo |
+| Integrante | Rivero, Lautaro |
+| Integrante | Romero, Giuliana |
+
+---
+
 Foco de equipo: Promos Player, Liked Tracks y feedback de receptor/artista.
 
 Objetivo: consolidar experiencia core del usuario receptor/artista.
