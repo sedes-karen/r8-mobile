@@ -61,4 +61,4 @@ export const styles = StyleSheet.create({
     lgText: {
         fontSize: fontSizes.sm,
     },
-});
+} as const);

@@ -3,7 +3,7 @@ import { Pressable, Text, type StyleProp, type ViewStyle, type TextStyle, type P
 import { styles } from './Button.style';
 
 export interface ButtonProps extends Omit<PressableProps, 'style'> {
-    variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'accept';
+    variant?: 'primary' | 'secondary' | 'danger' | 'success';
     size?: 'sm' | 'md' | 'lg';
     children?: ReactNode;
     style?: StyleProp<ViewStyle>;
@@ -18,13 +18,11 @@ export function Button({
     textStyle,
     ...rest
 }: ButtonProps) {
-    const variantKey = variant === 'accept' ? 'success' : variant;
-
-    const variantStyle = styles[variantKey];
+    const variantStyle = styles[variant];
     const sizeStyle = styles[size];
 
-    const textVariantStyle = styles[`${variantKey}Text` as keyof typeof styles];
-    const textSizeStyle = styles[`${size}Text` as keyof typeof styles];
+    const textVariantStyle = styles[`${variant}Text`];
+    const textSizeStyle = styles[`${size}Text`];
 
     const renderContent = () => {
         if (typeof children === 'string') {
