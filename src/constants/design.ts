@@ -14,6 +14,7 @@ export const colors = {
   neutralLight: '#F3F4F6', // gray-100
   neutralDark: '#374151', // gray-700
   error: '#EF4444',       // red-500
+  success: '#10b981',
   onError: '#FFFFFF',
   background: '#FFFFFF',
   surface: '#F9FAFB',     // gray-50
