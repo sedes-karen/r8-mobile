@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { TextInput, type TextInputProps, type StyleProp, type TextStyle, type FocusEvent } from 'react-native';
-import { styles } from './Input.style';
-import { colors } from '../../../constants/design';
+import { TextInput, StyleSheet, type TextInputProps, type StyleProp, type TextStyle, type FocusEvent } from 'react-native';
+import { colors, spacing, fontSizes, borderRadius } from '../../../constants/design';
 
 export interface InputProps extends Omit<TextInputProps, 'style'> {
     ref?: React.Ref<TextInput>;
@@ -77,3 +76,29 @@ export const Input = ({
 };
 
 Input.displayName = 'Input';
+
+const styles = StyleSheet.create({
+    input: {
+        width: '100%',
+        paddingVertical: spacing.s3,
+        paddingHorizontal: spacing.s4,
+        borderWidth: 1,
+        borderColor: colors.neutralLight,
+        borderRadius: borderRadius.md,
+        fontSize: fontSizes.sm,
+        color: colors.text,
+        backgroundColor: colors.background,
+        marginBottom: spacing.sm,
+    },
+    focused: {
+        borderColor: colors.primary,
+    },
+    disabled: {
+        backgroundColor: colors.neutralLight,
+        color: colors.textMuted,
+        opacity: 0.7,
+    },
+    hasError: {
+        borderColor: colors.error,
+    },
+} as const);
