@@ -41,6 +41,7 @@ Three roles: unauthenticated, Artist, Label. Spanish-speaking team, academic pro
 ## Important notes
 - No test runner or linter configured yet
 - All screen files are currently placeholder templates (though navigation works, given links to the screen that's being worked on exist)
-- API contract: `docs/REFERENCIA_API_R8.md`
-- Atomic design guide: `docs/ATOMIC_DESIGN.md`
-- Per-team functional specs: `docs/EQUIPO_*_FUNCIONAL.md`
+- Contributor guidelines (read this before making any change): `CONTRIBUTING.md`
+- API contract (only read it if you're tasked with improving the API service): `docs/REFERENCIA_API_R8.md`
+- Atomic design guide (only read it if you're tasked with creating a new component / set of components): `docs/ATOMIC_DESIGN.md`
+- Per-team functional specs (only read the one related to the group the user is in, ask first): `docs/EQUIPO_*_FUNCIONAL.md`
