@@ -1,3 +1,11 @@
+# Uso de agentes LLM/IA
+
+> Esto se pide para que el proyecto dure más de una semana sin ser un dolor de cabeza.
+
+No objetamos al uso de herramientas de codificación con IA ni similares. Es aceptable su uso **siempre y cuando** hayas leído y entendido los cambios. Cada grupo y alumno es responsable de los cambios que sube y debe estar suficientemente preparado como para explicar los cambios realizados, además de para corregirlos si hace falta.
+
+Estas herramientas tienen la capacidad de explicar cada parte por si mismas, por lo que es fácil cumplir con esto incluso sin haber revisado todo el código (igual revísenlo todo). Nótese que copiar y pegar las explicaciones que te pasan los agentes es insuficiente; se pide una comprensión real de los cambios y sus consecuencias.
+
 # Archivos críticos
 
 > Esto se pide para que el proyecto dure más de una semana sin ser un dolor de cabeza.
