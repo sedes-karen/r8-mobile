@@ -1,4 +1,6 @@
-# Archivos críticos 
+# Archivos críticos
+
+> Esto se pide para que el proyecto dure más de una semana sin ser un dolor de cabeza.
 
 Antes de tocar uno de los siguientes archivos, es necesario avisar al Team Leader del grupo en el que se encuentran para que le informe al resto de los TLs y entre ellos decidan si el cambio debe hacerse y por qué (efectivamente coordinando el cambio con el resto del curso).
 
@@ -14,11 +16,16 @@ Salvo que el Pull Request completo haya sido coordinado con el resto del curso, 
 
 # Componentes
 
+> Esto se pide para reducir el tiempo de revisión.
+
 Los átomos y moléculas deben ser tan generales y flexibles como sea necesario para el resto del proyecto.
 
 # Git
 
-En lo posible, intenten evitar las ramas que salen de otras ramas y luego se tratan de mergear a `main`. En su lugar, un grupo de PRs independientes por funcionalidad suelen ser más fáciles de revisar, probar y editar.
+> Esto se pide para simplificar el trabajo de revisión, testing, comentado, rechazo y aprobación de cambios.
+
+En lo posible, intenten evitar las ramas que salen de otras ramas y luego se tratan de mergear a `main`. En su lugar, un grupo de PRs independientes por funcionalidad suelen ser más fáciles de revisar, probar y editar ([ejemplos en TypeScript](https://github.com/microsoft/typescript-go/pulls?q=is%3Apr+is%3Amerged)). Son libres de crear cuantos PRs y ramas requieran.
 
 Son libres de usar cualquier mensaje de commit que prefieran en sus PRs, pero los mensajes de fusión (al mergear la PR) deberían describir el cambio en 50-70 caracteres. **No se debe usar el mensaje de fusión por defecto**, pero se puede usar el título de la PR.
 
+Dentro de una PR, se debe hacer un commit por cambio menor realizado. No importa si hubo que cambiar una sólo una línea para arreglar un bug, igual entra en un commit. Como referencia, un commit puede abarcar entre 1 y 200 líneas de código cambiadas (dependiendo de lo que se esté haciendo). Esto facilita el uso de `git revert` como un "Ctrl+Z mucho más potente".
