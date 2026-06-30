@@ -40,8 +40,8 @@ Objetivo: consolidar experiencia core del usuario receptor/artista.
 - Requests:
   - `GET /promos/inbox` (query `token=` si el usuario entra sin sesión Bearer)
   - `GET /promos/inbox/pending-count`
-  - `GET /promos/:id` — detalle con release embebido (URLs de audio/artwork firmadas)
-  - Detalle de release (si hace falta fuera del payload de la promo): `GET /releases/:releaseId` (mismo criterio de `token` en query que el web)
+  - `GET /promos/:id` — detalle con release embebido (puede venir **slim**, sin URLs de audio)
+  - **Reproductor:** tomar `release.id` del detalle de promo y llamar **`GET /releases/:releaseId?token=`** para `tracks[].audioUrl` y `coverUrl` (no asumir que un solo GET de promo alcanza)
 - Criterio:
   - lista inbox, detalle promo y reproducción básica funcionando.
 
@@ -64,11 +64,12 @@ Objetivo: consolidar experiencia core del usuario receptor/artista.
 ### 2.4 Promos Player (feedback/dismiss)
 
 - Requests:
-  - Asegurar feedback: `POST /releases/:releaseId/feedback` (body mínimo `{ userId }` para idempotencia)
-  - Formulario: `PATCH /releases/:releaseId/feedback/:feedbackId`
+  - Asegurar feedback: `POST /releases/:releaseId/feedback` — body `{ userId }` donde `userId` es el contacto **autenticado** (Bearer o `?token=`); **200** si ya existía, **201** si se creó
+  - Formulario: `PATCH /releases/:releaseId/feedback/:feedbackId` — **solo aplica en primer envío** (cuando `rating` era `null`)
   - Stats de escucha: `PATCH /releases/:releaseId/feedback/:feedbackId/track-stats`
   - Like de track: `PATCH /releases/:releaseId/feedback/:feedbackId/track-stats/liked`
-  - Descartar del inbox: `POST /promos/:id/dismiss` (con `?token=` si aplica; respuesta típica 204)
+  - Descartar del inbox: `POST /promos/:id/dismiss` — con `?token=` o Bearer con rol **`guest`** (no basta cualquier sesión `artist` sin ese rol)
+  - Descargas en lote: `PATCH /feedback/track-stats/downloaded` con array `[{ user_id, release_id, tracks: [uuid...] }]` (patrón `r8-site/src/api/feedback.ts`)
 - Criterio:
   - feedback incremental y dismiss estables.
 

@@ -4,12 +4,31 @@ Proyecto base para desarrollar la app móvil del sistema **R8** en React Native 
 
 ## Estado actual del proyecto
 
-El proyecto viene con un **template inicial** en **TypeScript** (archivo principal `App.tsx`). Al ejecutar la app verás un texto de bienvenida y `StatusBar`.
+El repo **ya no es el template mínimo de Expo**. En `main` (jun 2026):
+
+- **Entrypoint:** `index.tsx` en la raíz → monta `<Navigation />` (no existe `App.tsx`).
+- **Navegación:** React Navigation 7 (Static API) con stacks por rol: Auth, Artist y Label.
+- **Pantallas:** ~27 placeholders en `src/screens/{Auth,Artist,Label}/`.
+- **Tokens de diseño:** `src/constants/design.ts` (convención única del curso).
+- **Pendiente en `main`:** atoms/molecules compartidos, `src/services/api/` (apiClient) y auth real (hoy `AuthInfoProvider` siempre `isAuthenticated: false`).
+
+### API Stage del curso
+
+```text
+https://api-stage.technopremieres.com
+```
+
+Comprobar: `GET /health` → **200**. Variable sugerida al conectar HTTP real:
+
+```bash
+EXPO_PUBLIC_API_URL=https://api-stage.technopremieres.com
+```
 
 ### Alineación con el ecosistema R8
 
 - **Objetivo funcional:** la app móvil debe cubrir los mismos flujos que el front **r8-site** (React), consumiendo la misma API **r8-api** (Express).
-- **Contrato HTTP:** la API organiza rutas por **dominio** (`/releases`, `/promos`, `/recipient-lists`, `/feedback`, …) y el contexto de label/usuario lo resuelve el **JWT**, no rutas anidadas del estilo `/labels/:labelId/releases`. La referencia para el curso está en `docs/REFERENCIA_API_R8.md`.
+- **Contrato HTTP:** la API organiza rutas por **dominio** (`/releases`, `/promos`, `/recipient-lists`, `/feedback`, …) y el contexto de label/usuario lo resuelve el **JWT**, no rutas anidadas del estilo `/labels/:labelId/releases`.
+- **Fuente de verdad HTTP:** `docs/REFERENCIA_API_R8.md` y `docs/DTOs_Y_CUERPOS_HTTP.md` (jun 2026, v2026-06-30). Ante duda, ganan esos dos archivos y el cliente web `r8-site/src/api/`.
 
 ## Requisitos previos
 
@@ -131,35 +150,37 @@ npx expo start --clear
 
 ## Documentación de la cátedra
 
-Plan de trabajo y distribución por equipos:
+### Plan, arquitectura y pantallas
 
-- `docs/PLAN_TRABAJO_ALUMNOS_RN.md`
+- `docs/PLAN_TRABAJO_ALUMNOS_RN.md` — fases, equipos y estrategia anti-bloqueos
+- `docs/ATOMIC_DESIGN.md` — capas UI (atoms → screens)
+- `docs/screens.md` — mapa de pantallas y decisiones de navegación
+- `docs/_INIT.md` — guía de inicio (herramientas, estructura, stage)
 
-Referencia HTTP (paridad con r8-site / r8-api):
+### Contrato HTTP (obligatorio antes de codear servicios)
 
-- `docs/REFERENCIA_API_R8.md`
+- `docs/REFERENCIA_API_R8.md` — rutas, flujos y glosario (v2026-06-30)
+- `docs/DTOs_Y_CUERPOS_HTTP.md` — cuerpos JSON, enums y ejemplos (v2026-06-30)
 
-DTOs y cuerpos de cada petición (para consumo en stage sin código de API):
+### Prácticas de clase
 
-- `docs/DTOs_Y_CUERPOS_HTTP.md`
+- `docs/_Clases_Practicas/CLASE_02_PRACTICA.md` — hooks y ciclo de vida
+- `docs/_Clases_Practicas/CLASE_02_PRACTICA_B.md` — carpetas, atoms, pantallas estáticas
+- `docs/_Clases_Practicas/CLASE_03_PRACTICA.md` — organisms, mocks, capa de datos
+- `docs/_Clases_Practicas/CLASE_03_PRACTICA_B.md` — alineación post-revisión API, deuda técnica y convenciones
+- `docs/_Clases_Practicas/CLASE_04_PRACTICA.md` — apiClient, login stage, primer HTTP real
 
-Guía de inicio (incluye explicaciones generales):
+### Documentos funcionales por equipo
 
-- `docs/_INIT.md`
+- `docs/EQUIPO_1_FUNCIONAL.md` — Auth, splash, perfil artista
+- `docs/EQUIPO_2_FUNCIONAL.md` — Dashboard, perfil label, analytics
+- `docs/EQUIPO_3_FUNCIONAL.md` — Player, inbox, feedback receptor
+- `docs/EQUIPO_4_FUNCIONAL.md` — Releases y promos (label)
+- `docs/EQUIPO_5_FUNCIONAL.md` — Recipient lists, bulk batch, feedback label
 
-Documentos funcionales por equipo:
+### Diseño
 
-- `docs/EQUIPO_1_FUNCIONAL.md`
-- `docs/EQUIPO_2_FUNCIONAL.md`
-- `docs/EQUIPO_3_FUNCIONAL.md`
-- `docs/EQUIPO_4_FUNCIONAL.md`
-- `docs/EQUIPO_5_FUNCIONAL.md`
-
-Backlog para diseño:
-
-- `docs/PANTALLAS_PARA_DISENO_PRIORIZADAS.md`
-
-Índice conceptual de API (rutas + glosario): `docs/REFERENCIA_API_R8.md`. Cuerpos de petición: `docs/DTOs_Y_CUERPOS_HTTP.md`.
+- `docs/PANTALLAS_PARA_DISENO_PRIORIZADAS.md` — backlog para diseño
 
 ---
 

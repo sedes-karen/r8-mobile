@@ -67,13 +67,17 @@ Principio: primero entregar lectura robusta y estable; después CRUD avanzado.
 
 Objetivo: habilitar trabajo paralelo inmediato en todos los equipos.
 
+**Estado en `main` (jun 2026):** navegación por rol y `constants/design.ts` hechos; pendientes `apiClient`, atoms compartidos, tipos y auth real.
+
 Entregables:
 
-- Estructura de navegación principal (stacks por rol).
-- Capa API común (`apiClient`, **accessToken** en `Authorization`, estrategia de **refresh** alineada con `POST /auth/refresh` y cookies — ver [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)).
-- Base de diseño (tokens de color, spacing, tipografías).
-- Modelos/contratos compartidos mínimos.
+- Estructura de navegación principal (stacks por rol). — **hecho**
+- Capa API común (`apiClient`, **accessToken** en `Authorization`, estrategia de **refresh** alineada con `POST /auth/refresh` y cookies — ver [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md) § Autenticación en React Native).
+- Base de diseño (tokens de color, spacing, tipografías). — **parcial** (`src/constants/design.ts`)
+- Modelos/contratos compartidos mínimos (release/promo según DTOs).
 - Mocks funcionales por pantalla para desarrollo desacoplado.
+
+**Próximo hito transversal (1–2 personas + revisión del profe, luego merge a `main`):** PR pequeño con `apiClient` mínimo + 2–3 atoms (`AppText`, `PrimaryButton`, `LabeledTextField`) + tipos compartidos de release/promo. No mezclar con 5 pantallas en el mismo PR.
 
 Regla: cualquier pantalla debe poder iniciarse con mocks aunque el backend final no esté disponible.
 
@@ -119,7 +123,7 @@ Trabajo por equipos para acelerar cobertura (letras **A–E** = paralelismo en l
 
 Estructura recomendada:
 
-- `src/design/tokens/` -> variables visuales globales (colores, tipografías, spacing).
+- `src/constants/design.ts` -> variables visuales globales (colores, tipografías, spacing). Convención única del curso (no `src/design/tokens/`).
 - `src/components/atoms/` -> componentes mínimos reutilizables (`Text`, `Button`, `Input`, `Avatar`, `Icon`).
 - `src/components/molecules/` -> combinaciones pequeñas (`LabeledInput`, `ProfileField`, `StatCard`).
 - `src/components/organisms/` -> secciones complejas (`ArtistProfileForm`, `LabelProfileHeader`).

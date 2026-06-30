@@ -26,41 +26,32 @@
 
 Revisado contra `main` y las ramas remotas del curso.
 
-### `main` (rama integrada en clase)
+> **Actualizado jun 2026.** La navegación ya está mergeada en `main`. Para deuda técnica, contrato HTTP y convenciones de carpetas, leer primero [CLASE_03_PRACTICA_B.md](./CLASE_03_PRACTICA_B.md).
+
+### `main` (rama integrada)
 
 | Qué hay | Detalle |
 |---------|---------|
-| Esqueleto `src/` | Carpetas con `.keep`: `components/{atoms,molecules,organisms}`, `constants/design`, `features`, `navigation`, `screens/{auth,label,player,releases,audience}`, `services/api`, `types`. |
-| `App.tsx` | Sigue siendo el **template** de Expo (texto “Open up App.tsx…”). |
-| Navegación | **No** instalada en `package.json` de `main`. |
-| Práctica B en código | Los archivos de [CLASE_02_PRACTICA_B.md](./CLASE_02_PRACTICA_B.md) (`design/tokens`, atoms, `DevMenu`, etc.) **no están mergeados** en `main`; solo está el documento. |
+| Entrypoint | **`index.tsx`** en la raíz → monta `<Navigation />`. **No existe `App.tsx`.** |
+| Navegación | **React Navigation 7** (Static API): stacks Auth, Artist y Label con guards por rol. |
+| `src/screens/` | ~27 pantallas placeholder bajo `Auth/`, `Artist/`, `Label/`. |
+| Tokens | **`src/constants/design.ts`** — convención única del curso (no `src/design/tokens/`). |
+| `src/components/*` | Carpetas con `.keep` — **sin atoms/molecules/organisms** implementados aún. |
+| `src/services/api/`, `src/types/` | Vacíos — mocks locales por pantalla hasta el hito transversal de `apiClient`. |
+| Auth | `AuthInfoProvider` en `src/features/auth/info.tsx` — hoy siempre `isAuthenticated: false`. Para desarrollo: flag o menú dev con `{ isAuthenticated: true, role: 'label' \| 'artist' }`. |
 
-### `origin/feat/react-navigation` (Equipo 1 / infra navegación)
+### Ramas de alumnos (contexto histórico)
 
-Commits relevantes: instalación de React Navigation, `src/constants/design.ts`, navegación estática, auth stub.
-
-| Archivo / idea | Contenido |
-|----------------|-----------|
-| `package.json` | `@react-navigation/native`, `native-stack`, `safe-area-context`, `screens`. |
-| `index.tsx` (raíz) | Registra `App` que monta `<Navigation />` (ya no usa `App.tsx`). |
-| `src/navigation/index.tsx` | **Static Navigation API** (`createStaticNavigation`, stacks declarados como objeto). Stack Auth: Login, SignUp, PasswordReset (placeholders). Root con `if: useIsAuthenticated` / `useIsNotAuthenticated`. |
-| `src/features/auth/info.tsx` | `AuthInfoProvider` + hooks; hoy siempre `isAuthenticated: false`. |
-| `src/constants/design.ts` | Tokens de ejemplo (colores, spacing, tipografías). |
-| `docs/screens.md` | Mapa de rutas acordado para auth, artista y label. |
-| Pendiente | `Dashboard: undefined` (TODO en navegación); **sin** atoms/molecules/organisms implementados. |
-
-### `origin/releases-screen` (Equipo 4)
-
-| Qué hay | Detalle |
-|---------|---------|
-| `src/screens/releases/ReleasesListScreen.tsx` | UI al estilo Práctica B (lista mock con `PLACEHOLDER_RELEASES`). |
-| Imports | Apuntan a `../../design/tokens/` y a `ScreenTitle` / `ListRowCard` que **no existen** en esa rama → la pantalla **no compila sola** hasta mergear atoms o cambiar imports a `constants/design`. |
+| Rama | Nota |
+|------|------|
+| `origin/releases-screen` y similares | Pueden importar `design/tokens` o componentes inexistentes en `main` → adaptar a `constants/design` al integrar. |
+| Varias `feat/*` | Servicios, tipos y UI repartidos entre ramas → PRs chicos y rebase frecuente sobre `main`. |
 
 ### Conclusión para la Clase 3
 
-- El curso ya tiene **dos líneas de trabajo** válidas: navegación auth (`feat/react-navigation`) y pantalla releases (`releases-screen`).
-- Esta práctica **une** ambas ideas: organism + mock de releases, y deja preparado el mismo patrón para login mock en auth.
-- Convención de tokens en código vivo del alumno: **`src/constants/design.ts`** (no `src/design/tokens/`). En los ejemplos de abajo usamos esa ruta; si en tu rama tenés la otra, unificá en PR con el equipo.
+- La **infra de navegación ya está** en `main`; no reinstalar React Navigation ni recrear `App.tsx`.
+- Esta práctica sigue válida en **organisms, mocks y capa `features/` + `services/api/`**; la screen orquesta estados loading/error/vacío/éxito.
+- Convención de tokens: **`src/constants/design.ts`**. Si tu rama usa `src/design/tokens/`, unificá en PR antes de mergear.
 
 ---
 
@@ -201,7 +192,7 @@ Un tipo TypeScript alineado a lo que después devolverá `GET /releases` ([DTOs_
 
 ```ts
 /** Subconjunto del release para listados (mock y futura API). */
-export type ReleaseType = 'EP' | 'ALBUM' | 'REMIX';
+export type ReleaseType = 'EP' | 'VA' | 'ALBUM';
 
 export type ReleaseListItem = {
   id: string;
@@ -298,7 +289,10 @@ export async function fetchReleases(): Promise<ReleaseListItem[]> {
   if (!res.ok) {
     throw new Error(`releases: ${res.status}`);
   }
-  return res.json() as Promise<ReleaseListItem[]>;
+  const data = await res.json();
+  // GET /releases → { releases, hostingQuota, releaseAudioQuota } (no array plano)
+  if (Array.isArray(data)) return data as ReleaseListItem[];
+  return (data.releases ?? []) as ReleaseListItem[];
 }
 ```
 
@@ -310,7 +304,7 @@ export async function fetchReleases(): Promise<ReleaseListItem[]> {
 
 ### Cómo funciona
 
-`fetchReleases` devuelve una **Promise**. Hasta que resuelve, quien la llamó puede mostrar spinner. `throw` en el mock reproduce el camino `catch` → mensaje de error. Cuando `useMock` sea `false`, el mismo nombre de función llamará al HTTP real ([REFERENCIA_API_R8.md](../REFERENCIA_API_R8.md) — `GET /releases`).
+`fetchReleases` devuelve una **Promise**. Hasta que resuelve, quien la llamó puede mostrar spinner. `throw` en el mock reproduce el camino `catch` → mensaje de error. Cuando `useMock` sea `false`, el mismo nombre de función llamará al HTTP real ([REFERENCIA_API_R8.md](../REFERENCIA_API_R8.md) — `GET /releases` devuelve **`data.releases`**, no un array plano).
 
 ---
 
@@ -787,13 +781,17 @@ Idéntico a releases: el mock imita [DTOs — POST /auth/login](../DTOs_Y_CUERPO
 
 ---
 
-## 14. Qué sigue (Clase 4 o sprint siguiente)
+## 14. Qué sigue
+
+→ **[CLASE_04_PRACTICA.md](./CLASE_04_PRACTICA.md)** — apiClient, infra compartida, login stage y primera pantalla con HTTP real.
+
+Temas que quedaron explícitamente en Clase 4 (antes listados acá):
 
 1. **`apiClient` único** — base URL de stage, header `Authorization`, manejo de 401.
 2. Sustituir `useMock: true` por `GET /releases` real ([EQUIPO_4_FUNCIONAL.md](../EQUIPO_4_FUNCIONAL.md)).
 3. Conectar `AuthInfoProvider` con token real tras login ([EQUIPO_1_FUNCIONAL.md](../EQUIPO_1_FUNCIONAL.md)).
 4. Detalle `GET /releases/:releaseId` y navegación con parámetro `releaseId`.
-5. Merge de `feat/react-navigation` a `main` + eliminación de entrypoints duplicados.
+5. ~~Merge de `feat/react-navigation` a `main`~~ — **hecho** en `main`.
 
 ---
 

@@ -60,9 +60,9 @@ Objetivo: cubrir gestión de destinatarios/listas y explotación de feedback par
 
 - Ruta web origen: `/feedback`
 - Requests:
-  - `GET /feedback` — respuesta **`{ feedback, total }`**; filtros opcionales según la sección 8.1 de [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md)
+  - `GET /feedback` — respuesta **`{ feedback, total }`** (entidades crudas; **sin** `dateFrom`/`dateTo` en query); filtros opcionales según la sección 8.1 de [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md)
   - `GET /feedback/pending-count`
-  - `GET /feedback/analytics?dateFrom=&dateTo=` — usar **ambos** query params para acotar por fechas
+  - `GET /feedback/analytics?dateFrom=&dateTo=` — usar **ambos** query params para acotar por fechas (el rango **no** aplica en `GET /feedback`)
   - Para contexto de promos (estadísticas cruzadas en la UI web): `GET /promos/for-label?labelId=`
 - Criterio:
   - KPIs y listado de feedback visibles.
@@ -70,20 +70,23 @@ Objetivo: cubrir gestión de destinatarios/listas y explotación de feedback par
 ### 2.4 Destinatarios — alta y listas
 
 - Alta de contacto en una lista (flujo web): `POST /recipient-lists/:listId/recipients` (body con `email` y/o `recipientId`, etc.)
-- Toggle de baja de emails (cuando aplique): `POST /users/unsubscribe/:userId` (ver `recipientsService.toggleUnsubscription` en r8-site; el identificador es el del **usuario** contacto)
+- Toggle de baja de emails (cuando aplique): `POST /users/unsubscribe` (Bearer; **no** incluir `userId` en la URL). Con contacto promo: `?token=` según [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)
 - Criterio:
   - flujo coherente con el web de referencia (no asumir `POST /recipients` para el label).
 
-### 2.5 Editar lista + bulk upload
+### 2.5 Editar lista + bulk upload (batch)
 
 - Requests:
   - `POST /recipient-lists` — crear lista
   - `PUT /recipient-lists/:listId` — renombrar / actualizar
   - `DELETE /recipient-lists/:listId` — eliminar (manejar `409` y dependencias como en el web)
   - `DELETE /recipient-lists/:listId/recipients/:recipientId` — quitar miembro
-  - `POST /recipient-lists/:listId/recipients/bulk-upload` — **multipart**, campo `file` (CSV, XLS o XLSX según API)
+  - `POST /recipient-lists/:listId/recipients/batch` — JSON con **exactamente uno** de:
+    - `{ "recipientIds": ["uuid", ...] }` — IDs ya en el pool del label
+    - `{ "recipients": [{ "email", "display_name?" }] }` — emails nuevos (find-or-create)
+  - **No** existe `bulk-upload` multipart en la API: parsear CSV/Excel **en el dispositivo** (como `r8-site`) y enviar `recipients[]`
 - Criterio:
-  - crear/renombrar/eliminar lista y carga masiva funcionando.
+  - crear/renombrar/eliminar lista y carga masiva funcionando; respuesta batch `{ added, skipped }`.
 
 ---
 

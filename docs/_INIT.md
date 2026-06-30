@@ -1,6 +1,6 @@
 # Guía de inicio — Proyecto **R8 Mobile**
 
-Documento para el cursado de **Programación de dispositivos móviles**. El repo **`r8-mobile`** ya está creado: **Expo** + **React Native** + **TypeScript** (archivo de entrada `App.tsx`).
+Documento para el cursado de **Programación de dispositivos móviles**. El repo **`r8-mobile`** ya está creado: **Expo** + **React Native** + **TypeScript**. El **entrypoint** del curso es **`index.tsx`** en la raíz (monta `<Navigation />`); **no** usar ni recrear `App.tsx`.
 
 ## Información general
 
@@ -8,6 +8,16 @@ Documento para el cursado de **Programación de dispositivos móviles**. El repo
 - **Contrato API:** no usar documentación que anide recursos bajo `/labels/:labelId/...` para releases o promos; mapa de rutas en [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md). **Cuerpos JSON, query y enums por endpoint** (para quienes solo usan la API en stage): [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md). Opcionalmente el código de `r8-site` (`src/api/`) como segunda referencia.
 
 **Términos útiles:** **JWT** = token en `Authorization: Bearer`; **DTO** = forma del JSON de entrada/salida; **stage** = entorno de pruebas de la API. Tabla extendida en [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md#glosario-breve).
+
+**API Stage del curso:**
+
+```text
+https://api-stage.technopremieres.com
+```
+
+Variable sugerida: `EXPO_PUBLIC_API_URL=https://api-stage.technopremieres.com`. Health check: `GET /health` → **200**.
+
+**Estado de `main` (jun 2026):** navegación por rol (React Navigation 7), ~27 pantallas placeholder en `src/screens/`, tokens en `src/constants/design.ts`. Pendiente: `apiClient`, atoms compartidos y login real. Ver [CLASE_03_PRACTICA_B.md](./_Clases_Practicas/CLASE_03_PRACTICA_B.md) para el mapa de deuda técnica y convenciones vigentes.
 
 ---
 
@@ -111,16 +121,22 @@ npx expo start --clear
 
 ---
 
-## 3. Estructura esperada del código (evolución del proyecto)
+## 3. Estructura del código (estado en `main`)
 
-El template inicial es mínimo. El plan de la cátedra propone organizar así (ver [PLAN_TRABAJO_ALUMNOS_RN.md](./PLAN_TRABAJO_ALUMNOS_RN.md)):
+El plan de la cátedra organiza el repo así (ver [PLAN_TRABAJO_ALUMNOS_RN.md](./PLAN_TRABAJO_ALUMNOS_RN.md)):
 
-- `src/components/` — Atomic Design (atoms / molecules / organisms)
-- `src/screens/` — pantallas por flujo
-- `src/services/api/` — cliente HTTP y llamadas al backend
-- `src/types/` o tipos junto al servicio — formas de datos (**DTOs** / interfaces TypeScript) alineadas a [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md)
-- `src/navigation/` — stacks y guards por rol
-- `src/features/<dominio>/` — hooks y lógica de dominio
+| Ruta | Estado en `main` | Rol |
+|------|------------------|-----|
+| `index.tsx` (raíz) | Hecho | Entrypoint; monta navegación |
+| `src/navigation/` | Hecho | Stacks Auth / Artist / Label (React Navigation 7) |
+| `src/screens/{Auth,Artist,Label}/` | Placeholders | Pantallas por flujo |
+| `src/constants/design.ts` | Ejemplo | **Tokens únicos del curso** (no `src/design/tokens/`) |
+| `src/features/` | Auth stub | Hooks y contexto de dominio |
+| `src/components/{atoms,molecules,organisms}/` | Vacío (`.keep`) | UI compartida — próximo hito transversal |
+| `src/services/api/` | Vacío | `apiClient` + servicios HTTP |
+| `src/types/` | Vacío | DTOs TypeScript alineados a [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md) |
+
+**Navegación:** stacks anidados por rol (sin bottom tabs por ahora). Decisión documentada en [screens.md](./screens.md#navegación-decisión-del-curso-jun-2026).
 
 ---
 
@@ -139,6 +155,10 @@ El template inicial es mínimo. El plan de la cátedra propone organizar así (v
 - Plan por equipos y fases: [PLAN_TRABAJO_ALUMNOS_RN.md](./PLAN_TRABAJO_ALUMNOS_RN.md)
 - Endpoints y alineación con el web: [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)
 - DTOs y cuerpos por petición (stage): [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md)
+- Atomic Design y capas UI: [ATOMIC_DESIGN.md](./ATOMIC_DESIGN.md)
+- Mapa de pantallas: [screens.md](./screens.md)
+- Alineación post-revisión API: [CLASE_03_PRACTICA_B.md](./_Clases_Practicas/CLASE_03_PRACTICA_B.md)
+- Prácticas de clase: `docs/_Clases_Practicas/CLASE_02_PRACTICA.md`, `CLASE_02_PRACTICA_B.md`, `CLASE_03_PRACTICA.md`
 - Especificaciones por equipo: `EQUIPO_1_FUNCIONAL.md` … `EQUIPO_5_FUNCIONAL.md`
 - Backlog de diseño: [PANTALLAS_PARA_DISENO_PRIORIZADAS.md](./PANTALLAS_PARA_DISENO_PRIORIZADAS.md)
 
@@ -147,7 +167,8 @@ El template inicial es mínimo. El plan de la cátedra propone organizar así (v
 ## 6. Notas
 
 - iOS requiere macOS para simulador local (salvo build en la nube).
-- La integración con cookies de refresh en móvil debe definirse con cuidado (cliente HTTP / almacenamiento). Quien no tenga el repo **r8-api** debe basarse en [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md) y en pruebas contra stage.
+- **Auth en mobile:** estrategia por fases documentada en [REFERENCIA_API_R8.md § Autenticación en React Native](./REFERENCIA_API_R8.md#autenticación-en-react-native-decisión-del-curso). Sprint de login: `accessToken` en SecureStore + `Authorization: Bearer`; refresh con cookie en sprint siguiente.
+- Quien no tenga el repo **r8-api** debe basarse en [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md) y en pruebas contra stage.
 
 ---
 
