@@ -6,8 +6,8 @@
 
 - [CLASE_03_PRACTICA.md](./CLASE_03_PRACTICA.md) — organisms, mocks, `features/` + `services/api/`, estados de pantalla.
 - Documentación HTTP actualizada del curso:
-  - [REFERENCIA_API_R8.md](../REFERENCIA_API_R8.md) (v2026-06-17)
-  - [DTOs_Y_CUERPOS_HTTP.md](../DTOs_Y_CUERPOS_HTTP.md) (v2026-06-17)
+  - [REFERENCIA_API_R8.md](../REFERENCIA_API_R8.md) (v2026-06-30)
+  - [DTOs_Y_CUERPOS_HTTP.md](../DTOs_Y_CUERPOS_HTTP.md) (v2026-06-30)
 
 **Tipo de clase:** principalmente **explicativa y de acuerdos de equipo**. No es obligatorio entregar código nuevo al final de la hora; el objetivo es que todos entiendan **qué estaba mal o desactualizado**, **qué convención adoptamos** y **cómo evitar repetir los mismos bloqueos** al conectar stage y al mergear ramas.
 
@@ -19,7 +19,7 @@
 
 **Qué NO hace esta práctica (a propósito):**
 
-- No reemplaza la actualización masiva de README, `_INIT.md`, `EQUIPO_*`, etc. (eso queda para después de la clase, a cargo del docente).
+- ~~No reemplaza la actualización masiva de README, `_INIT.md`, `EQUIPO_*`, etc. (eso queda para después de la clase, a cargo del docente).~~ **done** — documentación alineada post-clase (checklist §7).
 - No implementa en vivo toda la Fase 0 del plan (apiClient productivo, login real, tabs); define **prioridades** y **orden** para hacerlo sin caos.
 
 ---
@@ -69,7 +69,7 @@ Varios documentos (`README.md`, `_INIT.md`, sección 0 de [CLASE_03_PRACTICA.md]
 - Hay **27 pantallas** placeholder en `src/screens/` y navegación por rol (Auth / Artist / Label) con React Navigation 7 (Static API).
 
 | Por qué importa | Los alumnos buscan archivos que no existen o piensan que la navegación “todavía no está”. |
-| Solución acordada | Tras la clase, actualizar README y `_INIT` (docente). En código: **no volver a crear `App.tsx`**; el entrypoint del curso es `index.tsx`. |
+| Solución acordada | ~~Tras la clase, actualizar README y `_INIT` (docente).~~ **done** — README y `_INIT` actualizados. En código: **no volver a crear `App.tsx`**; el entrypoint del curso es `index.tsx`. |
 | Referencia | `index.tsx`, `src/navigation/index.tsx` |
 
 ---
@@ -79,7 +79,7 @@ Varios documentos (`README.md`, `_INIT.md`, sección 0 de [CLASE_03_PRACTICA.md]
 La Práctica 3 original fue escrita **antes** del merge del PR de navegación.
 
 | Por qué importa | Quien solo lee CLASE_03 instala de nuevo dependencias o duplica trabajo de infra. |
-| Solución acordada | Considerar **obsoleto** el apartado “sin navegación en main”. La Práctica 3 sigue válida en organisms/mocks; la infra de stacks **ya está**. |
+| Solución acordada | Considerar **obsoleto** el apartado “sin navegación en main”. La Práctica 3 sigue válida en organisms/mocks; la infra de stacks **ya está**. **done** — sección 0 de `CLASE_03_PRACTICA.md` actualizada. |
 | Referencia | Commit `feat: React Navigation (pr #2)` en `main` |
 
 ---
@@ -101,7 +101,7 @@ La Práctica 3 original fue escrita **antes** del merge del PR de navegación.
 
 `README.md` no enlazaba `ATOMIC_DESIGN.md`, `screens.md`, prácticas de clase, ni la URL de stage.
 
-| Solución acordada | Tras la clase, el docente amplía el índice. Los alumnos deben conocer al menos: plan de equipos, referencia API, DTOs, atomic design, `screens.md`. |
+| Solución acordada | ~~Tras la clase, el docente amplía el índice.~~ **done** — `README.md` ampliado. Los alumnos deben conocer al menos: plan de equipos, referencia API, DTOs, atomic design, `screens.md`. |
 
 ---
 
@@ -158,7 +158,7 @@ Documentación funcional menciona **Splash/bootstrap**; no hay ruta en `src/navi
 Tampoco hay **bottom tabs** (Artist: Promos vs Profile; Label: muchas secciones).
 
 | Por qué importa | UX incompleta; alumnos no saben dónde colgar el bootstrap de sesión. |
-| Solución acordada | **Splash:** Equipo 1 — stack Auth o root con `initialRouteName` que resuelva `POST /auth/refresh` + `GET /users/me` antes de mostrar Login o el stack por rol. **Tabs:** decisión de diseño pendiente; hasta tener tabs, stacks anidados actuales son aceptables para el curso si documentamos la limitación. |
+| Solución acordada | **Splash:** Equipo 1 — stack Auth o root con `initialRouteName` que resuelva `POST /auth/refresh` + `GET /users/me` antes de mostrar Login o el stack por rol. **Tabs:** **done** — stacks anidados aceptables hasta Fase 3+; bottom tabs opcionales. Documentado en [screens.md](../screens.md#navegación-decisión-del-curso-jun-2026). |
 | Referencia | [EQUIPO_1_FUNCIONAL.md](../EQUIPO_1_FUNCIONAL.md), [screens.md](../screens.md) |
 
 ---
@@ -250,10 +250,12 @@ Respuesta habitual:
 ```json
 {
   "releases": [ /* ... */ ],
-  "hostingQuota": { "usedBytes": 0 },
+  "hostingQuota": { "used": 0 },
   "releaseAudioQuota": { "maxBytes": 524288000 }
 }
 ```
+
+`hostingQuota.used` = conteo de releases activos con audio (no bytes).
 
 (Si el usuario no tiene label, la API puede devolver `[]` solo.)
 
@@ -355,14 +357,14 @@ Web (`r8-site`): `credentials: 'include'` en login/register/refresh.
 React Native **no** trae cookies automáticamente como el navegador.
 
 | Por qué importa | Sin refresh, el `accessToken` expira y la app parece “desloguearse” sola. |
-| Solución acordada (a definir en detalle con el profe) | Opciones habituales: (A) librería de cookies + `credentials` en fetch, (B) almacenar refresh token si el curso expone política alternativa, (C) para **primeras entregas**, relogin manual aceptable si se documenta. **Mínimo para la clase:** guardar `accessToken` en memoria/secure store y enviar `Authorization: Bearer` en `apiClient`. Implementar refresh en sprint siguiente a login. |
+| Solución acordada (a definir en detalle con el profe) | **done** — estrategia por fases documentada en [REFERENCIA_API_R8.md](../REFERENCIA_API_R8.md#autenticación-en-react-native-decisión-del-curso): sprint login con `accessToken` + Bearer; refresh con cookies en sprint siguiente; relogin manual aceptable en entregas iniciales. |
 | Referencia | REFERENCIA_API § Auth; `r8-site/src/utils/api.ts` |
 
 ---
 
 ## 5. Qué debe hacer cada equipo después de esta clase
 
-Tabla orientativa (no sustituye los `EQUIPO_*`; los actualizará el docente).
+Tabla orientativa (no sustituye los `EQUIPO_*`; **done** — alineados jun 2026).
 
 | Equipo | Prioridad inmediata | Evitar |
 |--------|---------------------|--------|
@@ -409,13 +411,13 @@ En una rama `chore/clase-3b-checklist`, cada pareja completa **solo** esta tabla
 
 Usar después de explicar en vivo; guía la actualización del resto de la documentación.
 
-- [ ] Actualizar `README.md` y `_INIT.md` (entrypoint `index.tsx`, navegación, URL stage, enlaces).
-- [ ] Refrescar sección 0 de `CLASE_03_PRACTICA.md` o añadir nota “ver CLASE_03_PRACTICA_B”.
-- [ ] Alinear `EQUIPO_1` … `EQUIPO_5` con DTOs corregidos (batch, enums release, feedback).
-- [ ] Actualizar `CLASE_02_PRACTICA_B` nota sobre `design/tokens` → `constants/design` (o aviso de legado).
-- [ ] Decidir y documentar estrategia refresh/cookies en mobile.
-- [ ] Decidir tabs vs stacks solo (UX).
-- [ ] Coordinar PR transversal apiClient + atoms a `main`.
+- [x] **done** — Actualizar `README.md` y `_INIT.md` (entrypoint `index.tsx`, navegación, URL stage, enlaces).
+- [x] **done** — Refrescar sección 0 de `CLASE_03_PRACTICA.md` o añadir nota “ver CLASE_03_PRACTICA_B”.
+- [x] **done** — Alinear `EQUIPO_1` … `EQUIPO_5` con DTOs corregidos (batch, enums release, feedback).
+- [x] **done** — Actualizar `CLASE_02_PRACTICA_B` nota sobre `design/tokens` → `constants/design` (o aviso de legado).
+- [x] **done** — Decidir y documentar estrategia refresh/cookies en mobile (`REFERENCIA_API_R8.md`).
+- [x] **done** — Decidir tabs vs stacks solo (UX) — documentado en `screens.md`.
+- [x] **done** — Coordinar PR transversal apiClient + atoms a `main` — prioridad y alcance en `PLAN_TRABAJO_ALUMNOS_RN.md` § Fase 0 (implementación pendiente en código).
 
 ---
 
@@ -439,4 +441,4 @@ Usar después de explicar en vivo; guía la actualización del resto de la docum
 
 ---
 
-*Documento para la cátedra — Práctica 3B, alineación post-revisión r8-api / r8-site (2026-06-17).*
+*Documento para la cátedra — Práctica 3B, alineación post-revisión r8-api / r8-site (2026-06-30).*

@@ -1,9 +1,11 @@
 # DTOs y cuerpos HTTP — API Stage (r8-api)
 
-**Versión:** 2026-06-17  
+**Versión:** 2026-06-30  
 **Audiencia:** alumnos **sin acceso al código** de r8-api; consumirán la API en **stage**.  
 **URL base:** `https://api-stage.technopremieres.com`  
 **Mapa de rutas y flujos:** [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)
+
+> Revisión alineada con `r8-api` y cliente `r8-site/src/api/` (jun 2026).
 
 ---
 
@@ -40,10 +42,10 @@
 
 | Método | Ruta | Cuerpo (request) | Respuesta (resumen) |
 |--------|------|------------------|---------------------|
-| `POST` | `/users/register` | **RegisterBody** | **201** `{ "success": true, "user": <perfil>, "accessToken": string }` |
+| `POST` | `/users/register` | **RegisterBody** (o completar cuenta promo con `?token=` — ver abajo) | **201** `{ "success": true, "user": <perfil>, "accessToken": string }` |
 | `GET` | `/users/me` | — | Usuario enriquecido (`labels[]`, `artist`, URLs firmadas, `labelId` derivable) |
 | `PUT` | `/users/me` | **UpdateUserDto** | Usuario actualizado |
-| `POST` | `/users/me/change-password` | `{ "currentPassword": string, "newPassword": string }` | `{ "message": "Password changed successfully" }` |
+| `POST` | `/users/me/change-password` | `{ "currentPassword": string, "newPassword": string }` | `{ "message": "Password changed successfully" }` — revoca **todas** las cookies refresh del usuario (re-login o refresh necesario) |
 | `GET` | `/users/me/recipient` | — | Vista recipient (email, displayName, flags) |
 | `GET` | `/users/recipient-by-token?token=` | — | Contacto promo por token (sin Bearer) |
 | `POST` | `/users/password/request-reset` | `{ "email": string }` | `{ "message": "If an account exists..." }` |
@@ -62,6 +64,18 @@
 | `artistName`, `firstName`, `lastName` | string | no | Si `role === "artist"` |
 
 > Tras registro **label**, el servidor crea label + stub de artista. Tras registro **artist**, crea artista + label vacío scaffold.
+
+### Completar cuenta promo (`POST /users/register?token=<jwt_contacto>`)
+
+Para contactos promo que reciben un link de alta (sin registro previo completo):
+
+| Campo | Tipo | Obligatorio | Notas |
+|-------|------|-------------|--------|
+| `password` | string | sí | |
+| `email` | string | no | Si se envía, debe coincidir con el email del contacto del token |
+| `artistName`, `firstName`, `lastName` | string | no | Perfil artista opcional al completar |
+
+Respuesta **201** con `accessToken` + cookie refresh (mismo patrón que login). El `role` del body **no** aplica en este flujo.
 
 ### UpdateUserDto (`PUT /users/me`)
 
@@ -148,10 +162,12 @@ Opcionales: `first_name`, `last_name`, `artist_name`, `bio`, `instagramUrl`, `so
 ```json
 {
   "releases": [ /* Release[] */ ],
-  "hostingQuota": { "usedBytes": number, "maxBytes"?: number },
+  "hostingQuota": { "used": number },
   "releaseAudioQuota": { "maxBytes": number }
 }
 ```
+
+`hostingQuota.used` = conteo informativo de releases activos con audio del label (**no** bytes; sin límite duro en API).
 
 Si el usuario no tiene label, la API puede responder `[]` (array vacío) en lugar del objeto envuelto.
 
@@ -185,19 +201,21 @@ Opcionales: `title`, `artist`, `artistId`, `artistEmail`, `releaseDate`, `type` 
 
 **Artwork**
 
-| Paso | Método | Ruta | Cuerpo |
-|------|--------|------|--------|
-| 1 | `PUT` | `/releases/:releaseId/artwork` | `{ "filename": string, "mimetype"?: string }` |
-| 2 | `PUT` | `<uploadUrl>` | binario |
-| 3 | `POST` | `/releases/:releaseId/artwork/confirm` | `{ "path": string }` |
+| Paso | Método | Ruta | Cuerpo request | Respuesta presign |
+|------|--------|------|----------------|-------------------|
+| 1 | `PUT` | `/releases/:releaseId/artwork` | `{ "filename": string, "mimetype"?: string }` | `{ "uploadUrl", "expiresIn", "path", "contentType" }` |
+| 2 | `PUT` | `<uploadUrl>` | binario | — |
+| 3 | `POST` | `/releases/:releaseId/artwork/confirm` | `{ "path": string }` | release actualizado |
+
+> Request: **`mimetype`**. Respuesta presign: **`contentType`** (valor acordado para el PUT al storage).
 
 **Audio de track**
 
-| Paso | Método | Ruta | Cuerpo |
-|------|--------|------|--------|
-| 1 | `PUT` | `/releases/:releaseId/tracks/:trackId` | `{ "filename": string, "mimetype"?: string, "expectedSize"?: number }` |
-| 2 | `PUT` | `<uploadUrl>` | binario |
-| 3 | `POST` | `/releases/:releaseId/tracks/:trackId/confirm` | `{ "path": string }` |
+| Paso | Método | Ruta | Cuerpo request | Respuesta presign |
+|------|--------|------|----------------|-------------------|
+| 1 | `PUT` | `/releases/:releaseId/tracks/:trackId` | `{ "filename": string, "mimetype"?: string, "expectedSize"?: number }` | `{ "uploadUrl", "expiresIn", "path", "contentType" }` |
+| 2 | `PUT` | `<uploadUrl>` | binario | — |
+| 3 | `POST` | `/releases/:releaseId/tracks/:trackId/confirm` | `{ "path": string }` | track actualizado |
 
 - **`expectedSize`:** bytes del archivo; si supera cuota → **409** `RELEASE_AUDIO_QUOTA_EXCEEDED` con `{ code, used, max }`.
 - Lectura: `coverUrl` y `tracks[].audioUrl` en **`GET /releases/:releaseId`**.
@@ -218,7 +236,7 @@ Opcionales: `title`, `artist`, `artistId`, `artistEmail`, `releaseDate`, `type` 
 | `DELETE` | `/promos/:id` | — | **204** o **409** |
 | `POST` | `/promos/:id/send` | — | Envío manual |
 | `POST` | `/promos/:id/cancel` | — | Cancelación |
-| `POST` | `/promos/:id/dismiss` | `?token=` | **204** |
+| `POST` | `/promos/:id/dismiss` | `?token=` | **204** — rol **`guest`** en JWT o `?token=` (el middleware omite chequeo de rol con token promo) |
 | `GET` | `/promos` | — | **Solo admin** |
 
 ### CreatePromoDto (`POST /promos`)
@@ -246,7 +264,7 @@ Campos habituales: `id`, `labelId`, `labelName`, `release` (con `tracks[].src` p
 
 ### PromoDetailDto (resumen `GET /promos/:id`)
 
-Incluye: `id`, `release` (slim: `id`, `title`, `artistName`, `labelName`, `catalogNumber`, `artwork`, `releaseDate`, `type`, `notes`), `scheduledAt`, `status`, `isActive`, `useCuratedDb`, `recipientLists`, `createdAt`, `updatedAt`, `errorMessage?`.  
+Incluye: `id`, `release` (slim: `id`, `title`, `artistName`, `labelName`, `catalogNumber`, `artwork`, `releaseDate`, `type`, `notes`), `scheduledAt` (**`string \| null`**), `status`, `isActive`, `useCuratedDb`, `recipientLists`, `createdAt`, `updatedAt`, `errorMessage?`.  
 **No** incluye: `labelId`, `releaseId`, `recipientListIds`, `release.tracks` (para audio usar `GET /releases/:releaseId`).
 
 ---
@@ -259,7 +277,7 @@ Sin `:labelId` en la URL; el tenant lo resuelve el JWT.
 |--------|------|----------------|-----------|
 | `GET` | `/recipient-lists/recipients` | — | Pool `Recipient[]` |
 | `GET` | `/recipient-lists` | `?page`, `?limit`, `?search` | **RecipientListsIndexResponse** |
-| `POST` | `/recipient-lists` | `{ "name": string, "recipientIds"?: string[] }` | **201** lista |
+| `POST` | `/recipient-lists` | `{ "name": string }` | **201** lista — para agregar miembros usar `POST .../recipients` o `.../batch` después |
 | `GET` | `/recipient-lists/:listId` | — | Lista |
 | `PUT` | `/recipient-lists/:listId` | **UpdateRecipientListDto** | Actualizada |
 | `DELETE` | `/recipient-lists/:listId` | — | **204** o **409** |
@@ -275,7 +293,10 @@ Sin `:labelId` en la URL; el tenant lo resuelve el JWT.
   "lists": [
     {
       "id": "uuid",
+      "labelId": "uuid",
       "name": "string",
+      "createdAt": "ISO",
+      "recipientCount": 0,
       "hasNonValidMailRecipients": false
     }
   ],
@@ -327,12 +348,18 @@ Opcionales: `name`, `recipientIds` (array único de IDs).
 
 | Método | Ruta | Query | Respuesta |
 |--------|------|--------|-----------|
-| `GET` | `/feedback` | `releaseId`, `recipientId`, `rating`, `supported`, `status`, `priority`, `sentiment`, `category`, `search`, `limit`, `offset`, `sortBy`, `sortOrder`, `dateFrom`, `dateTo` | **`{ "feedback": Feedback[], "total": number }`** |
+| `GET` | `/feedback` | `releaseId`, `recipientId`, `rating`, `supported`, `status`, `priority`, `sentiment`, `category`, `search`, `limit`, `offset`, `sortBy`, `sortOrder` — **sin** `dateFrom`/`dateTo` (rango solo en analytics) | **`{ "feedback": Feedback[], "total": number }`** |
 | `GET` | `/feedback/pending-count` | — | `{ "count": number }` |
 | `GET` | `/feedback/analytics` | **`dateFrom` y `dateTo` juntos** para rango | Objeto analytics |
-| `GET` | `/feedback/:feedbackId` | — | `Feedback` |
+| `GET` | `/feedback/:feedbackId` | — | `Feedback` — label dueño del release, o el **propio recipient** (Bearer o `?token=`) |
 | `GET` | `/feedback/liked-tracks` | `?token=` | **LikedTracksReleaseItemDto[]** |
 | `PATCH` | `/feedback/track-stats/downloaded` | `?token=` | **Feedback[]** |
+
+**Forma de `Feedback` en `GET /feedback`** (entidad cruda; distinta de `GET /releases/:releaseId/feedback`):
+
+- Campos habituales: `id`, `releaseId`, `userId`, `rating`, `comment`, `willPlay`, `supported`, `status`, `trackStats[]` en **snake_case** (`track_id`, `play_count`, `listening_time`, `liked`, `downloaded`).
+- Puede incluir join `release` según consulta.
+- **No** incluye objeto `recipient` anidado (eso solo en listado por release, §8.2).
 
 ### LikedTracksReleaseItemDto (resumen)
 
@@ -345,7 +372,7 @@ Opcionales: `name`, `recipientIds` (array único de IDs).
 | `GET` | `/releases/:releaseId/feedback` | query filtros | **`{ summary, total, items }`** |
 | `POST` | `/releases/:releaseId/feedback` | **CreateFeedbackDto** | **200** existente / **201** creado |
 | `GET` | `/releases/:releaseId/feedback/:feedbackId` | — | `Feedback` |
-| `PATCH` | `/releases/:releaseId/feedback/:feedbackId` | **UpdateFeedbackDto** | Actualizado |
+| `PATCH` | `/releases/:releaseId/feedback/:feedbackId` | **UpdateFeedbackDto** (receptor) | Actualizado — **solo aplica si `rating` era `null`** (primer envío del formulario) |
 | `PATCH` | `.../track-stats` | **TrackStatsDeltaItemDto[]** | `Feedback` |
 | `PATCH` | `.../track-stats/liked` | **SetTrackLikedDto** | `Feedback` |
 | `PATCH` | `.../track-stats/downloaded` | `{ "track_id": uuid }` | `Feedback` |
@@ -366,32 +393,32 @@ Opcionales: `name`, `recipientIds` (array único de IDs).
       "createdAt": "ISO",
       "updatedAt": "ISO",
       "trackStats": [],
+      "connectionCountry": null,
+      "connectionCity": null,
       "recipient": { "email": "", "displayName": null, "profileImageUrl": null }
     }
   ]
 }
 ```
 
-### CreateFeedbackDto (`POST`)
+### CreateFeedbackDto (`POST` — ensure receptor)
 
 | Campo | Tipo | Notas |
 |-------|------|--------|
-| `userId` | UUID | **Obligatorio** — `users.id` del contacto promo |
-| `rating` | 1–5 | opcional |
-| `comment` | string | opcional |
-| `feedbackOptions` | string[] | opcional |
-| `supported`, `willPlay` | boolean | opcional |
-| `status` | `PENDING` \| `REVIEWED` \| `RESPONDED` \| `ARCHIVED` | gestión label |
-| `internalNotes`, `labelResponse` | string | label |
-| `sentiment` | `POSITIVE` \| `NEUTRAL` \| `NEGATIVE` | |
-| `category` | string | |
-| `priority` | `LOW` \| `MEDIUM` \| `HIGH` \| `URGENT` | |
+| `userId` | UUID | **Obligatorio** — debe ser el `users.id` del contacto **autenticado** (JWT Bearer o `?token=`). Si no coincide → **403**. |
+| `rating`, `comment`, `willPlay`, `supported`, etc. | — | Opcionales en ensure; lo habitual es enviar solo `{ "userId": "<uuid>" }` y completar con PATCH. |
 
-> En ensure (abrir formulario), enviar solo `{ "userId": "<uuid>" }`.
+> `releaseId` va en la **URL**, no en el body. Respuesta **200** si ya existía feedback para ese par release+usuario; **201** si se creó.
 
-### UpdateFeedbackDto (`PATCH`)
+### UpdateFeedbackDto (`PATCH` — formulario receptor)
 
-Opcionales: `rating`, `comment`, `willPlay`, `supported`, `status`, `internalNotes`, `labelResponse`, `sentiment`, `category`, `priority`.
+Opcionales: `rating`, `comment`, `willPlay`, `supported`.
+
+> El PATCH del receptor **solo persiste cambios en la primera entrega** (`rating == null` antes del PATCH). Reintentos posteriores no actualizan campos.
+
+### Campos de gestión label (no usar en POST ensure del receptor)
+
+En la entidad existen `status`, `internalNotes`, `labelResponse`, `sentiment`, `category`, `priority` — son para gestión label; el flujo receptor usa POST ensure + PATCH con `rating`/`comment`/`willPlay`/`supported`.
 
 ### TrackStatsDeltaItemDto (cuerpo = **array**)
 
@@ -450,4 +477,4 @@ Contrato completo: **r8-api** `docs/MODULES.md` (lectura opcional docentes).
 
 ---
 
-*Documento sincronizado con r8-api y r8-site — 2026-06-17.*
+*Documento sincronizado con r8-api y r8-site — 2026-06-30.*

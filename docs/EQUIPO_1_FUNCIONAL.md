@@ -46,6 +46,7 @@ Objetivo: dejar completo el flujo de entrada y el perfil del artista, asegurando
 - Criterio de aceptación:
   - redirige correctamente a stack label o artist/recipient.
   - maneja token ausente/expirado sin romper app.
+- **Desarrollo (corto plazo):** menú o flag dev en `AuthInfoProvider` con `{ isAuthenticated: true, role: 'label' | 'artist' }` para probar stacks sin login real (ver [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md) § Autenticación en React Native).
 
 ### 2.2 Perfil artista (lectura)
 
@@ -72,6 +73,7 @@ Objetivo: dejar completo el flujo de entrada y el perfil del artista, asegurando
 - Ruta web origen: `/register`
 - Requests:
   - `POST /users/register` (mismo patrón de `accessToken` + cookies que login)
+  - `POST /users/register?token=<jwt_contacto>` — completar cuenta de contacto promo (solo `password` obligatorio; ver DTOs §2)
   - `GET /users/me` (post register)
 - Criterio:
   - alta correcta por rol y navegación posterior.
