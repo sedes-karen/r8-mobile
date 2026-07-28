@@ -14,7 +14,7 @@ Antes de tocar uno de los siguientes archivos, es necesario avisar al Team Leade
 
 Salvo que el Pull Request completo haya sido coordinado con el resto del curso, cada cambio a estos archivos críticos **debe estar en un PR aparte**.
 
-- `package.json`, `package-lock.json` y `app.json` (todos se pueden editar en el mismo PR de ser necesario)
+- `package.json`, `package-lock.json` y `app.json` (todos se pueden editar en el mismo PR de ser necesario; conviene usar `npm ci` en lugar de `npm install` para instalar dependencias)
 - `*.config.{js,ts,jsx,tsx}` (cualquier configuración general del proyecto)
 - `tsconfig.json`
 - Cualquier archivo en `docs/` cuyo nombre esté en mayúsculas o MACRO_CASE (incluyendo este archivo)
@@ -36,4 +36,4 @@ En lo posible, intenten evitar las ramas que salen de otras ramas y luego se tra
 
 Son libres de usar cualquier mensaje de commit que prefieran en sus PRs, pero los mensajes de fusión (al mergear la PR) deberían describir el cambio en 50-70 caracteres. **No se debe usar el mensaje de fusión por defecto**, pero se puede usar el título de la PR.
 
-Dentro de una PR, se debe hacer un commit por cambio menor realizado. No importa si hubo que cambiar una sólo una línea para arreglar un bug, igual entra en un commit. Como referencia, un commit puede abarcar entre 1 y 200 líneas de código cambiadas (dependiendo de lo que se esté haciendo). Esto facilita el uso de `git revert` como un "Ctrl+Z mucho más potente".
+Dentro de una PR, se debe hacer un commit por cambio menor realizado. No importa si hubo que cambiar sólo una línea para arreglar un bug, igual entra en un commit. Como referencia, un commit puede abarcar entre 1 y 200 líneas de código cambiadas (dependiendo de lo que se esté haciendo). Esto facilita el uso de `git revert` como un "Ctrl+Z mucho más potente".
