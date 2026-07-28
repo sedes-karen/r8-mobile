@@ -26,7 +26,7 @@ Salvo que el Pull Request completo haya sido coordinado con el resto del curso, 
 
 > Esto se pide para reducir el tiempo de revisión.
 
-Los átomos y moléculas deben ser tan generales y flexibles como sea necesario para el resto del proyecto.
+Los átomos y moléculas deben ser tan generales y flexibles como sea necesario para el resto del proyecto. A veces conviene listar los componentes necesarios _antes_ de realizarlos, a fin de obtener un mejor panorama sobre lo que se necesita.
 
 # Git
 
