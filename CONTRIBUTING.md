@@ -28,6 +28,8 @@ Salvo que el Pull Request completo haya sido coordinado con el resto del curso, 
 
 Los átomos y moléculas deben ser tan generales y flexibles como sea necesario para el resto del proyecto. A veces conviene listar los componentes necesarios _antes_ de realizarlos, a fin de obtener un mejor panorama sobre lo que se necesita.
 
+Los estilos de un componente deben estar en el mismo archivo que el resto del mismo. Si alguna de las partes se vuelve muy grande, *quizás* sea momento de separar el componente en otros más pequeños.
+
 # Git
 
 > Esto se pide para simplificar el trabajo de revisión, testing, comentado, rechazo y aprobación de cambios.
@@ -37,3 +39,15 @@ En lo posible, intenten evitar las ramas que salen de otras ramas y luego se tra
 Son libres de usar cualquier mensaje de commit que prefieran en sus PRs, pero los mensajes de fusión (al mergear la PR) deberían describir el cambio en 50-70 caracteres. **No se debe usar el mensaje de fusión por defecto**, pero se puede usar el título de la PR.
 
 Dentro de una PR, se debe hacer un commit por cambio menor realizado. No importa si hubo que cambiar sólo una línea para arreglar un bug, igual entra en un commit. Como referencia, un commit puede abarcar entre 1 y 200 líneas de código cambiadas (dependiendo de lo que se esté haciendo). Esto facilita el uso de `git revert` como un "Ctrl+Z mucho más potente".
+
+# Estilo del código
+
+> Esto se pide para facilitar la comprensión y el mantenimiento del código, apuntando a la claridad y legibilidad ante todo. Algunos aspectos son más o menos controversiales.
+
+- **Idioma**: El código debe estar escrito en inglés, con sus comentarios en español.
+- **Comentarios**: En su mayoría, deben ser justificativos en lugar de indicativos. Por ejemplo, "Se usa esto como solución temporal del bug https://github.com/react/react-native/issues/33532" en lugar de "Suma dos números" debajo de una función llamada "sumar" con dos argumentos de tipo `number`. Los comentarios se ignoran al ejecutar el código, y por eso son más difíciles de actualizar y verificar, además de no siempre aportar información relevante.
+- **Comentarios de documentación**: Se deben utilizar comentarios *de documentación* (`/** ... */`) encima de las funciones que tengan requerimientos o asuman cosas específicas que no se pueden verificar con Typescript (ej: `/** Asume que el número es par */`); estos comentarios aparecen al autocompletar el nombre de la función en el editor (en cualquiera que soporte LSP, incluyendo VSCode).
+- **Nombres de variables**: Deben ser relativamente cortos, de propósito obvio, evitando abreviar palabras y utilizando `camelCase`. Se deben respetar las convenciones de React / React Native cuando apliquen.
+- **Nombres de componentes**: Los átomos deben, en lo posible, tener nombres "estándar". En las moléculas y organismos esto es menos importante.
+- **"Números mágicos" y constantes**: Se deben utilizar las constantes definidas en `src/constants/*` tanto como sea posible, evitando valores 
+- **Iteración y manipulación de estructuras de datos**: Si se requiere manipular datos, la forma más clara suele ser utilizando métodos de las clases apropiadas (`Array`, `Iterator`, etc), además de `for (const ... of ...) {...}`, que se prefiere por sobre `forEach(...)` debido a la tendencia del último de requerir acumuladores adicionales (que se terminan separando visualmente si se usa `forEach` encadenado a otros métodos). Se debe evitar, tanto como sea posible, el uso de `for (let i = ...; i < ...; i++) {...}`, debido a que incrementa tanto la carga cognitiva como la posibilidad de errores.
