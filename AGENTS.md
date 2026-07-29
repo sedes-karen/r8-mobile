@@ -39,9 +39,9 @@ Three roles: unauthenticated, Artist, Label. Spanish-speaking team, academic pro
 - Nested stacks allowed (e.g. Label > Releases > Promos)
 
 ## Important notes
-- No test runner or linter configured yet
+- No test runner or linter configured yet, but `npx tsc --noEmit` is used to check files (aside from LSP support, if enabled).
 - All screen files are currently placeholder templates (though navigation works, given links to the screen that's being worked on exist)
-- Contributor guidelines (read this before making any change): `CONTRIBUTING.md`
+- Contributor guidelines (read this before making any change, and/or if the user requests a change): `CONTRIBUTING.md`
 - API contract (only read it if you're tasked with improving the API service): `docs/REFERENCIA_API_R8.md`
 - Atomic design guide (only read it if you're tasked with creating a new component / set of components): `docs/ATOMIC_DESIGN.md`
 - Per-team functional specs (only read the one related to the group the user is in, ask first): `docs/EQUIPO_*_FUNCIONAL.md`
