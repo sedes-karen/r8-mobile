@@ -4,7 +4,11 @@
 
 No objetamos al uso de herramientas de codificación con IA ni similares. Es aceptable su uso **siempre y cuando** hayas leído y entendido los cambios. Cada grupo y alumno es responsable de los cambios que sube y debe estar suficientemente preparado como para explicar los cambios realizados, además de para corregirlos si hace falta.
 
-Estas herramientas tienen la capacidad de explicar cada parte por si mismas, por lo que es fácil cumplir con esto incluso sin haber revisado todo el código (igual revísenlo todo). Nótese que copiar y pegar las explicaciones que te pasan los agentes es insuficiente; se pide una comprensión real de los cambios y sus consecuencias.
+Estas herramientas tienen la capacidad de explicar cada parte por si mismas, por lo que es fácil cumplir con esto incluso sin haber revisado todo el código (que igual se recomienda). Nótese que copiar y pegar las explicaciones que arman los agentes es insuficiente; se pide una comprensión real de los cambios y sus consecuencias. Es posible que no se entienda algo al principio: El siguiente paso debe ser hacer tantas preguntas como sea necesario.
+
+Se debe incluir `AGENTS.md` como contexto desde el primer mensaje. Esto lo hace automáticamente cualquier _harness_ como Claude Code, OpenCode, Codex, Antigravity, etc. Este archivo es muy importante porque contiene instrucciones específicas para agentes. Se debe incluir este archivo (`CONTRIBUTING.md`) si se quiere hacer un cambio en el código, ya que contiene las convenciones del proyecto.
+
+Se debe verificar que se cumpla todo lo que dice este documento, tanto de forma automática (consultando el agente a que lo haga, pidiéndole una _review_) como de forma manual.
 
 # Archivos críticos
 
@@ -82,5 +86,5 @@ Dentro de una PR, se debe hacer un commit por cambio menor realizado. No importa
 **Cuando revises un PR de un compañero:**
 
 - Buscá inconsistencias con esta guía.
-- Comprobá que el código hace lo que dice hacer, tanto leyéndolo como ejecutándolo (con sus respectivos _tests_ si los hubiese). Si algo no se entiende, pedí que lo expliquen.
+- Comprobá que el código hace lo que debería, tanto leyéndolo como ejecutándolo (con sus respectivos _tests_ si los hubiere). Si algo no se entiende, pedí que lo expliquen.
 - Sé específico. "Esto no funciona" no ayuda tanto como "`handleLogin` no se llama en ningún lado".
