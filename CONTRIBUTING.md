@@ -20,8 +20,9 @@ Salvo que el Pull Request completo haya sido coordinado con el resto del curso, 
 
 - `package.json`, `package-lock.json` y `app.json` (todos se pueden editar en el mismo PR de ser necesario; conviene usar `npm ci` en lugar de `npm install` para instalar dependencias)
 - `*.config.{js,ts,jsx,tsx}` (cualquier configuración general del proyecto)
+- `AGENTS.md`, `CLAUDE.md` y/o `CONTRIBUTING.md`.
 - `tsconfig.json`
-- Cualquier archivo en `docs/` cuyo nombre esté en mayúsculas o MACRO_CASE (incluyendo este archivo)
+- Cualquier archivo en `docs/` cuyo nombre esté en mayúsculas o MACRO_CASE
 - `src/navigation/*` (en este caso no hace falta que esté en un PR aparte, pero si que haya un acuerdo)
 - `src/constants/*` (se pueden modificar varios archivos de esta carpeta en el mismo PR)
 - `src/components/atoms/*`
