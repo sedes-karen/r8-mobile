@@ -30,6 +30,23 @@ Los átomos y moléculas deben ser tan generales y flexibles como sea necesario 
 
 Los estilos de un componente deben estar en el mismo archivo que el resto del mismo. Si alguna de las partes se vuelve muy grande, *quizás* sea momento de separar el componente en otros más pequeños.
 
+Los átomos y moléculas **no deben** utilizar ningún servicio. Tienen el propósito expreso de poderse reutilizar tanto como sea necesario, cosa que su interfaz debe reflejar. Los organismos que estén atados a una pantalla particular (generalmente provenientes de un refactoreo) pueden utilizar servicios. Las pantallas pueden hacer uso de servicios tanto como sea conveniente (ese es el punto).
+
+**Bajo ninguna circunstancia** puede un componente (cualquiera sea su naturaleza) "saltarse" los servicios proveídos para llamar a la API o similar. Este tipo de efectos secundarios se considera crítico y debe aislarse lo más posible (utilizando servicios, con validación de datos completa). Nótese que el uso de `console.log`/`console.table`/`console.error` para depuración está permitido, siempre y cuando esto no llegue a la versión final (siendo removido en el mismo PR).
+
+# Antes de abrir un Pull Request / Solicitud de Cambio
+
+> Esto se pide para reducir iteraciones en revisión y evitar merges que rompan la app.
+
+Antes de abrir un PR, revisar que:
+
+- La app no tenga errores de TypeScript. El editor de cada uno suele mostrar estos errores. Alternativamente, se puede ejecutar `npx tsc --noEmit` desde la raíz del proyecto.
+- Se gestionen correctamente los errores generados por el uso de servicios como la API.
+- No haya valores de colores, espaciados o tipografías hardcodeados que deberían usar tokens de `src/constants/design.ts`.
+- No hay `console.log` ni comentarios de depuración olvidados. Se recomienda que los comentarios de depuración inicien con `DEBUG:` para facilitar su búsqueda (`TODO:` es útil para "me falta hacer esta parte").
+- No se importan librerías o APIs que no están en `package.json`. Si se necesita una nueva dependencia, siga el proceso de archivos críticos (consultando a tanta gente como sea necesario).
+- Se sigue el resto de esta guía de contribuidores, y se tuvo en cuenta lo que dice en el archivo `AGENTS.md` en caso de utilizar IA.
+
 # Git
 
 > Esto se pide para simplificar el trabajo de revisión, testing, comentado, rechazo y aprobación de cambios.
