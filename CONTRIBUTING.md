@@ -68,3 +68,19 @@ Dentro de una PR, se debe hacer un commit por cambio menor realizado. No importa
 - **Nombres de componentes**: Los átomos deben, en lo posible, tener nombres "estándar". En las moléculas y organismos esto es menos importante.
 - **"Números mágicos" y constantes**: Se deben utilizar las constantes definidas en `src/constants/*` tanto como sea posible, evitando valores 
 - **Iteración y manipulación de estructuras de datos**: Si se requiere manipular datos, la forma más clara suele ser utilizando métodos de las clases apropiadas (`Array`, `Iterator`, etc), además de `for (const ... of ...) {...}`, que se prefiere por sobre `forEach(...)` debido a la tendencia del último de requerir acumuladores adicionales (que se terminan separando visualmente si se usa `forEach` encadenado a otros métodos). Se debe evitar, tanto como sea posible, el uso de `for (let i = ...; i < ...; i++) {...}`, debido a que incrementa tanto la carga cognitiva como la posibilidad de errores.
+
+# Code review / Revisión de código
+
+> Esto se pide para mantener buena calidad de código y la cohesión del proyecto entre equipos.
+
+**Cuando alguien revise tu PR:**
+
+- No lo tomes como personal. Los comentarios apuntan al código, no a la persona. Preguntá si algo no se entiende en vez de asumir mala intención.
+- Respondé a cada comentario aunque sea para decir "corregido" o para preguntar si no estás de acuerdo.
+- Hacé los cambios en _commits_ nuevos. No uses `git commit --amend` ni `git rebase` durante la revisión: eso reescribe el historial y hace imposible seguir qué cambió entre rondas.
+
+**Cuando revises un PR de un compañero:**
+
+- Buscá inconsistencias con esta guía.
+- Comprobá que el código hace lo que dice hacer, tanto leyéndolo como ejecutándolo (con sus respectivos _tests_ si los hubiese). Si algo no se entiende, pedí que lo expliquen.
+- Sé específico. "Esto no funciona" no ayuda tanto como "`handleLogin` no se llama en ningún lado".
