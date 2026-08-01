@@ -12,8 +12,6 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
 - Artista: bandeja de promos, reproducción, feedback, favoritos y perfil propio.
 - Label: dashboard, análisis, perfil del sello, releases, promos, listas de destinatarios y feedback.
 
-# Requisitos funcionales
-
 # Consideraciones generales
 
 - Estados de presentación de datos: carga, vacío, error y éxito, con contenido consistente en cada estado.
@@ -25,355 +23,299 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
 - Carga de imágenes de perfil mediante flujo de subida en tres pasos (prefirmado, subida binaria y confirmación).
 - Confirmación antes de acciones destructivas (eliminación, cancelación).
 
-# Módulo de autenticación (perfil no autenticado)
+# Requisitos funcionales
 
-## Auth/Login
+- Auth/Login
+  - Captura de credenciales
+    - Formulario con campos de correo electrónico y contraseña.
+    - Campo de contraseña con ocultamiento de caracteres y opción de mostrar el contenido.
+    - Validación de formato de correo y de completitud de contraseña antes del envío.
+    - Envío de credenciales al sistema y gestión de la respuesta de autenticación.
+  - Resultado de autenticación
+    - Resolución automática del rol del usuario a partir de la sesión establecida.
+    - Navegación al stack correspondiente al rol resuelto (artista o label).
+    - Mensaje de error ante credenciales inválidas, sin revelar detalles de seguridad.
+    - Indicador de carga durante el procesamiento de la solicitud.
+  - Acciones complementarias
+    - Acceso a la pantalla de recuperación de contraseña.
+    - Acceso a la pantalla de registro.
+- Auth/SignUp
+  - Registro de cuenta nueva
+    - Formulario de registro con selección del rol del usuario (artista o label).
+    - Campos condicionales según rol: nombre del sello para label; nombre de artista y datos personales para artista.
+    - Validación de correo, contraseña y campos obligatorios del rol seleccionado.
+  - Completado de cuenta de contacto promo
+    - Flujo alternativo que finaliza la cuenta de un contacto promocional invitado.
+    - Preferencia de un token de invitación como identificador del proceso.
+    - Campos de perfil de artista opcionales durante el completado.
+  - Resultado del registro
+    - Establecimiento de sesión tras el registro exitoso.
+    - Navegación posterior al stack correspondiente al rol creado.
+    - Mensaje de error ante datos inválidos o duplicados.
+- Auth/PasswordReset
+  - Solicitud de restablecimiento
+    - Formulario para ingresar el correo electrónico de la cuenta.
+    - Envío de la solicitud y confirmación de que, de existir la cuenta, se envió un código de verificación.
+  - Confirmación y nueva contraseña
+    - Formulario con campos de código de verificación, nueva contraseña y confirmación de contraseña.
+    - Validación de longitud y coincidencia de la nueva contraseña.
+    - Envío del restablecimiento y mensaje de resultado ante éxito o error.
+- Artist/Promos/Player
+  - Bandeja de promos
+    - Listado de las promos recibidas por el artista.
+    - Consulta del contador de promos pendientes de atención.
+    - Soporte de acceso con sesión autenticada o con token de contacto.
+  - Presentación de la lista
+    - Estados de carga, vacío y error con mensajes adecuados.
+    - Identificación visual de cada promo por label y release asociado.
+    - Indicación del estado pendiente cuando corresponda.
+  - Navegación
+    - Acceso al detalle de cada promo.
+    - Acceso a la lista de canciones favoritas.
+- Artist/Promos/Details
+  - Detalle de una promo
+    - Presentación de la información completa de la promo y su release asociado.
+    - Carga del contexto de reproducción a partir del release de la promo.
+  - Reproducción de audio
+    - Reproductor con lista de pistas del release.
+    - Obtención de las URLs de audio y de portada para la reproducción.
+    - Control de reproducción, pausa y avance entre pistas.
+  - Acciones sobre la promo
+    - Botón de retroalimentación que conduce al formulario de feedback.
+    - Botón de descarte de la promo de la bandeja.
+  - Gestión de pistas
+    - Marcado de pistas como descargadas.
+    - Marcado de pistas como favoritas.
+- Artist/Promos/Feedback
+  - Formulario de retroalimentación
+    - Formulario de evaluación sobre una promo específica.
+    - Campos de calificación, comentario, intención de reproducción y soporte del release.
+    - Validación de los campos del formulario.
+  - Registro de la retroalimentación
+    - Registro previo del receptor de la promo para permitir la asociación de datos.
+    - Envío de la retroalimentación completada, permitido únicamente en la primera entrega.
+  - Estadísticas de consumo
+    - Registro de estadísticas de reproducción de cada pista.
+    - Registro de likes y descargas de pistas.
+  - Confirmación
+    - Mensaje visual de confirmación tras el envío exitoso del formulario.
+- Artist/Promos/LikedTracks
+  - Lista de favoritos
+    - Listado de las pistas marcadas como favoritas por el artista.
+    - Soporte de acceso con sesión autenticada o con token de contacto.
+  - Presentación
+    - Agrupación de la información por release.
+    - Estados de carga, vacío y error.
+  - Acciones
+    - Reproducción de las pistas favoritas.
+    - Descarga de las pistas favoritas.
+- Artist/Profile/View
+  - Visualización del perfil
+    - Presentación de los datos del perfil del artista.
+    - Consulta del usuario autenticado y de los datos específicos del artista.
+    - Carga del avatar del perfil.
+  - Contenido mostrado
+    - Nombre de artista, datos personales, biografía y redes sociales.
+    - Avatar con manejo de estados de carga y error de imagen.
+  - Navegación
+    - Acceso a la pantalla de edición del perfil.
+- Artist/Profile/Edit
+  - Edición de datos
+    - Formulario de edición de datos personales, biografía y redes sociales.
+    - Persistencia de los cambios realizados.
+    - Validación de campos y mensajes de error por campo.
+  - Imagen de perfil
+    - Selección de una nueva imagen desde el dispositivo.
+    - Subida del avatar mediante el flujo de prefirmado, subida binaria y confirmación.
+    - Previsualización de la imagen antes de confirmar.
+  - Resultado de la edición
+    - Mensajes de éxito o error según el resultado de la operación.
+- Label/Dashboard
+  - Resumen del label
+    - Consulta del contexto del usuario y del sello asociado.
+    - Presentación de datos de bienvenida al usuario.
+  - Actividad reciente
+    - Listado de las promos recientes del label.
+    - Estados de carga, vacío y error.
+  - Navegación
+    - Acceso a las áreas principales del módulo label.
+- Label/Analytics
+  - Selección de contexto
+    - Selector de release sobre el que consultar métricas.
+    - Obtención del catálogo de releases del label.
+  - Métricas agregadas
+    - Presentación de métricas base de feedback por release.
+    - Consulta del listado de feedback con su total.
+  - Filtro por fechas
+    - Selector de rango de fechas opcional.
+    - Aplicación de ambas fechas del rango para acotar el análisis.
+    - Cálculo de métricas en función del rango seleccionado.
+- Label/Profile/View
+  - Visualización del perfil
+    - Presentación de los datos del perfil del sello.
+    - Consulta del usuario autenticado y de los datos del label.
+    - Carga del avatar del label.
+  - Contenido mostrado
+    - Nombre del sello, descripción y redes sociales.
+    - Avatar con manejo de estados de carga y error de imagen.
+  - Navegación
+    - Acceso a la pantalla de edición del perfil.
+- Label/Profile/Edit
+  - Edición de datos
+    - Formulario de edición de nombre, descripción y URLs sociales del sello.
+    - Persistencia de los cambios realizados.
+    - Validación de campos y mensajes de error por campo.
+  - Imagen de perfil
+    - Selección de una nueva imagen de avatar desde el dispositivo.
+    - Subida mediante el flujo de prefirmado, subida binaria y confirmación.
+  - Cambio de contraseña
+    - Formulario de cambio de contraseña con campos de contraseña actual y nueva.
+    - Validación de coincidencia y de requerimientos mínimos.
+    - Invalidez de las sesiones activas tras el cambio de contraseña.
+    - Mensaje de resultado ante éxito o error.
+- Label/Releases/List
+  - Listado de releases
+    - Consulta del catálogo de releases del label.
+    - Presentación de información de cuotas de alojamiento y de audio.
+  - Presentación de la lista
+    - Estados de carga, vacío y error.
+    - Identificación visual de cada release.
+  - Navegación
+    - Acceso al detalle de cada release mediante su identificador.
+    - Acceso a la creación de un nuevo release.
+- Label/Releases/New
+  - Creación de release
+    - Formulario de creación de un release.
+    - Campos de título, artista, fecha de publicación, tipo y formatos.
+    - Campos de número de catálogo, notas y URLs asociadas.
+    - Definición de la lista de pistas con sus metadatos.
+  - Validación
+    - Validación de campos obligatorios y de formato.
+    - Validación de enums de tipo y formato según valores admitidos.
+  - Resultado
+    - Estados de carga y error durante la mutación.
+    - Navegación al detalle del release tras la creación exitosa.
+- Label/Releases/Details
+  - Detalle de release
+    - Presentación de la metadata completa del release.
+    - Presentación del artwork mediante su URL de portada.
+    - Listado de pistas con sus URLs de audio.
+  - Cuotas
+    - Presentación de la información de cuotas asociadas al release.
+  - Navegación
+    - Acceso a la edición del release.
+    - Acceso a la gestión de promos del release.
+- Label/Releases/Edit
+  - Edición de release
+    - Formulario de edición de datos del release.
+    - Actualización de pistas, tipo y estado del release.
+    - Validación de campos y de transiciones de estado válidas.
+  - Artwork
+    - Reemplazo del artwork mediante prefirmado, subida binaria y confirmación.
+  - Audio por pista
+    - Subida del audio de cada pista mediante el flujo de prefirmado, subida binaria y confirmación.
+    - Validación de la cuota de audio disponible.
+  - Resultado
+    - Mensajes de éxito o error según el resultado de la operación.
+- Label/Releases/Promos/List
+  - Listado de promos de un release
+    - Consulta de las promos asociadas al label.
+    - Filtrado de las promos por el release seleccionado.
+  - Presentación
+    - Estados de carga, vacío y error.
+    - Identificación visual de cada promo y su estado.
+  - Navegación
+    - Acceso al detalle de cada promo.
+    - Acceso a la creación de una nueva promo para el release.
 
-- Captura de credenciales
-  - Formulario con campos de correo electrónico y contraseña.
-  - Campo de contraseña con ocultamiento de caracteres y opción de mostrar el contenido.
-  - Validación de formato de correo y de completitud de contraseña antes del envío.
-  - Envío de credenciales al sistema y gestión de la respuesta de autenticación.
-- Resultado de autenticación
-  - Resolución automática del rol del usuario a partir de la sesión establecida.
-  - Navegación al stack correspondiente al rol resuelto (artista o label).
-  - Mensaje de error ante credenciales inválidas, sin revelar detalles de seguridad.
-  - Indicador de carga durante el procesamiento de la solicitud.
-- Acciones complementarias
-  - Acceso a la pantalla de recuperación de contraseña.
-  - Acceso a la pantalla de registro.
-
-## Auth/SignUp
-
-- Registro de cuenta nueva
-  - Formulario de registro con selección del rol del usuario (artista o label).
-  - Campos condicionales según rol: nombre del sello para label; nombre de artista y datos personales para artista.
-  - Validación de correo, contraseña y campos obligatorios del rol seleccionado.
-- Completado de cuenta de contacto promo
-  - Flujo alternativo que finaliza la cuenta de un contacto promocional invitado.
-  - Preferencia de un token de invitación como identificador del proceso.
-  - Campos de perfil de artista opcionales durante el completado.
-- Resultado del registro
-  - Establecimiento de sesión tras el registro exitoso.
-  - Navegación posterior al stack correspondiente al rol creado.
-  - Mensaje de error ante datos inválidos o duplicados.
-
-## Auth/PasswordReset
-
-- Solicitud de restablecimiento
-  - Formulario para ingresar el correo electrónico de la cuenta.
-  - Envío de la solicitud y confirmación de que, de existir la cuenta, se envió un código de verificación.
-- Confirmación y nueva contraseña
-  - Formulario con campos de código de verificación, nueva contraseña y confirmación de contraseña.
-  - Validación de longitud y coincidencia de la nueva contraseña.
-  - Envío del restablecimiento y mensaje de resultado ante éxito o error.
-
-# Módulo artista
-
-## Artist/Promos/Player
-
-- Bandeja de promos
-  - Listado de las promos recibidas por el artista.
-  - Consulta del contador de promos pendientes de atención.
-  - Soporte de acceso con sesión autenticada o con token de contacto.
-- Presentación de la lista
-  - Estados de carga, vacío y error con mensajes adecuados.
-  - Identificación visual de cada promo por label y release asociado.
-  - Indicación del estado pendiente cuando corresponda.
-- Navegación
-  - Acceso al detalle de cada promo.
-  - Acceso a la lista de canciones favoritas.
-
-## Artist/Promos/Details
-
-- Detalle de una promo
-  - Presentación de la información completa de la promo y su release asociado.
-  - Carga del contexto de reproducción a partir del release de la promo.
-- Reproducción de audio
-  - Reproductor con lista de pistas del release.
-  - Obtención de las URLs de audio y de portada para la reproducción.
-  - Control de reproducción, pausa y avance entre pistas.
-- Acciones sobre la promo
-  - Botón de retroalimentación que conduce al formulario de feedback.
-  - Botón de descarte de la promo de la bandeja.
-- Gestión de pistas
-  - Marcado de pistas como descargadas.
-  - Marcado de pistas como favoritas.
-
-## Artist/Promos/Feedback
-
-- Formulario de retroalimentación
-  - Formulario de evaluación sobre una promo específica.
-  - Campos de calificación, comentario, intención de reproducción y soporte del release.
-  - Validación de los campos del formulario.
-- Registro de la retroalimentación
-  - Registro previo del receptor de la promo para permitir la asociación de datos.
-  - Envío de la retroalimentación completada, permitido únicamente en la primera entrega.
-- Estadísticas de consumo
-  - Registro de estadísticas de reproducción de cada pista.
-  - Registro de likes y descargas de pistas.
-- Confirmación
-  - Mensaje visual de confirmación tras el envío exitoso del formulario.
-
-## Artist/Promos/LikedTracks
-
-- Lista de favoritos
-  - Listado de las pistas marcadas como favoritas por el artista.
-  - Soporte de acceso con sesión autenticada o con token de contacto.
-- Presentación
-  - Agrupación de la información por release.
-  - Estados de carga, vacío y error.
-- Acciones
-  - Reproducción de las pistas favoritas.
-  - Descarga de las pistas favoritas.
-
-## Artist/Profile/View
-
-- Visualización del perfil
-  - Presentación de los datos del perfil del artista.
-  - Consulta del usuario autenticado y de los datos específicos del artista.
-  - Carga del avatar del perfil.
-- Contenido mostrado
-  - Nombre de artista, datos personales, biografía y redes sociales.
-  - Avatar con manejo de estados de carga y error de imagen.
-- Navegación
-  - Acceso a la pantalla de edición del perfil.
-
-## Artist/Profile/Edit
-
-- Edición de datos
-  - Formulario de edición de datos personales, biografía y redes sociales.
-  - Persistencia de los cambios realizados.
-  - Validación de campos y mensajes de error por campo.
-- Imagen de perfil
-  - Selección de una nueva imagen desde el dispositivo.
-  - Subida del avatar mediante el flujo de prefirmado, subida binaria y confirmación.
-  - Previsualización de la imagen antes de confirmar.
-- Resultado de la edición
-  - Mensajes de éxito o error según el resultado de la operación.
-
-# Módulo label
-
-## Label/Dashboard
-
-- Resumen del label
-  - Consulta del contexto del usuario y del sello asociado.
-  - Presentación de datos de bienvenida al usuario.
-- Actividad reciente
-  - Listado de las promos recientes del label.
-  - Estados de carga, vacío y error.
-- Navegación
-  - Acceso a las áreas principales del módulo label.
-
-## Label/Analytics
-
-- Selección de contexto
-  - Selector de release sobre el que consultar métricas.
-  - Obtención del catálogo de releases del label.
-- Métricas agregadas
-  - Presentación de métricas base de feedback por release.
-  - Consulta del listado de feedback con su total.
-- Filtro por fechas
-  - Selector de rango de fechas opcional.
-  - Aplicación de ambas fechas del rango para acotar el análisis.
-  - Cálculo de métricas en función del rango seleccionado.
-
-## Label/Profile/View
-
-- Visualización del perfil
-  - Presentación de los datos del perfil del sello.
-  - Consulta del usuario autenticado y de los datos del label.
-  - Carga del avatar del label.
-- Contenido mostrado
-  - Nombre del sello, descripción y redes sociales.
-  - Avatar con manejo de estados de carga y error de imagen.
-- Navegación
-  - Acceso a la pantalla de edición del perfil.
-
-## Label/Profile/Edit
-
-- Edición de datos
-  - Formulario de edición de nombre, descripción y URLs sociales del sello.
-  - Persistencia de los cambios realizados.
-  - Validación de campos y mensajes de error por campo.
-- Imagen de perfil
-  - Selección de una nueva imagen de avatar desde el dispositivo.
-  - Subida mediante el flujo de prefirmado, subida binaria y confirmación.
-- Cambio de contraseña
-  - Formulario de cambio de contraseña con campos de contraseña actual y nueva.
-  - Validación de coincidencia y de requerimientos mínimos.
-  - Invalidez de las sesiones activas tras el cambio de contraseña.
-  - Mensaje de resultado ante éxito o error.
-
-## Label/Releases/List
-
-- Listado de releases
-  - Consulta del catálogo de releases del label.
-  - Presentación de información de cuotas de alojamiento y de audio.
-- Presentación de la lista
-  - Estados de carga, vacío y error.
-  - Identificación visual de cada release.
-- Navegación
-  - Acceso al detalle de cada release mediante su identificador.
-  - Acceso a la creación de un nuevo release.
-
-## Label/Releases/New
-
-- Creación de release
-  - Formulario de creación de un release.
-  - Campos de título, artista, fecha de publicación, tipo y formatos.
-  - Campos de número de catálogo, notas y URLs asociadas.
-  - Definición de la lista de pistas con sus metadatos.
-- Validación
-  - Validación de campos obligatorios y de formato.
-  - Validación de enums de tipo y formato según valores admitidos.
-- Resultado
-  - Estados de carga y error durante la mutación.
-  - Navegación al detalle del release tras la creación exitosa.
-
-## Label/Releases/Details
-
-- Detalle de release
-  - Presentación de la metadata completa del release.
-  - Presentación del artwork mediante su URL de portada.
-  - Listado de pistas con sus URLs de audio.
-- Cuotas
-  - Presentación de la información de cuotas asociadas al release.
-- Navegación
-  - Acceso a la edición del release.
-  - Acceso a la gestión de promos del release.
-
-## Label/Releases/Edit
-
-- Edición de release
-  - Formulario de edición de datos del release.
-  - Actualización de pistas, tipo y estado del release.
-  - Validación de campos y de transiciones de estado válidas.
-- Artwork
-  - Reemplazo del artwork mediante prefirmado, subida binaria y confirmación.
-- Audio por pista
-  - Subida del audio de cada pista mediante el flujo de prefirmado, subida binaria y confirmación.
-  - Validación de la cuota de audio disponible.
-- Resultado
-  - Mensajes de éxito o error según el resultado de la operación.
-
-## Label/Releases/Promos/List
-
-- Listado de promos de un release
-  - Consulta de las promos asociadas al label.
-  - Filtrado de las promos por el release seleccionado.
-- Presentación
-  - Estados de carga, vacío y error.
-  - Identificación visual de cada promo y su estado.
-- Navegación
-  - Acceso al detalle de cada promo.
-  - Acceso a la creación de una nueva promo para el release.
-
-## Label/Releases/Promos/New
-
-- Creación de promo
-  - Formulario de creación de una promo para un release específico.
-  - Campos de tipo de envío (inmediato o programado) y fecha de programación.
-  - Selección de listas de destinatarios y de uso de base de datos curada.
-  - Campo de fecha de expiración.
-- Validación
-  - Validación de campos obligatorios según el tipo de envío seleccionado.
-  - Validación de que la fecha de programación sea posterior a la actual.
-- Resultado
-  - Estados de carga y error durante la mutación.
-
-## Label/Releases/Promos/Details
-
-- Detalle de promo
-  - Presentación del resumen de la promo.
-  - Presentación del estado actual de la promo.
-  - Presentación de las listas de destinatarios y de las fechas relevantes.
-  - Presentación del mensaje de error cuando la promo haya fallado.
-- Acciones según estado
-  - Envío de la promo cuando su estado lo permite.
-  - Cancelación de la promo cuando su estado lo permite.
-
-## Label/Releases/Promos/Edit
-
-- Edición de promo
-  - Formulario de edición de los parámetros de la promo.
-  - Ajuste de fecha de programación, tipo de envío y listas de destinatarios.
-  - Ajuste del uso de base de datos curada y de la fecha de expiración.
-  - Validación de campos según las reglas del tipo de envío.
-- Eliminación
-  - Eliminación de la promo cuando su estado lo permite.
-  - Confirmación previa de la acción destructiva.
-  - Manejo de errores de dependencia que impidan la eliminación.
-
-## Label/RecipientLists/List
-
-- Índice de listas
-  - Listado paginado de listas de destinatarios del label.
-  - Búsqueda por nombre dentro del listado.
-- Presentación
-  - Información de cantidad de destinatarios por lista.
-  - Indicación de listas con destinatarios de correo no válido.
-  - Resumen de entregas del conjunto de listas.
-- Navegación
-  - Acceso al detalle de cada lista.
-  - Acceso a la creación de una nueva lista.
-  - Acceso a la edición y a la gestión de feedback.
-
-## Label/RecipientLists/New
-
-- Creación de lista
-  - Formulario de creación de una nueva lista de destinatarios.
-  - Campo de nombre de la lista con validación de completitud.
-- Resultado
-  - Estados de carga y error durante la mutación.
-  - Navegación al detalle de la lista tras la creación exitosa.
-
-## Label/RecipientLists/Details
-
-- Detalle de lista
-  - Presentación de la información de la lista.
-  - Listado de los miembros de la lista.
-- Gestión de miembros
-  - Alta de un destinatario por correo electrónico o por identificador del pool.
-  - Validación de unicidad del destinatario dentro de la lista.
-  - Estados de carga, vacío y error del listado de miembros.
-- Navegación
-  - Acceso a la edición de la lista y a la carga masiva de destinatarios.
-
-## Label/RecipientLists/Edit
-
-- Edición de lista
-  - Formulario de edición del nombre de la lista.
-  - Actualización del conjunto de miembros de la lista.
-  - Validación de campos antes del envío.
-- Gestión de miembros
-  - Remoción de miembros individuales de la lista.
-- Eliminación
-  - Eliminación de la lista con confirmación previa.
-  - Manejo de errores de dependencia cuando la lista esté en uso.
-
-## Label/RecipientLists/Feedback
-
-- Listado de feedback
-  - Listado de los feedback recibidos por el label.
-  - Presentación del total de feedback y del contador de pendientes.
-- Filtros
-  - Aplicación de filtros para acotar el listado.
-- Métricas
-  - Consulta de métricas agregadas del feedback.
-  - Presentación de indicadores de análisis.
-- Navegación
-  - Acceso al detalle de cada feedback.
-
-## Label/RecipientLists/BulkUpload
-
-- Carga masiva de destinatarios
-  - Selección de un archivo CSV o Excel desde el dispositivo.
-  - Parsing del archivo en el dispositivo para extraer los destinatarios.
-  - Extracción de correos electrónicos y nombres de visualización.
-- Validación
-  - Validación de formato y de campos mínimos del archivo.
-  - Exclusión de destinatarios duplicados o inválidos.
-- Envío y resultado
-  - Envío del conjunto de destinatarios a la lista seleccionada.
-  - Presentación del resultado de la carga con cantidad de agregados y omitidos.
+- Label/Releases/Promos/New
+  - Creación de promo
+    - Formulario de creación de una promo para un release específico.
+    - Campos de tipo de envío (inmediato o programado) y fecha de programación.
+    - Selección de listas de destinatarios y de uso de base de datos curada.
+    - Campo de fecha de expiración.
+  - Validación
+    - Validación de campos obligatorios según el tipo de envío seleccionado.
+    - Validación de que la fecha de programación sea posterior a la actual.
+  - Resultado
+    - Estados de carga y error durante la mutación.
+- Label/Releases/Promos/Details
+  - Detalle de promo
+    - Presentación del resumen de la promo.
+    - Presentación del estado actual de la promo.
+    - Presentación de las listas de destinatarios y de las fechas relevantes.
+    - Presentación del mensaje de error cuando la promo haya fallado.
+  - Acciones según estado
+    - Envío de la promo cuando su estado lo permite.
+    - Cancelación de la promo cuando su estado lo permite.
+- Label/Releases/Promos/Edit
+  - Edición de promo
+    - Formulario de edición de los parámetros de la promo.
+    - Ajuste de fecha de programación, tipo de envío y listas de destinatarios.
+    - Ajuste del uso de base de datos curada y de la fecha de expiración.
+    - Validación de campos según las reglas del tipo de envío.
+  - Eliminación
+    - Eliminación de la promo cuando su estado lo permite.
+    - Confirmación previa de la acción destructiva.
+    - Manejo de errores de dependencia que impidan la eliminación.
+- Label/RecipientLists/List
+  - Índice de listas
+    - Listado paginado de listas de destinatarios del label.
+    - Búsqueda por nombre dentro del listado.
+  - Presentación
+    - Información de cantidad de destinatarios por lista.
+    - Indicación de listas con destinatarios de correo no válido.
+    - Resumen de entregas del conjunto de listas.
+  - Navegación
+    - Acceso al detalle de cada lista.
+    - Acceso a la creación de una nueva lista.
+    - Acceso a la edición y a la gestión de feedback.
+- Label/RecipientLists/New
+  - Creación de lista
+    - Formulario de creación de una nueva lista de destinatarios.
+    - Campo de nombre de la lista con validación de completitud.
+  - Resultado
+    - Estados de carga y error durante la mutación.
+    - Navegación al detalle de la lista tras la creación exitosa.
+- Label/RecipientLists/Details
+  - Detalle de lista
+    - Presentación de la información de la lista.
+    - Listado de los miembros de la lista.
+  - Gestión de miembros
+    - Alta de un destinatario por correo electrónico o por identificador del pool.
+    - Validación de unicidad del destinatario dentro de la lista.
+    - Estados de carga, vacío y error del listado de miembros.
+  - Navegación
+    - Acceso a la edición de la lista y a la carga masiva de destinatarios.
+- Label/RecipientLists/Edit
+  - Edición de lista
+    - Formulario de edición del nombre de la lista.
+    - Actualización del conjunto de miembros de la lista.
+    - Validación de campos antes del envío.
+  - Gestión de miembros
+    - Remoción de miembros individuales de la lista.
+  - Eliminación
+    - Eliminación de la lista con confirmación previa.
+    - Manejo de errores de dependencia cuando la lista esté en uso.
+- Label/RecipientLists/Feedback
+  - Listado de feedback
+    - Listado de los feedback recibidos por el label.
+    - Presentación del total de feedback y del contador de pendientes.
+  - Filtros
+    - Aplicación de filtros para acotar el listado.
+  - Métricas
+    - Consulta de métricas agregadas del feedback.
+    - Presentación de indicadores de análisis.
+  - Navegación
+    - Acceso al detalle de cada feedback.
+- Label/RecipientLists/BulkUpload
+  - Carga masiva de destinatarios
+    - Selección de un archivo CSV o Excel desde el dispositivo.
+    - Parsing del archivo en el dispositivo para extraer los destinatarios.
+    - Extracción de correos electrónicos y nombres de visualización.
+  - Validación
+    - Validación de formato y de campos mínimos del archivo.
+    - Exclusión de destinatarios duplicados o inválidos.
+  - Envío y resultado
+    - Envío del conjunto de destinatarios a la lista seleccionada.
+    - Presentación del resultado de la carga con cantidad de agregados y omitidos.
