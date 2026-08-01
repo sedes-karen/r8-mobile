@@ -8,9 +8,9 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
 
 # Roles y alcance funcional por perfil
 
-- No autenticado: ingreso, registro y recuperación de contraseña, además del acceso a promos dado un token especial.
-- Artista: bandeja de promos, reproducción, feedback, favoritos y perfil propio.
-- Label: dashboard, análisis, perfil del sello, releases, promos, listas de destinatarios y feedback.
+- **No autenticado:** ingreso, registro y recuperación de contraseña, además del acceso a promos dado un token especial.
+- **Artista:** bandeja de promos, reproducción, feedback, favoritos y perfil propio.
+- **Label:** dashboard, análisis, perfil del sello, releases, promos, listas de destinatarios y feedback.
 
 # Consideraciones generales
 
@@ -25,7 +25,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
 
 # Requisitos funcionales
 
-- Auth/Login
+- **Auth/Login**
   - Captura de credenciales
     - Formulario con campos de correo electrónico y contraseña.
     - Campo de contraseña con ocultamiento de caracteres y opción de mostrar el contenido.
@@ -39,7 +39,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Acciones complementarias
     - Acceso a la pantalla de recuperación de contraseña.
     - Acceso a la pantalla de registro.
-- Auth/SignUp
+- **Auth/SignUp**
   - Registro de cuenta nueva
     - Formulario de registro con selección del rol del usuario (artista o label).
     - Campos condicionales según rol: nombre del sello para label; nombre de artista y datos personales para artista.
@@ -52,7 +52,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Establecimiento de sesión tras el registro exitoso.
     - Navegación posterior al stack correspondiente al rol creado.
     - Mensaje de error ante datos inválidos o duplicados.
-- Auth/PasswordReset
+- **Auth/PasswordReset**
   - Solicitud de restablecimiento
     - Formulario para ingresar el correo electrónico de la cuenta.
     - Envío de la solicitud y confirmación de que, de existir la cuenta, se envió un código de verificación.
@@ -60,7 +60,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Formulario con campos de código de verificación, nueva contraseña y confirmación de contraseña.
     - Validación de longitud y coincidencia de la nueva contraseña.
     - Envío del restablecimiento y mensaje de resultado ante éxito o error.
-- Artist/Promos/Player
+- **Artist/Promos/Player**
   - Bandeja de promos
     - Listado de las promos recibidas por el artista.
     - Consulta del contador de promos pendientes de atención.
@@ -72,7 +72,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Navegación
     - Acceso al detalle de cada promo.
     - Acceso a la lista de canciones favoritas.
-- Artist/Promos/Details
+- **Artist/Promos/Details**
   - Detalle de una promo
     - Presentación de la información completa de la promo y su release asociado.
     - Carga del contexto de reproducción a partir del release de la promo.
@@ -86,7 +86,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Gestión de pistas
     - Marcado de pistas como descargadas.
     - Marcado de pistas como favoritas.
-- Artist/Promos/Feedback
+- **Artist/Promos/Feedback**
   - Formulario de retroalimentación
     - Formulario de evaluación sobre una promo específica.
     - Campos de calificación, comentario, intención de reproducción y soporte del release.
@@ -99,7 +99,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Registro de likes y descargas de pistas.
   - Confirmación
     - Mensaje visual de confirmación tras el envío exitoso del formulario.
-- Artist/Promos/LikedTracks
+- **Artist/Promos/LikedTracks**
   - Lista de favoritos
     - Listado de las pistas marcadas como favoritas por el artista.
     - Soporte de acceso con sesión autenticada o con token de contacto.
@@ -109,7 +109,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Acciones
     - Reproducción de las pistas favoritas.
     - Descarga de las pistas favoritas.
-- Artist/Profile/View
+- **Artist/Profile/View**
   - Visualización del perfil
     - Presentación de los datos del perfil del artista.
     - Consulta del usuario autenticado y de los datos específicos del artista.
@@ -119,7 +119,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Avatar con manejo de estados de carga y error de imagen.
   - Navegación
     - Acceso a la pantalla de edición del perfil.
-- Artist/Profile/Edit
+- **Artist/Profile/Edit**
   - Edición de datos
     - Formulario de edición de datos personales, biografía y redes sociales.
     - Persistencia de los cambios realizados.
@@ -130,7 +130,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Previsualización de la imagen antes de confirmar.
   - Resultado de la edición
     - Mensajes de éxito o error según el resultado de la operación.
-- Label/Dashboard
+- **Label/Dashboard**
   - Resumen del label
     - Consulta del contexto del usuario y del sello asociado.
     - Presentación de datos de bienvenida al usuario.
@@ -139,7 +139,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Estados de carga, vacío y error.
   - Navegación
     - Acceso a las áreas principales del módulo label.
-- Label/Analytics
+- **Label/Analytics**
   - Selección de contexto
     - Selector de release sobre el que consultar métricas.
     - Obtención del catálogo de releases del label.
@@ -150,7 +150,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Selector de rango de fechas opcional.
     - Aplicación de ambas fechas del rango para acotar el análisis.
     - Cálculo de métricas en función del rango seleccionado.
-- Label/Profile/View
+- **Label/Profile/View**
   - Visualización del perfil
     - Presentación de los datos del perfil del sello.
     - Consulta del usuario autenticado y de los datos del label.
@@ -160,7 +160,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Avatar con manejo de estados de carga y error de imagen.
   - Navegación
     - Acceso a la pantalla de edición del perfil.
-- Label/Profile/Edit
+- **Label/Profile/Edit**
   - Edición de datos
     - Formulario de edición de nombre, descripción y URLs sociales del sello.
     - Persistencia de los cambios realizados.
@@ -173,7 +173,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Validación de coincidencia y de requerimientos mínimos.
     - Invalidez de las sesiones activas tras el cambio de contraseña.
     - Mensaje de resultado ante éxito o error.
-- Label/Releases/List
+- **Label/Releases/List**
   - Listado de releases
     - Consulta del catálogo de releases del label.
     - Presentación de información de cuotas de alojamiento y de audio.
@@ -183,7 +183,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Navegación
     - Acceso al detalle de cada release mediante su identificador.
     - Acceso a la creación de un nuevo release.
-- Label/Releases/New
+- **Label/Releases/New**
   - Creación de release
     - Formulario de creación de un release.
     - Campos de título, artista, fecha de publicación, tipo y formatos.
@@ -195,7 +195,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Resultado
     - Estados de carga y error durante la mutación.
     - Navegación al detalle del release tras la creación exitosa.
-- Label/Releases/Details
+- **Label/Releases/Details**
   - Detalle de release
     - Presentación de la metadata completa del release.
     - Presentación del artwork mediante su URL de portada.
@@ -205,7 +205,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Navegación
     - Acceso a la edición del release.
     - Acceso a la gestión de promos del release.
-- Label/Releases/Edit
+- **Label/Releases/Edit**
   - Edición de release
     - Formulario de edición de datos del release.
     - Actualización de pistas, tipo y estado del release.
@@ -217,7 +217,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Validación de la cuota de audio disponible.
   - Resultado
     - Mensajes de éxito o error según el resultado de la operación.
-- Label/Releases/Promos/List
+- **Label/Releases/Promos/List**
   - Listado de promos de un release
     - Consulta de las promos asociadas al label.
     - Filtrado de las promos por el release seleccionado.
@@ -227,8 +227,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Navegación
     - Acceso al detalle de cada promo.
     - Acceso a la creación de una nueva promo para el release.
-
-- Label/Releases/Promos/New
+- **Label/Releases/Promos/New**
   - Creación de promo
     - Formulario de creación de una promo para un release específico.
     - Campos de tipo de envío (inmediato o programado) y fecha de programación.
@@ -239,7 +238,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Validación de que la fecha de programación sea posterior a la actual.
   - Resultado
     - Estados de carga y error durante la mutación.
-- Label/Releases/Promos/Details
+- **Label/Releases/Promos/Details**
   - Detalle de promo
     - Presentación del resumen de la promo.
     - Presentación del estado actual de la promo.
@@ -248,7 +247,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Acciones según estado
     - Envío de la promo cuando su estado lo permite.
     - Cancelación de la promo cuando su estado lo permite.
-- Label/Releases/Promos/Edit
+- **Label/Releases/Promos/Edit**
   - Edición de promo
     - Formulario de edición de los parámetros de la promo.
     - Ajuste de fecha de programación, tipo de envío y listas de destinatarios.
@@ -258,7 +257,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Eliminación de la promo cuando su estado lo permite.
     - Confirmación previa de la acción destructiva.
     - Manejo de errores de dependencia que impidan la eliminación.
-- Label/RecipientLists/List
+- **Label/RecipientLists/List**
   - Índice de listas
     - Listado paginado de listas de destinatarios del label.
     - Búsqueda por nombre dentro del listado.
@@ -270,14 +269,14 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Acceso al detalle de cada lista.
     - Acceso a la creación de una nueva lista.
     - Acceso a la edición y a la gestión de feedback.
-- Label/RecipientLists/New
+- **Label/RecipientLists/New**
   - Creación de lista
     - Formulario de creación de una nueva lista de destinatarios.
     - Campo de nombre de la lista con validación de completitud.
   - Resultado
     - Estados de carga y error durante la mutación.
     - Navegación al detalle de la lista tras la creación exitosa.
-- Label/RecipientLists/Details
+- **Label/RecipientLists/Details**
   - Detalle de lista
     - Presentación de la información de la lista.
     - Listado de los miembros de la lista.
@@ -287,7 +286,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Estados de carga, vacío y error del listado de miembros.
   - Navegación
     - Acceso a la edición de la lista y a la carga masiva de destinatarios.
-- Label/RecipientLists/Edit
+- **Label/RecipientLists/Edit**
   - Edición de lista
     - Formulario de edición del nombre de la lista.
     - Actualización del conjunto de miembros de la lista.
@@ -297,7 +296,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
   - Eliminación
     - Eliminación de la lista con confirmación previa.
     - Manejo de errores de dependencia cuando la lista esté en uso.
-- Label/RecipientLists/Feedback
+- **Label/RecipientLists/Feedback**
   - Listado de feedback
     - Listado de los feedback recibidos por el label.
     - Presentación del total de feedback y del contador de pendientes.
@@ -308,7 +307,7 @@ El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se e
     - Presentación de indicadores de análisis.
   - Navegación
     - Acceso al detalle de cada feedback.
-- Label/RecipientLists/BulkUpload
+- **Label/RecipientLists/BulkUpload**
   - Carga masiva de destinatarios
     - Selección de un archivo CSV o Excel desde el dispositivo.
     - Parsing del archivo en el dispositivo para extraer los destinatarios.
