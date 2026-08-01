@@ -1,185 +1,382 @@
-# Pantallas — Desglose por pantalla
+# Especificación de Requerimientos de Software (ERS): R8 Mobile
 
-Para cada pantalla se indica su **ruta en el árbol de navegación** y la lista de características funcionales que debe implementar. La mayoría son aún **placeholders** (el código de `src/screens/` renderiza un texto de "editar pantalla"); la navegación ya funciona.
+## Propósito
 
----
+Este documento especifica los requerimientos funcionales de la aplicación móvil R8 Mobile, cliente de la plataforma R8 de promos de música. Describe el comportamiento esperado de cada pantalla organizado por rol y por área funcional, con el objetivo de servir como contrato de desarrollo para los equipos.
 
-## Auth
+## Alcance
 
-### `src/screens/Auth/Login.tsx` — `Auth/Login`
+El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se especifican las pantallas de autenticación, el flujo de promos del lado del receptor (artista), la gestión de releases y promos del lado del label, y la gestión de listas de destinatarios y feedback. Quedan fuera de alcance las funcionalidades administrativas y los paneles de control del sistema backend.
 
-- Inicio de sesión con **email** y **contraseña**.
-- Orquesta `POST /auth/login` → `GET /users/me` → `applySession` (via `useLogin`).
-- Resuelve el rol automáticamente y navega al stack Artist o Label.
-- Maneja estados de **carga**, **error** (credenciales inválidas) y **éxito**.
-- **Pendiente:** cablear el formulario (`useLogin` ya existe en `features/auth/useLogin`).
+## Roles y alcance funcional por perfil
 
-### `src/screens/Auth/SignUp.tsx` — `Auth/SignUp`
+- No autenticado: ingreso, registro y recuperación de contraseña.
+- Artista: bandeja de promos, reproducción, feedback, favoritos y perfil propio.
+- Label: dashboard, análisis, perfil del sello, releases, promos, listas de destinatarios y feedback.
+- Flujo guest: acceso a promos mediante token de contacto, sin requerir sesión autenticada.
 
-- Registro de nuevo usuario con rol **label** o **artist** (`POST /users/register`).
-- Campos según rol: `labelName` para label; `artistName`, `firstName`, `lastName` para artist.
-- Flujo alternativo de completar cuenta de contacto promo (`POST /users/register?token=`).
-- Navegación posterior al stack del rol creado.
+## Requerimientos transversales
 
-### `src/screens/Auth/PasswordReset.tsx` — `Auth/PasswordReset`
+Aplican a todas las pantallas de la aplicación:
 
-- Recuperación de contraseña en dos pasos.
-- Paso 1: `POST /users/password/request-reset` (envía PIN por email).
-- Paso 2: `POST /users/password/reset` (PIN + nueva contraseña + confirmación).
-- Validaciones de los campos del formulario.
+- Estados de presentación de datos: carga, vacío, error y éxito, con contenido consistente en cada estado.
+- Navegación condicional por rol, determinada por el estado de autenticación.
+- Manejo de sesión: persistencia, validación y expiración de token con reintento de autenticación.
+- Validación de formularios con mensajes de error descriptivos por campo.
+- Feedback visual ante acciones de mutación (crear, editar, eliminar, enviar).
+- Manejo de errores de red y de servidor con mensajes comprensibles para el usuario.
+- Carga de imágenes de perfil mediante flujo de subida en tres pasos (prefirmado, subida binaria y confirmación).
+- Confirmación antes de acciones destructivas (eliminación, cancelación).
 
----
+## Módulo de autenticación (perfil no autenticado)
 
-## Artist
+### Auth/Login
 
-### `src/screens/Artist/Promos/Player.tsx` — `Artist/Promos/Player`
+- Captura de credenciales
+  - Formulario con campos de correo electrónico y contraseña.
+  - Campo de contraseña con ocultamiento de caracteres y opción de mostrar el contenido.
+  - Validación de formato de correo y de completitud de contraseña antes del envío.
+  - Envío de credenciales al sistema y gestión de la respuesta de autenticación.
+- Resultado de autenticación
+  - Resolución automática del rol del usuario a partir de la sesión establecida.
+  - Navegación al stack correspondiente al rol resuelto (artista o label).
+  - Mensaje de error ante credenciales inválidas, sin revelar detalles de seguridad.
+  - Indicador de carga durante el procesamiento de la solicitud.
+- Acciones complementarias
+  - Acceso a la pantalla de recuperación de contraseña.
+  - Acceso a la pantalla de registro.
 
-- Lista las promos recibidas (**inbox**).
-- Consulta `GET /promos/inbox` (con `?token=` si es guest) y `GET /promos/inbox/pending-count` para el contador de pendientes.
-- Navegación al detalle de cada promo y a la lista de favoritos (LikedTracks).
-- Estados de carga / vacío / error.
+### Auth/SignUp
 
-### `src/screens/Artist/Promos/Details.tsx` — `Artist/Promos/Details`
+- Registro de cuenta nueva
+  - Formulario de registro con selección del rol del usuario (artista o label).
+  - Campos condicionales según rol: nombre del sello para label; nombre de artista y datos personales para artista.
+  - Validación de correo, contraseña y campos obligatorios del rol seleccionado.
+- Completado de cuenta de contacto promo
+  - Flujo alternativo que finaliza la cuenta de un contacto promocional invitado.
+  - Preferencia de un token de invitación como identificador del proceso.
+  - Campos de perfil de artista opcionales durante el completado.
+- Resultado del registro
+  - Establecimiento de sesión tras el registro exitoso.
+  - Navegación posterior al stack correspondiente al rol creado.
+  - Mensaje de error ante datos inválidos o duplicados.
 
-- Detalle de una promo (`GET /promos/:id`).
-- **Reproductor de audio**: resuelve `release.id` y llama `GET /releases/:releaseId` para `tracks[].audioUrl` y `coverUrl`.
-- Botones de **feedback** (navega al formulario) y **dismiss** (`POST /promos/:id/dismiss`).
-- Permite marcar tracks como **descargados** y **favoritos**.
+### Auth/PasswordReset
 
-### `src/screens/Artist/Promos/Feedback.tsx` — `Artist/Promos/Feedback`
+- Solicitud de restablecimiento
+  - Formulario para ingresar el correo electrónico de la cuenta.
+  - Envío de la solicitud y confirmación de que, de existir la cuenta, se envió un código de verificación.
+- Confirmación y nueva contraseña
+  - Formulario con campos de código de verificación, nueva contraseña y confirmación de contraseña.
+  - Validación de longitud y coincidencia de la nueva contraseña.
+  - Envío del restablecimiento y mensaje de resultado ante éxito o error.
 
-- Formulario de retroalimentación sobre una promo.
-- Asegura el feedback: `POST /releases/:releaseId/feedback` con `{ userId }`.
-- Envía el formulario: `PATCH /releases/:releaseId/feedback/:feedbackId` con `rating`, `comment`, `willPlay`, `supported` (solo primer envío).
-- Registra estadísticas de reproducción (`track-stats`), likes y descargas.
-- Confirmación visual del envío.
+## Módulo artista
 
-### `src/screens/Artist/Promos/LikedTracks.tsx` — `Artist/Promos/LikedTracks`
+### Artist/Promos/Player
 
-- Lista las canciones marcadas como favoritas.
-- Consulta `GET /feedback/liked-tracks` (con `?token=` si aplica).
-- Muestra información agrupada por release y permite reproducir/descargar.
+- Bandeja de promos
+  - Listado de las promos recibidas por el artista.
+  - Consulta del contador de promos pendientes de atención.
+  - Soporte de acceso con sesión autenticada o con token de contacto.
+- Presentación de la lista
+  - Estados de carga, vacío y error con mensajes adecuados.
+  - Identificación visual de cada promo por label y release asociado.
+  - Indicación del estado pendiente cuando corresponda.
+- Navegación
+  - Acceso al detalle de cada promo.
+  - Acceso a la lista de canciones favoritas.
 
-### `src/screens/Artist/Profile/View.tsx` — `Artist/Profile/View`
+### Artist/Promos/Details
 
-- Visualización del perfil del artista.
-- Consulta `GET /users/me`, `GET /artists/me` y avatar (`GET /artists/me/profile-image`).
-- Muestra nombre, bio, redes y avatar.
-- Navegación a edición.
+- Detalle de una promo
+  - Presentación de la información completa de la promo y su release asociado.
+  - Carga del contexto de reproducción a partir del release de la promo.
+- Reproducción de audio
+  - Reproductor con lista de pistas del release.
+  - Obtención de las URLs de audio y de portada para la reproducción.
+  - Control de reproducción, pausa y avance entre pistas.
+- Acciones sobre la promo
+  - Botón de retroalimentación que conduce al formulario de feedback.
+  - Botón de descarte de la promo de la bandeja.
+- Gestión de pistas
+  - Marcado de pistas como descargadas.
+  - Marcado de pistas como favoritas.
 
-### `src/screens/Artist/Profile/Edit.tsx` — `Artist/Profile/Edit`
+### Artist/Promos/Feedback
 
-- Edición de datos del perfil (`PUT /artists/me`).
-- **Subida de imagen** de perfil (presign → PUT binario → confirm).
-- Validación de campos y feedback de éxito/error.
+- Formulario de retroalimentación
+  - Formulario de evaluación sobre una promo específica.
+  - Campos de calificación, comentario, intención de reproducción y soporte del release.
+  - Validación de los campos del formulario.
+- Registro de la retroalimentación
+  - Registro previo del receptor de la promo para permitir la asociación de datos.
+  - Envío de la retroalimentación completada, permitido únicamente en la primera entrega.
+- Estadísticas de consumo
+  - Registro de estadísticas de reproducción de cada pista.
+  - Registro de likes y descargas de pistas.
+- Confirmación
+  - Mensaje visual de confirmación tras el envío exitoso del formulario.
 
----
+### Artist/Promos/LikedTracks
 
-## Label
+- Lista de favoritos
+  - Listado de las pistas marcadas como favoritas por el artista.
+  - Soporte de acceso con sesión autenticada o con token de contacto.
+- Presentación
+  - Agrupación de la información por release.
+  - Estados de carga, vacío y error.
+- Acciones
+  - Reproducción de las pistas favoritas.
+  - Descarga de las pistas favoritas.
 
-### `src/screens/Label/Dashboard.tsx` — `Label/Dashboard`
+### Artist/Profile/View
 
-- Dashboard del label.
-- Consulta `GET /users/me` (contexto/`labelId`) y `GET /promos/for-label?labelId=` (promos recientes).
-- Muestra datos de bienvenida y resumen de actividad.
+- Visualización del perfil
+  - Presentación de los datos del perfil del artista.
+  - Consulta del usuario autenticado y de los datos específicos del artista.
+  - Carga del avatar del perfil.
+- Contenido mostrado
+  - Nombre de artista, datos personales, biografía y redes sociales.
+  - Avatar con manejo de estados de carga y error de imagen.
+- Navegación
+  - Acceso a la pantalla de edición del perfil.
 
-### `src/screens/Label/Analytics.tsx` — `Label/Analytics`
+### Artist/Profile/Edit
 
-- Métricas agregadas por release y por rango de fechas.
-- Consulta `GET /users/me`, `GET /releases` (catálogo del tenant) y `GET /feedback` (`{ feedback, total }`).
-- Rango de fechas opcional con `GET /feedback/analytics?dateFrom=&dateTo=` (ambos parámetros).
-- Selector de release + métricas base.
+- Edición de datos
+  - Formulario de edición de datos personales, biografía y redes sociales.
+  - Persistencia de los cambios realizados.
+  - Validación de campos y mensajes de error por campo.
+- Imagen de perfil
+  - Selección de una nueva imagen desde el dispositivo.
+  - Subida del avatar mediante el flujo de prefirmado, subida binaria y confirmación.
+  - Previsualización de la imagen antes de confirmar.
+- Resultado de la edición
+  - Mensajes de éxito o error según el resultado de la operación.
 
-### `src/screens/Label/Profile/View.tsx` — `Label/Profile/View`
+## Módulo label
 
-- Visualización del perfil del label.
-- Consulta `GET /users/me`, `GET /labels/me` y avatar (`GET /labels/me/profile-image`).
-- Muestra datos del sello y redes sociales.
+### Label/Dashboard
 
-### `src/screens/Label/Profile/Edit.tsx` — `Label/Profile/Edit`
+- Resumen del label
+  - Consulta del contexto del usuario y del sello asociado.
+  - Presentación de datos de bienvenida al usuario.
+- Actividad reciente
+  - Listado de las promos recientes del label.
+  - Estados de carga, vacío y error.
+- Navegación
+  - Acceso a las áreas principales del módulo label.
 
-- Edición del perfil (`PUT /labels/me`): nombre, descripción, URLs sociales.
-- **Subida de imagen** de avatar (presign → PUT → confirm).
-- **Cambio de contraseña** (`POST /users/me/change-password`) — revoca cookies de refresh.
+### Label/Analytics
 
-### `src/screens/Label/Releases/List.tsx` — `Label/Releases/List`
+- Selección de contexto
+  - Selector de release sobre el que consultar métricas.
+  - Obtención del catálogo de releases del label.
+- Métricas agregadas
+  - Presentación de métricas base de feedback por release.
+  - Consulta del listado de feedback con su total.
+- Filtro por fechas
+  - Selector de rango de fechas opcional.
+  - Aplicación de ambas fechas del rango para acotar el análisis.
+  - Cálculo de métricas en función del rango seleccionado.
 
-- Lista de releases del label.
-- Consulta `GET /releases` (respuesta `{ releases, hostingQuota, releaseAudioQuota }`).
-- Navegación al detalle (`releaseId`).
-- Estados de carga / vacío / error.
+### Label/Profile/View
 
-### `src/screens/Label/Releases/New.tsx` — `Label/Releases/New`
+- Visualización del perfil
+  - Presentación de los datos del perfil del sello.
+  - Consulta del usuario autenticado y de los datos del label.
+  - Carga del avatar del label.
+- Contenido mostrado
+  - Nombre del sello, descripción y redes sociales.
+  - Avatar con manejo de estados de carga y error de imagen.
+- Navegación
+  - Acceso a la pantalla de edición del perfil.
 
-- Creación de un release (`POST /releases`).
-- Campos: `title`, `artist`, `releaseDate`, `type` (`EP`/`VA`/`ALBUM`), `formats` (`DIGITAL`/`VINYL`), `catalogNumber`, `notes`, URLs, `tracks`.
-- Validaciones y estados de mutación.
+### Label/Profile/Edit
 
-### `src/screens/Label/Releases/Details.tsx` — `Label/Releases/Details`
+- Edición de datos
+  - Formulario de edición de nombre, descripción y URLs sociales del sello.
+  - Persistencia de los cambios realizados.
+  - Validación de campos y mensajes de error por campo.
+- Imagen de perfil
+  - Selección de una nueva imagen de avatar desde el dispositivo.
+  - Subida mediante el flujo de prefirmado, subida binaria y confirmación.
+- Cambio de contraseña
+  - Formulario de cambio de contraseña con campos de contraseña actual y nueva.
+  - Validación de coincidencia y de requerimientos mínimos.
+  - Invalidez de las sesiones activas tras el cambio de contraseña.
+  - Mensaje de resultado ante éxito o error.
 
-- Detalle de un release (`GET /releases/:releaseId`).
-- Muestra metadata, artwork (`coverUrl`), tracks (con `audioUrl`) y cuotas.
-- Acceso a la gestión de promos de ese release.
+### Label/Releases/List
 
-### `src/screens/Label/Releases/Edit.tsx` — `Label/Releases/Edit`
+- Listado de releases
+  - Consulta del catálogo de releases del label.
+  - Presentación de información de cuotas de alojamiento y de audio.
+- Presentación de la lista
+  - Estados de carga, vacío y error.
+  - Identificación visual de cada release.
+- Navegación
+  - Acceso al detalle de cada release mediante su identificador.
+  - Acceso a la creación de un nuevo release.
 
-- Edición de un release (`PATCH /releases/:releaseId`).
-- **Artwork** (presign → PUT → confirm) y **audio** por track (`/releases/:releaseId/tracks/:trackId`).
-- Actualización de tracks, tipo y estado (`DRAFT`/`CREATED`).
+### Label/Releases/New
 
-### `src/screens/Label/Releases/Promos/List.tsx` — `Label/Releases/Promos/List`
+- Creación de release
+  - Formulario de creación de un release.
+  - Campos de título, artista, fecha de publicación, tipo y formatos.
+  - Campos de número de catálogo, notas y URLs asociadas.
+  - Definición de la lista de pistas con sus metadatos.
+- Validación
+  - Validación de campos obligatorios y de formato.
+  - Validación de enums de tipo y formato según valores admitidos.
+- Resultado
+  - Estados de carga y error durante la mutación.
+  - Navegación al detalle del release tras la creación exitosa.
 
-- Lista de promos atadas a un release particular.
-- Consulta `GET /promos/for-label?labelId=` y filtra por release.
-- Navegación al detalle y creación de nuevas promos.
+### Label/Releases/Details
 
-### `src/screens/Label/Releases/Promos/New.tsx` — `Label/Releases/Promos/New`
+- Detalle de release
+  - Presentación de la metadata completa del release.
+  - Presentación del artwork mediante su URL de portada.
+  - Listado de pistas con sus URLs de audio.
+- Cuotas
+  - Presentación de la información de cuotas asociadas al release.
+- Navegación
+  - Acceso a la edición del release.
+  - Acceso a la gestión de promos del release.
 
-- Creación de una promo para una release específica (`POST /promos`).
-- Campos: `releaseId`, `sendType` (`IMMEDIATE`/`SCHEDULED`), `scheduledAt`, `recipientListIds`, `useCuratedDb`, `expiresAt`.
+### Label/Releases/Edit
 
-### `src/screens/Label/Releases/Promos/Details.tsx` — `Label/Releases/Promos/Details`
+- Edición de release
+  - Formulario de edición de datos del release.
+  - Actualización de pistas, tipo y estado del release.
+  - Validación de campos y de transiciones de estado válidas.
+- Artwork
+  - Reemplazo del artwork mediante prefirmado, subida binaria y confirmación.
+- Audio por pista
+  - Subida del audio de cada pista mediante el flujo de prefirmado, subida binaria y confirmación.
+  - Validación de la cuota de audio disponible.
+- Resultado
+  - Mensajes de éxito o error según el resultado de la operación.
 
-- Detalle de una promo (`GET /promos/:id`).
-- Muestra resumen, estado (`DRAFT`/`SCHEDULED`/`SENDING`/`SENT`/`CANCELLED`/`FAILED`/`EXPIRED`), listas y fechas.
-- Acciones de **enviar** (`POST .../send`) y **cancelar** (`POST .../cancel`).
+### Label/Releases/Promos/List
 
-### `src/screens/Label/Releases/Promos/Edit.tsx` — `Label/Releases/Promos/Edit`
+- Listado de promos de un release
+  - Consulta de las promos asociadas al label.
+  - Filtrado de las promos por el release seleccionado.
+- Presentación
+  - Estados de carga, vacío y error.
+  - Identificación visual de cada promo y su estado.
+- Navegación
+  - Acceso al detalle de cada promo.
+  - Acceso a la creación de una nueva promo para el release.
 
-- Edición de una promo (`PATCH /promos/:id`).
-- Ajuste de `scheduledAt`, `sendType`, `recipientListIds`, `useCuratedDb`, `expiresAt`.
-- **Eliminación** (`DELETE /promos/:id`) en estados permitidos.
+### Label/Releases/Promos/New
 
-### `src/screens/Label/RecipientLists/List.tsx` — `Label/RecipientLists/List`
+- Creación de promo
+  - Formulario de creación de una promo para un release específico.
+  - Campos de tipo de envío (inmediato o programado) y fecha de programación.
+  - Selección de listas de destinatarios y de uso de base de datos curada.
+  - Campo de fecha de expiración.
+- Validación
+  - Validación de campos obligatorios según el tipo de envío seleccionado.
+  - Validación de que la fecha de programación sea posterior a la actual.
+- Resultado
+  - Estados de carga y error durante la mutación.
 
-- Índice de listas de destinatarios.
-- Consulta `GET /recipient-lists` (`page`, `limit`, `search`), con `deliverySummary` y `hasNonValidMailRecipients` por lista.
-- Navegación a detalle, edición, feedback y alta.
+### Label/Releases/Promos/Details
 
-### `src/screens/Label/RecipientLists/New.tsx` — `Label/RecipientLists/New`
+- Detalle de promo
+  - Presentación del resumen de la promo.
+  - Presentación del estado actual de la promo.
+  - Presentación de las listas de destinatarios y de las fechas relevantes.
+  - Presentación del mensaje de error cuando la promo haya fallado.
+- Acciones según estado
+  - Envío de la promo cuando su estado lo permite.
+  - Cancelación de la promo cuando su estado lo permite.
 
-- Creación de una nueva lista (`POST /recipient-lists` con `{ name }`).
+### Label/Releases/Promos/Edit
 
-### `src/screens/Label/RecipientLists/Details.tsx` — `Label/RecipientLists/Details`
+- Edición de promo
+  - Formulario de edición de los parámetros de la promo.
+  - Ajuste de fecha de programación, tipo de envío y listas de destinatarios.
+  - Ajuste del uso de base de datos curada y de la fecha de expiración.
+  - Validación de campos según las reglas del tipo de envío.
+- Eliminación
+  - Eliminación de la promo cuando su estado lo permite.
+  - Confirmación previa de la acción destructiva.
+  - Manejo de errores de dependencia que impidan la eliminación.
 
-- Detalle de una lista (`GET /recipient-lists/:listId`).
-- Miembros (`GET /recipient-lists/:listId/recipients`).
-- Alta de destinatario por email/ID (`POST .../recipients`).
+### Label/RecipientLists/List
 
-### `src/screens/Label/RecipientLists/Edit.tsx` — `Label/RecipientLists/Edit`
+- Índice de listas
+  - Listado paginado de listas de destinatarios del label.
+  - Búsqueda por nombre dentro del listado.
+- Presentación
+  - Información de cantidad de destinatarios por lista.
+  - Indicación de listas con destinatarios de correo no válido.
+  - Resumen de entregas del conjunto de listas.
+- Navegación
+  - Acceso al detalle de cada lista.
+  - Acceso a la creación de una nueva lista.
+  - Acceso a la edición y a la gestión de feedback.
 
-- Edición de una lista (`PUT /recipient-lists/:listId`): nombre y `recipientIds`.
-- **Eliminación** (`DELETE /recipient-lists/:listId`) manejando `409` por dependencias.
-- Quitar miembros (`DELETE .../recipients/:recipientId`).
+### Label/RecipientLists/New
 
-### `src/screens/Label/RecipientLists/Feedback.tsx` — `Label/RecipientLists/Feedback`
+- Creación de lista
+  - Formulario de creación de una nueva lista de destinatarios.
+  - Campo de nombre de la lista con validación de completitud.
+- Resultado
+  - Estados de carga y error durante la mutación.
+  - Navegación al detalle de la lista tras la creación exitosa.
 
-- Listado y métricas de feedback del label.
-- Consulta `GET /feedback` (`{ feedback, total }`), `GET /feedback/pending-count` y opcionalmente `GET /feedback/analytics`.
-- Filtros y navegación al detalle de cada feedback.
+### Label/RecipientLists/Details
 
-### `src/screens/Label/RecipientLists/BulkUpload.tsx` — `Label/RecipientLists/BulkUpload`
+- Detalle de lista
+  - Presentación de la información de la lista.
+  - Listado de los miembros de la lista.
+- Gestión de miembros
+  - Alta de un destinatario por correo electrónico o por identificador del pool.
+  - Validación de unicidad del destinatario dentro de la lista.
+  - Estados de carga, vacío y error del listado de miembros.
+- Navegación
+  - Acceso a la edición de la lista y a la carga masiva de destinatarios.
 
-- **Carga masiva** de destinatarios desde CSV/Excel **parseado en el dispositivo**.
-- Envía JSON a `POST /recipient-lists/:listId/recipients/batch` con `recipientIds[]` o `recipients[]` (exactamente uno).
-- Muestra el resultado `{ added, skipped }`.
+### Label/RecipientLists/Edit
+
+- Edición de lista
+  - Formulario de edición del nombre de la lista.
+  - Actualización del conjunto de miembros de la lista.
+  - Validación de campos antes del envío.
+- Gestión de miembros
+  - Remoción de miembros individuales de la lista.
+- Eliminación
+  - Eliminación de la lista con confirmación previa.
+  - Manejo de errores de dependencia cuando la lista esté en uso.
+
+### Label/RecipientLists/Feedback
+
+- Listado de feedback
+  - Listado de los feedback recibidos por el label.
+  - Presentación del total de feedback y del contador de pendientes.
+- Filtros
+  - Aplicación de filtros para acotar el listado.
+- Métricas
+  - Consulta de métricas agregadas del feedback.
+  - Presentación de indicadores de análisis.
+- Navegación
+  - Acceso al detalle de cada feedback.
+
+### Label/RecipientLists/BulkUpload
+
+- Carga masiva de destinatarios
+  - Selección de un archivo CSV o Excel desde el dispositivo.
+  - Parsing del archivo en el dispositivo para extraer los destinatarios.
+  - Extracción de correos electrónicos y nombres de visualización.
+- Validación
+  - Validación de formato y de campos mínimos del archivo.
+  - Exclusión de destinatarios duplicados o inválidos.
+- Envío y resultado
+  - Envío del conjunto de destinatarios a la lista seleccionada.
+  - Presentación del resultado de la carga con cantidad de agregados y omitidos.
