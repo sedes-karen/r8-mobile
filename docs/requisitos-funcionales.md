@@ -1,23 +1,20 @@
-# Especificación de Requerimientos de Software (ERS): R8 Mobile
+# Propósito
 
-## Propósito
+Este documento especifica los requerimientos funcionales de la aplicación móvil R8 Mobile, cliente de la plataforma R8 de promos de música. Describe el comportamiento esperado de cada pantalla organizado por rol y por área funcional, con el objetivo de servir como referencia para los equipos.
 
-Este documento especifica los requerimientos funcionales de la aplicación móvil R8 Mobile, cliente de la plataforma R8 de promos de música. Describe el comportamiento esperado de cada pantalla organizado por rol y por área funcional, con el objetivo de servir como contrato de desarrollo para los equipos.
-
-## Alcance
+# Alcance
 
 El sistema cubre tres perfiles de usuario: no autenticado, artista y label. Se especifican las pantallas de autenticación, el flujo de promos del lado del receptor (artista), la gestión de releases y promos del lado del label, y la gestión de listas de destinatarios y feedback. Quedan fuera de alcance las funcionalidades administrativas y los paneles de control del sistema backend.
 
-## Roles y alcance funcional por perfil
+# Roles y alcance funcional por perfil
 
-- No autenticado: ingreso, registro y recuperación de contraseña.
+- No autenticado: ingreso, registro y recuperación de contraseña, además del acceso a promos dado un token especial.
 - Artista: bandeja de promos, reproducción, feedback, favoritos y perfil propio.
 - Label: dashboard, análisis, perfil del sello, releases, promos, listas de destinatarios y feedback.
-- Flujo guest: acceso a promos mediante token de contacto, sin requerir sesión autenticada.
 
-## Requerimientos transversales
+# Requisitos funcionales
 
-Aplican a todas las pantallas de la aplicación:
+# Consideraciones generales
 
 - Estados de presentación de datos: carga, vacío, error y éxito, con contenido consistente en cada estado.
 - Navegación condicional por rol, determinada por el estado de autenticación.
@@ -28,9 +25,9 @@ Aplican a todas las pantallas de la aplicación:
 - Carga de imágenes de perfil mediante flujo de subida en tres pasos (prefirmado, subida binaria y confirmación).
 - Confirmación antes de acciones destructivas (eliminación, cancelación).
 
-## Módulo de autenticación (perfil no autenticado)
+# Módulo de autenticación (perfil no autenticado)
 
-### Auth/Login
+## Auth/Login
 
 - Captura de credenciales
   - Formulario con campos de correo electrónico y contraseña.
@@ -46,7 +43,7 @@ Aplican a todas las pantallas de la aplicación:
   - Acceso a la pantalla de recuperación de contraseña.
   - Acceso a la pantalla de registro.
 
-### Auth/SignUp
+## Auth/SignUp
 
 - Registro de cuenta nueva
   - Formulario de registro con selección del rol del usuario (artista o label).
@@ -61,7 +58,7 @@ Aplican a todas las pantallas de la aplicación:
   - Navegación posterior al stack correspondiente al rol creado.
   - Mensaje de error ante datos inválidos o duplicados.
 
-### Auth/PasswordReset
+## Auth/PasswordReset
 
 - Solicitud de restablecimiento
   - Formulario para ingresar el correo electrónico de la cuenta.
@@ -71,9 +68,9 @@ Aplican a todas las pantallas de la aplicación:
   - Validación de longitud y coincidencia de la nueva contraseña.
   - Envío del restablecimiento y mensaje de resultado ante éxito o error.
 
-## Módulo artista
+# Módulo artista
 
-### Artist/Promos/Player
+## Artist/Promos/Player
 
 - Bandeja de promos
   - Listado de las promos recibidas por el artista.
@@ -87,7 +84,7 @@ Aplican a todas las pantallas de la aplicación:
   - Acceso al detalle de cada promo.
   - Acceso a la lista de canciones favoritas.
 
-### Artist/Promos/Details
+## Artist/Promos/Details
 
 - Detalle de una promo
   - Presentación de la información completa de la promo y su release asociado.
@@ -103,7 +100,7 @@ Aplican a todas las pantallas de la aplicación:
   - Marcado de pistas como descargadas.
   - Marcado de pistas como favoritas.
 
-### Artist/Promos/Feedback
+## Artist/Promos/Feedback
 
 - Formulario de retroalimentación
   - Formulario de evaluación sobre una promo específica.
@@ -118,7 +115,7 @@ Aplican a todas las pantallas de la aplicación:
 - Confirmación
   - Mensaje visual de confirmación tras el envío exitoso del formulario.
 
-### Artist/Promos/LikedTracks
+## Artist/Promos/LikedTracks
 
 - Lista de favoritos
   - Listado de las pistas marcadas como favoritas por el artista.
@@ -130,7 +127,7 @@ Aplican a todas las pantallas de la aplicación:
   - Reproducción de las pistas favoritas.
   - Descarga de las pistas favoritas.
 
-### Artist/Profile/View
+## Artist/Profile/View
 
 - Visualización del perfil
   - Presentación de los datos del perfil del artista.
@@ -142,7 +139,7 @@ Aplican a todas las pantallas de la aplicación:
 - Navegación
   - Acceso a la pantalla de edición del perfil.
 
-### Artist/Profile/Edit
+## Artist/Profile/Edit
 
 - Edición de datos
   - Formulario de edición de datos personales, biografía y redes sociales.
@@ -155,9 +152,9 @@ Aplican a todas las pantallas de la aplicación:
 - Resultado de la edición
   - Mensajes de éxito o error según el resultado de la operación.
 
-## Módulo label
+# Módulo label
 
-### Label/Dashboard
+## Label/Dashboard
 
 - Resumen del label
   - Consulta del contexto del usuario y del sello asociado.
@@ -168,7 +165,7 @@ Aplican a todas las pantallas de la aplicación:
 - Navegación
   - Acceso a las áreas principales del módulo label.
 
-### Label/Analytics
+## Label/Analytics
 
 - Selección de contexto
   - Selector de release sobre el que consultar métricas.
@@ -181,7 +178,7 @@ Aplican a todas las pantallas de la aplicación:
   - Aplicación de ambas fechas del rango para acotar el análisis.
   - Cálculo de métricas en función del rango seleccionado.
 
-### Label/Profile/View
+## Label/Profile/View
 
 - Visualización del perfil
   - Presentación de los datos del perfil del sello.
@@ -193,7 +190,7 @@ Aplican a todas las pantallas de la aplicación:
 - Navegación
   - Acceso a la pantalla de edición del perfil.
 
-### Label/Profile/Edit
+## Label/Profile/Edit
 
 - Edición de datos
   - Formulario de edición de nombre, descripción y URLs sociales del sello.
@@ -208,7 +205,7 @@ Aplican a todas las pantallas de la aplicación:
   - Invalidez de las sesiones activas tras el cambio de contraseña.
   - Mensaje de resultado ante éxito o error.
 
-### Label/Releases/List
+## Label/Releases/List
 
 - Listado de releases
   - Consulta del catálogo de releases del label.
@@ -220,7 +217,7 @@ Aplican a todas las pantallas de la aplicación:
   - Acceso al detalle de cada release mediante su identificador.
   - Acceso a la creación de un nuevo release.
 
-### Label/Releases/New
+## Label/Releases/New
 
 - Creación de release
   - Formulario de creación de un release.
@@ -234,7 +231,7 @@ Aplican a todas las pantallas de la aplicación:
   - Estados de carga y error durante la mutación.
   - Navegación al detalle del release tras la creación exitosa.
 
-### Label/Releases/Details
+## Label/Releases/Details
 
 - Detalle de release
   - Presentación de la metadata completa del release.
@@ -246,7 +243,7 @@ Aplican a todas las pantallas de la aplicación:
   - Acceso a la edición del release.
   - Acceso a la gestión de promos del release.
 
-### Label/Releases/Edit
+## Label/Releases/Edit
 
 - Edición de release
   - Formulario de edición de datos del release.
@@ -260,7 +257,7 @@ Aplican a todas las pantallas de la aplicación:
 - Resultado
   - Mensajes de éxito o error según el resultado de la operación.
 
-### Label/Releases/Promos/List
+## Label/Releases/Promos/List
 
 - Listado de promos de un release
   - Consulta de las promos asociadas al label.
@@ -272,7 +269,7 @@ Aplican a todas las pantallas de la aplicación:
   - Acceso al detalle de cada promo.
   - Acceso a la creación de una nueva promo para el release.
 
-### Label/Releases/Promos/New
+## Label/Releases/Promos/New
 
 - Creación de promo
   - Formulario de creación de una promo para un release específico.
@@ -285,7 +282,7 @@ Aplican a todas las pantallas de la aplicación:
 - Resultado
   - Estados de carga y error durante la mutación.
 
-### Label/Releases/Promos/Details
+## Label/Releases/Promos/Details
 
 - Detalle de promo
   - Presentación del resumen de la promo.
@@ -296,7 +293,7 @@ Aplican a todas las pantallas de la aplicación:
   - Envío de la promo cuando su estado lo permite.
   - Cancelación de la promo cuando su estado lo permite.
 
-### Label/Releases/Promos/Edit
+## Label/Releases/Promos/Edit
 
 - Edición de promo
   - Formulario de edición de los parámetros de la promo.
@@ -308,7 +305,7 @@ Aplican a todas las pantallas de la aplicación:
   - Confirmación previa de la acción destructiva.
   - Manejo de errores de dependencia que impidan la eliminación.
 
-### Label/RecipientLists/List
+## Label/RecipientLists/List
 
 - Índice de listas
   - Listado paginado de listas de destinatarios del label.
@@ -322,7 +319,7 @@ Aplican a todas las pantallas de la aplicación:
   - Acceso a la creación de una nueva lista.
   - Acceso a la edición y a la gestión de feedback.
 
-### Label/RecipientLists/New
+## Label/RecipientLists/New
 
 - Creación de lista
   - Formulario de creación de una nueva lista de destinatarios.
@@ -331,7 +328,7 @@ Aplican a todas las pantallas de la aplicación:
   - Estados de carga y error durante la mutación.
   - Navegación al detalle de la lista tras la creación exitosa.
 
-### Label/RecipientLists/Details
+## Label/RecipientLists/Details
 
 - Detalle de lista
   - Presentación de la información de la lista.
@@ -343,7 +340,7 @@ Aplican a todas las pantallas de la aplicación:
 - Navegación
   - Acceso a la edición de la lista y a la carga masiva de destinatarios.
 
-### Label/RecipientLists/Edit
+## Label/RecipientLists/Edit
 
 - Edición de lista
   - Formulario de edición del nombre de la lista.
@@ -355,7 +352,7 @@ Aplican a todas las pantallas de la aplicación:
   - Eliminación de la lista con confirmación previa.
   - Manejo de errores de dependencia cuando la lista esté en uso.
 
-### Label/RecipientLists/Feedback
+## Label/RecipientLists/Feedback
 
 - Listado de feedback
   - Listado de los feedback recibidos por el label.
@@ -368,7 +365,7 @@ Aplican a todas las pantallas de la aplicación:
 - Navegación
   - Acceso al detalle de cada feedback.
 
-### Label/RecipientLists/BulkUpload
+## Label/RecipientLists/BulkUpload
 
 - Carga masiva de destinatarios
   - Selección de un archivo CSV o Excel desde el dispositivo.
