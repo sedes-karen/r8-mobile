@@ -1,46 +1,47 @@
 import { StyleSheet } from 'react-native';
+import { colors, spacing, fontSizes, borderRadius, fontWeights } from '../../../constants/design';
 
 export const styles = StyleSheet.create({
     checkboxWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 8,
+        marginVertical: spacing.sm,
     },
     disabled: {
         opacity: 0.6,
     },
     box: {
-        width: 24,
-        height: 24,
-        borderWidth: 2,
-        borderColor: '#007AFF',
-        borderRadius: 4,
+        width: spacing.lg,
+        height: spacing.lg,
+        borderWidth: spacing.px,
+        borderColor: colors.primary,
+        borderRadius: borderRadius.sm,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
-        backgroundColor: 'transparent',
+        marginRight: spacing.sm,
+        backgroundColor: colors.background,
     },
     boxChecked: {
-        backgroundColor: '#007AFF',
+        backgroundColor: colors.primary,
     },
     boxDisabled: {
-        borderColor: '#A1A1A1',
+        borderColor: colors.textMuted,
         backgroundColor: 'transparent',
     },
     checkmark: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: 'bold',
-        lineHeight: 18,
+        color: colors.neutralLight,
+        fontSize: fontSizes.md,
+        fontWeight: fontWeights.bold,
+        lineHeight: spacing.md,
     },
     checkmarkDisabled: {
-        color: '#A1A1A1',
+        color: colors.textMuted,
     },
     checkboxLabel: {
-        fontSize: 16,
-        color: '#333333',
+        fontSize: fontSizes.md,
+        color: colors.neutralDark,
     },
     labelDisabled: {
-        color: '#A1A1A1',
+        color: colors.neutral,
     },
 });
