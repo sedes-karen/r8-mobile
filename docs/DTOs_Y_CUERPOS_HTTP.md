@@ -1,11 +1,11 @@
 # DTOs y cuerpos HTTP — API Stage (r8-api)
 
-**Versión:** 2026-06-30  
+**Versión:** 2026-08-06  
 **Audiencia:** alumnos **sin acceso al código** de r8-api; consumirán la API en **stage**.  
-**URL base:** `https://api-stage.technopremieres.com`  
+**URL base:** `https://api.stage.r8.audio`  
 **Mapa de rutas y flujos:** [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)
 
-> Revisión alineada con `r8-api` y cliente `r8-site/src/api/` (jun 2026).
+> Revisión alineada con `r8-api` y cliente `r8-site/src/api/` (ago 2026). DNS canónico: `*.r8.audio` (el host legacy `technopremieres.com` ya no aplica).
 
 ---
 
@@ -13,7 +13,7 @@
 
 | Tema | Regla |
 |------|--------|
-| **Base URL** | `https://api-stage.technopremieres.com` + ruta (ej. `/auth/login`) |
+| **Base URL** | `https://api.stage.r8.audio` + ruta (ej. `/auth/login`) |
 | **Content-Type** | `application/json` en requests con cuerpo (excepto `PUT` binario a URL firmada) |
 | **Auth estándar** | `Authorization: Bearer <accessToken>` |
 | **Auth destinatario promo** | Query `?token=<jwt_contacto>` (rol `guest`; puede combinarse con reglas por ruta) |
@@ -30,7 +30,7 @@
 
 | Método | Ruta | Cuerpo (request) | Respuesta (resumen) |
 |--------|------|------------------|---------------------|
-| `POST` | `/auth/login` | `{ "email": string, "password": string }` | `{ "success": true, "user": <perfil>, "accessToken": string }` + cookie refresh |
+| `POST` | `/auth/login` | `{ "email": string, "password": string }` | `{ "success": true, "user": <perfil>, "accessToken": string }` + cookie refresh. Si el usuario está `EMAIL_NOT_VERIFIED` → **403** `"Email verification required"` |
 | `POST` | `/auth/refresh` | (vacío; cookie refresh) | `{ "success": true, "accessToken": string }` |
 | `POST` | `/auth/logout` | Opcional `{ "scope": "all" }` | `{ "success": true }` |
 | `POST` | `/auth/validate` | — (Bearer) | Perfil / validación |
@@ -42,7 +42,10 @@
 
 | Método | Ruta | Cuerpo (request) | Respuesta (resumen) |
 |--------|------|------------------|---------------------|
-| `POST` | `/users/register` | **RegisterBody** (o completar cuenta promo con `?token=` — ver abajo) | **201** `{ "success": true, "user": <perfil>, "accessToken": string }` |
+| `POST` | `/users/register` | **RegisterBody** (alta abierta) | **201** `{ "success": true, "requiresEmailVerification": true, "email": string }` — **sin** `accessToken` |
+| `POST` | `/users/verify-email` | **VerifyEmailDto** | **200** `{ "success": true, "user": <perfil>, "accessToken": string }` + cookie refresh |
+| `POST` | `/users/resend-verification` | `{ "email": string }` | **200** `{ "message": "If an unverified account exists..." }` (genérico; rate-limited) |
+| `POST` | `/users/register?token=` | Completar cuenta promo — ver abajo | **201** con `accessToken` (sin paso PIN) |
 | `GET` | `/users/me` | — | Usuario enriquecido (`labels[]`, `artist`, URLs firmadas, `labelId` derivable) |
 | `PUT` | `/users/me` | **UpdateUserDto** | Usuario actualizado |
 | `POST` | `/users/me/change-password` | `{ "currentPassword": string, "newPassword": string }` | `{ "message": "Password changed successfully" }` — revoca **todas** las cookies refresh del usuario (re-login o refresh necesario) |
@@ -63,7 +66,17 @@
 | `labelName` | string | no | Si `role === "label"` (default generado) |
 | `artistName`, `firstName`, `lastName` | string | no | Si `role === "artist"` |
 
-> Tras registro **label**, el servidor crea label + stub de artista. Tras registro **artist**, crea artista + label vacío scaffold.
+> Tras registro **label**, el servidor crea label + stub de artista. Tras registro **artist**, crea artista + label vacío scaffold.  
+> El usuario queda en status **`EMAIL_NOT_VERIFIED`**. Se envía un **PIN de 4 caracteres** por email (TTL ~120 min). **No** hay sesión hasta `verify-email`.
+
+### VerifyEmailDto (`POST /users/verify-email`)
+
+| Campo | Tipo | Notas |
+|-------|------|--------|
+| `email` | string | Email del registro |
+| `pin` | string | **4 caracteres** (código del email) |
+
+Activa la cuenta (`ACTIVE`) y emite sesión. PIN inválido/expirado → **400** `"Invalid or expired verification code"`. Endpoints de PIN tienen **rate limit**.
 
 ### Completar cuenta promo (`POST /users/register?token=<jwt_contacto>`)
 
@@ -75,7 +88,7 @@ Para contactos promo que reciben un link de alta (sin registro previo completo):
 | `email` | string | no | Si se envía, debe coincidir con el email del contacto del token |
 | `artistName`, `firstName`, `lastName` | string | no | Perfil artista opcional al completar |
 
-Respuesta **201** con `accessToken` + cookie refresh (mismo patrón que login). El `role` del body **no** aplica en este flujo.
+Respuesta **201** con `accessToken` + cookie refresh (mismo patrón que login). **No** requiere `verify-email`. El `role` del body **no** aplica en este flujo.
 
 ### UpdateUserDto (`PUT /users/me`)
 
@@ -215,9 +228,10 @@ Opcionales: `title`, `artist`, `artistId`, `artistEmail`, `releaseDate`, `type` 
 |------|--------|------|----------------|-------------------|
 | 1 | `PUT` | `/releases/:releaseId/tracks/:trackId` | `{ "filename": string, "mimetype"?: string, "expectedSize"?: number }` | `{ "uploadUrl", "expiresIn", "path", "contentType" }` |
 | 2 | `PUT` | `<uploadUrl>` | binario | — |
-| 3 | `POST` | `/releases/:releaseId/tracks/:trackId/confirm` | `{ "path": string }` | track actualizado |
+| 3 | `POST` | `/releases/:releaseId/tracks/:trackId/confirm` | `{ "path": string, "duration"?: number }` | track actualizado (`duration` en segundos si el cliente la envió) |
 
 - **`expectedSize`:** bytes del archivo; si supera cuota → **409** `RELEASE_AUDIO_QUOTA_EXCEEDED` con `{ code, used, max }`.
+- **`duration` en confirm:** opcional; si se omite, el backend puede programar extracción async. Preferible enviarla desde el cliente cuando se conozca.
 - Lectura: `coverUrl` y `tracks[].audioUrl` en **`GET /releases/:releaseId`**.
 
 ---
@@ -473,8 +487,8 @@ Contrato completo: **r8-api** `docs/MODULES.md` (lectura opcional docentes).
 
 - Rutas, roles y flujos: [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)
 - Cliente web de referencia: **r8-site** `src/api/`
-- Variable Expo sugerida: `EXPO_PUBLIC_API_URL=https://api-stage.technopremieres.com`
+- Variable Expo sugerida: `EXPO_PUBLIC_API_URL=https://api.stage.r8.audio`
 
 ---
 
-*Documento sincronizado con r8-api y r8-site — 2026-06-30.*
+*Documento sincronizado con r8-api y r8-site — 2026-08-06.*

@@ -1,7 +1,7 @@
 # Referencia HTTP — alineación con r8-site y r8-api
 
-**Versión:** 2026-06-30  
-**Sincronizado con:** `r8-api` (`docs/MODULES.md` v1.6, 2026-04-21) y cliente web `r8-site` (`src/api/`).  
+**Versión:** 2026-08-06  
+**Sincronizado con:** `r8-api` (`docs/MODULES.md` v1.6 + auth PIN / DNS `r8.audio`) y cliente web `r8-site` (`src/api/`).  
 **Propósito:** La app móvil debe ofrecer las **mismas capacidades funcionales** que **r8-site** (`src/app/router.tsx`), consumiendo **r8-api** (Express). El contrato vigente usa **prefijos por dominio**; el **tenant (label / usuario)** lo resuelve el **JWT** (y en flujos de destinatario, `?token=`), no rutas anidadas del estilo `/labels/:labelId/releases`.
 
 **DTOs, cuerpos JSON y enums por endpoint:** [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md).
@@ -12,13 +12,15 @@
 
 | Concepto | Valor |
 |----------|--------|
-| **URL base** | `https://api-stage.technopremieres.com` |
-| **Health check** | `GET https://api-stage.technopremieres.com/health` → **200** si el servicio responde |
-| **Variable en Expo** | `EXPO_PUBLIC_API_URL=https://api-stage.technopremieres.com` |
+| **URL base** | `https://api.stage.r8.audio` |
+| **Health check** | `GET https://api.stage.r8.audio/health` → **200** si el servicio responde |
+| **Variable en Expo** | `EXPO_PUBLIC_API_URL=https://api.stage.r8.audio` |
+| **Prod (referencia)** | `https://api.r8.audio` — no usar en el curso |
 
-Todas las rutas de este documento son **relativas** a esa base. Ejemplo: login → `POST https://api-stage.technopremieres.com/auth/login`.
+Todas las rutas de este documento son **relativas** a esa base. Ejemplo: login → `POST https://api.stage.r8.audio/auth/login`.
 
-> **Nota:** Stage es un entorno compartido de pruebas. No usar para datos sensibles reales ni cargas destructivas masivas.
+> **Nota:** Stage es un entorno compartido de pruebas. No usar para datos sensibles reales ni cargas destructivas masivas.  
+> **DNS:** el host legacy `api-stage.technopremieres.com` **ya no resuelve**; usar solo `api.stage.r8.audio`.
 
 ---
 
@@ -32,6 +34,7 @@ Todas las rutas de este documento son **relativas** a esa base. Ejemplo: login �
 | **Tenant** | Contexto de label deducido del usuario autenticado, no siempre de la URL. |
 | **DTO** | Forma del JSON request/response; detalle en [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md). |
 | **Hard delete** | `DELETE` de promo o release **borra la fila** en DB (no hay papelera ni estado `DELETED`). |
+| **EMAIL_NOT_VERIFIED** | Status tras `POST /users/register` abierto. No puede hacer login hasta `POST /users/verify-email` con el PIN de 4 caracteres. |
 
 ---
 
@@ -91,6 +94,8 @@ Auth, usuarios, labels, artists, releases (+ artwork/tracks), promos (label + in
 - **`POST .../recipients/bulk-upload`** (multipart CSV al servidor) → reemplazado por **`POST .../recipients/batch`** (JSON); el **parseo CSV/Excel es en el cliente** (como en r8-site).
 - **`PUT /users/me/change-password`** → la API expone **`POST /users/me/change-password`**.
 - **`POST /users/unsubscribe/:userId`** → la API usa **`POST /users/unsubscribe`** (Bearer o contexto de usuario) y **`POST /users/unsubscribe?token=`** vía el mismo middleware de token promo donde aplique.
+- **`POST /users/register` emite `accessToken` de inmediato** → el alta abierta queda `EMAIL_NOT_VERIFIED` y responde `{ requiresEmailVerification: true, email }`; la sesión se emite en **`POST /users/verify-email`**. (El path promo `?token=` sí sigue emitiendo sesión al registrar.)
+- Host legacy **`api-stage.technopremieres.com`** → reemplazado por **`https://api.stage.r8.audio`**.
 - Enums de release obsoletos en docs viejos: no usar `REMIX`, `SINGLE`, `PUBLISHED`; ver sección Releases.
 - Estado `DELETED` en promos → no existe; el delete es físico.
 
@@ -100,8 +105,10 @@ Auth, usuarios, labels, artists, releases (+ artwork/tracks), promos (label + in
 
 | Método | Ruta | Auth | Uso en mobile |
 |--------|------|------|----------------|
-| `POST` | `/auth/login` | — | Login label/artist |
-| `POST` | `/users/register` | — | Registro (`role`: `label` \| `artist`) |
+| `POST` | `/auth/login` | — | Login label/artist — **403** si `EMAIL_NOT_VERIFIED` |
+| `POST` | `/users/register` | — | Alta abierta (`role`: `label` \| `artist`) → **no** emite sesión; pide PIN |
+| `POST` | `/users/verify-email` | — | Confirmar PIN de signup → emite `accessToken` + cookie |
+| `POST` | `/users/resend-verification` | — | Reenviar PIN (respuesta genérica; rate-limited) |
 | `POST` | `/auth/refresh` | Cookie refresh | Bootstrap / renovar accessToken |
 | `POST` | `/auth/logout` | Cookie (+ Bearer opcional) | Cierre de sesión; body opcional `{ "scope": "all" }` |
 | `POST` | `/auth/validate` | Bearer | Validar token (usuario app, no admin) |
@@ -116,6 +123,12 @@ Auth, usuarios, labels, artists, releases (+ artwork/tracks), promos (label + in
 | `POST` | `/users/unsubscribe` | Bearer (roles artist/label/guest) | Baja de mailing del usuario/contacto |
 | `POST` | `/users/resubscribe` | Bearer (roles artist/label/guest) | Reactivar mailing |
 
+**Registro abierto (label/artist):** `POST /users/register` → **201** `{ success, requiresEmailVerification: true, email }` (usuario queda `EMAIL_NOT_VERIFIED`, **sin** `accessToken`) → el usuario ingresa el PIN del email → `POST /users/verify-email` → **200** con `accessToken` + cookie → `GET /users/me`. Reenvío: `POST /users/resend-verification`.
+
+**Completar cuenta promo:** `POST /users/register?token=` sigue emitiendo sesión al instante (**sin** paso PIN).
+
+**Login con email sin verificar:** contraseña correcta pero status `EMAIL_NOT_VERIFIED` → **403** `"Email verification required"` → redirigir a pantalla de PIN / `verify-email`.
+
 **Flujo bootstrap (splash):** `POST /auth/refresh` → si OK, `GET /users/me` → elegir stack Artist o Label según perfil.
 
 **Token promo (`?token=`):** el middleware asigna `guest` y permite inbox, detalle de promo, feedback y dismiss sin cuenta registrada. El token debe tener `token_enabled: true` en el contacto.
@@ -126,8 +139,8 @@ React Native **no** persiste cookies httpOnly como el navegador. El curso adopta
 
 | Fase | Alcance | Qué implementar |
 |------|---------|-----------------|
-| **Sprint login (Fase 0–1)** | Entregas iniciales | Tras `POST /auth/login` o `/users/register`, guardar **`accessToken`** en memoria + **Expo SecureStore** (o equivalente). El `apiClient` envía `Authorization: Bearer <accessToken>` en todas las rutas autenticadas. Si el token expira → **relogin manual** aceptable (documentar en la app). |
-| **Sprint refresh (siguiente)** | Sesión persistente | Persistir cookie de refresh con librería de cookies RN (p. ej. `@react-native-cookies/cookies`) y usar `credentials: 'include'` en login, register, refresh y logout — mismo patrón que `r8-site/src/utils/api.ts`. Interceptor: ante **401**, `POST /auth/refresh` → actualizar `accessToken` → reintentar la petición original. |
+| **Sprint login (Fase 0–1)** | Entregas iniciales | Tras `POST /auth/login` o `POST /users/verify-email` (no tras el register abierto), guardar **`accessToken`** en memoria + **Expo SecureStore** (o equivalente). El `apiClient` envía `Authorization: Bearer <accessToken>` en todas las rutas autenticadas. Si el token expira → **relogin manual** aceptable (documentar en la app). |
+| **Sprint refresh (siguiente)** | Sesión persistente | Persistir cookie de refresh con librería de cookies RN (p. ej. `@react-native-cookies/cookies`) y usar `credentials: 'include'` en login, verify-email, register promo, refresh y logout — mismo patrón que `r8-site/src/utils/api.ts`. Interceptor: ante **401**, `POST /auth/refresh` → actualizar `accessToken` → reintentar la petición original. |
 | **Flujo guest (Equipo 3)** | Receptor sin cuenta | **No** mezclar con login de artista. Usar `?token=<jwt_contacto>` en query; helper en `apiClient` para append del token. Ver § Token promo arriba. |
 
 **Bootstrap (splash):** en el sprint de refresh, la pantalla inicial llama `POST /auth/refresh` con la cookie guardada; si falla → stack Auth (Login). Hasta tener refresh, el splash puede ir directo a Login.
@@ -175,7 +188,7 @@ React Native **no** persiste cookies httpOnly como el navegador. El curso adopta
 | `PUT` | `/releases/:releaseId/artwork` | Presign artwork |
 | `POST` | `/releases/:releaseId/artwork/confirm` | Confirmar artwork |
 | `PUT` | `/releases/:releaseId/tracks/:trackId` | Presign audio (`expectedSize` opcional) |
-| `POST` | `/releases/:releaseId/tracks/:trackId/confirm` | Confirmar audio |
+| `POST` | `/releases/:releaseId/tracks/:trackId/confirm` | Confirmar audio — body `{ path, duration? }` (si omite `duration`, el backend puede extraerla async) |
 | `GET` | `/releases/:releaseId/files` | Metadatos de archivos |
 | `GET/DELETE` | `/releases/:releaseId/files/:fileId` | Metadato / borrar (`fileId` puede ser `artwork` o UUID de track) |
 
@@ -248,7 +261,7 @@ Tenant por JWT; **sin** `:labelId` en la URL.
 | Pantalla web (`r8-site`) | Requests principales |
 |--------------------------|----------------------|
 | `/` (splash) | `POST /auth/refresh`, `GET /users/me` |
-| `/login`, `/register`, `/password-reset` | Sección Auth |
+| `/login`, `/register` (+ paso PIN), `/password-reset` | Sección Auth (register → verify-email) |
 | `/dashboard` | `GET /users/me`, `GET /promos/for-label?labelId=<id>` |
 | `/profile` (label) | `GET /users/me`, `GET /labels/me`, `GET /labels/me/profile-image`, `PUT /labels/me` |
 | `/analytics` | `GET /releases`, `GET /feedback`, `GET /feedback/analytics?dateFrom=&dateTo=` |
@@ -304,7 +317,7 @@ Tenant por JWT; **sin** `:labelId` en la URL.
 | Código | Situación |
 |--------|-----------|
 | **401** | Token ausente o inválido |
-| **403** | Rol incorrecto, token promo deshabilitado, sin acceso al release |
+| **403** | Rol incorrecto, token promo deshabilitado, sin acceso al release, login con email **sin verificar** (`Email verification required`) |
 | **404** | Recurso inexistente o promo/release no visible para el receptor |
 | **409** | Delete con dependencias (`DELETE_DEPENDENCY_ERROR`), cuota de audio (`RELEASE_AUDIO_QUOTA_EXCEEDED`) |
 | **410** | Release/promo ya no disponible (`RELEASE_GONE`) |
@@ -319,4 +332,4 @@ Tenant por JWT; **sin** `:labelId` en la URL.
 
 ---
 
-*Documento sincronizado con r8-api y r8-site — 2026-06-30.*
+*Documento sincronizado con r8-api y r8-site — 2026-08-06.*

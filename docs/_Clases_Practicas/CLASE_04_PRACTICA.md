@@ -7,8 +7,8 @@
 - [CLASE_03_PRACTICA.md](./CLASE_03_PRACTICA.md) — organisms, mocks, `features/` + `services/api/`, estados de pantalla.
 - [CLASE_03_PRACTICA_B.md](./CLASE_03_PRACTICA_B.md) — convenciones del curso, contrato HTTP y reglas de integración.
 - Documentación HTTP vigente:
-  - [REFERENCIA_API_R8.md](../REFERENCIA_API_R8.md) (v2026-06-30)
-  - [DTOs_Y_CUERPOS_HTTP.md](../DTOs_Y_CUERPOS_HTTP.md) (v2026-06-30)
+  - [REFERENCIA_API_R8.md](../REFERENCIA_API_R8.md) (v2026-08-06)
+  - [DTOs_Y_CUERPOS_HTTP.md](../DTOs_Y_CUERPOS_HTTP.md) (v2026-08-06)
 
 **Objetivos de esta clase:**
 
@@ -60,14 +60,14 @@
 **API Stage:**
 
 ```text
-https://api-stage.technopremieres.com
+https://api.stage.r8.audio
 ```
 
 ```bash
-EXPO_PUBLIC_API_URL=https://api-stage.technopremieres.com
+EXPO_PUBLIC_API_URL=https://api.stage.r8.audio
 ```
 
-Health check: `GET /health` → **200**.
+Health check: `GET /health` → **200**. El DNS legacy `api-stage.technopremieres.com` ya no resuelve.
 
 ---
 
@@ -93,7 +93,7 @@ Un único punto de salida HTTP para todo el curso: base URL, JSON, Bearer y erro
 **Variable de entorno** (archivo `.env` en la raíz del proyecto, no commitear credenciales):
 
 ```bash
-EXPO_PUBLIC_API_URL=https://api-stage.technopremieres.com
+EXPO_PUBLIC_API_URL=https://api.stage.r8.audio
 ```
 
 **Archivo:** `src/services/api/config.ts`
@@ -691,4 +691,4 @@ Ver borrador de temas en la sección 10 de este documento; el docente publicará
 
 ---
 
-*Documento de práctica 4 — infra compartida, apiClient y primer HTTP real (2026-06-30).*
+*Documento de práctica 4 — infra compartida, apiClient y primer HTTP real (actualizado 2026-08-06: DNS `api.stage.r8.audio`).*

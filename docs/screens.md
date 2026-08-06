@@ -2,8 +2,9 @@
 
 - Auth: Autenticación en general
   - Splash: Bootstrap de sesión (`POST /auth/refresh` + `GET /users/me`) — **pendiente en navegación**; Equipo 1
-  - Login: Inicio de sesión
-  - Signup: Registro
+  - Login: Inicio de sesión (`POST /auth/login`; si **403** email sin verificar → paso PIN)
+  - Signup: Registro abierto (`POST /users/register` → PIN → `POST /users/verify-email`)
+  - VerifyEmail / PIN: Confirmación de email de signup (también reenvío `POST /users/resend-verification`)
   - PasswordReset: Recuperación de contraseña
 
 ## Navegación (decisión del curso, jun 2026)

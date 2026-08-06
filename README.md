@@ -15,20 +15,22 @@ El repo **ya no es el template mínimo de Expo**. En `main` (jun 2026):
 ### API Stage del curso
 
 ```text
-https://api-stage.technopremieres.com
+https://api.stage.r8.audio
 ```
 
 Comprobar: `GET /health` → **200**. Variable sugerida al conectar HTTP real:
 
 ```bash
-EXPO_PUBLIC_API_URL=https://api-stage.technopremieres.com
+EXPO_PUBLIC_API_URL=https://api.stage.r8.audio
 ```
+
+> El host legacy `api-stage.technopremieres.com` ya no resuelve. Prod (fuera del curso): `https://api.r8.audio`.
 
 ### Alineación con el ecosistema R8
 
 - **Objetivo funcional:** la app móvil debe cubrir los mismos flujos que el front **r8-site** (React), consumiendo la misma API **r8-api** (Express).
 - **Contrato HTTP:** la API organiza rutas por **dominio** (`/releases`, `/promos`, `/recipient-lists`, `/feedback`, …) y el contexto de label/usuario lo resuelve el **JWT**, no rutas anidadas del estilo `/labels/:labelId/releases`.
-- **Fuente de verdad HTTP:** `docs/REFERENCIA_API_R8.md` y `docs/DTOs_Y_CUERPOS_HTTP.md` (jun 2026, v2026-06-30). Ante duda, ganan esos dos archivos y el cliente web `r8-site/src/api/`.
+- **Fuente de verdad HTTP:** `docs/REFERENCIA_API_R8.md` y `docs/DTOs_Y_CUERPOS_HTTP.md` (ago 2026, v2026-08-06). Ante duda, ganan esos dos archivos y el cliente web `r8-site/src/api/`.
 
 ## Requisitos previos
 
@@ -159,8 +161,8 @@ npx expo start --clear
 
 ### Contrato HTTP (obligatorio antes de codear servicios)
 
-- `docs/REFERENCIA_API_R8.md` — rutas, flujos y glosario (v2026-06-30)
-- `docs/DTOs_Y_CUERPOS_HTTP.md` — cuerpos JSON, enums y ejemplos (v2026-06-30)
+- `docs/REFERENCIA_API_R8.md` — rutas, flujos y glosario (v2026-08-06)
+- `docs/DTOs_Y_CUERPOS_HTTP.md` — cuerpos JSON, enums y ejemplos (v2026-08-06)
 
 ### Prácticas de clase
 

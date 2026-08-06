@@ -12,10 +12,11 @@ Documento para el cursado de **Programación de dispositivos móviles**. El repo
 **API Stage del curso:**
 
 ```text
-https://api-stage.technopremieres.com
+https://api.stage.r8.audio
 ```
 
-Variable sugerida: `EXPO_PUBLIC_API_URL=https://api-stage.technopremieres.com`. Health check: `GET /health` → **200**.
+Variable sugerida: `EXPO_PUBLIC_API_URL=https://api.stage.r8.audio`. Health check: `GET /health` → **200**.  
+DNS canónico bajo `r8.audio` (el host legacy `api-stage.technopremieres.com` ya no aplica).
 
 **Estado de `main` (jun 2026):** navegación por rol (React Navigation 7), ~27 pantallas placeholder en `src/screens/`, tokens en `src/constants/design.ts`. Pendiente: `apiClient`, atoms compartidos y login real. Ver [CLASE_03_PRACTICA_B.md](./_Clases_Practicas/CLASE_03_PRACTICA_B.md) para el mapa de deuda técnica y convenciones vigentes.
 

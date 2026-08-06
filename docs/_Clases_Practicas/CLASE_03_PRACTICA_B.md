@@ -6,8 +6,8 @@
 
 - [CLASE_03_PRACTICA.md](./CLASE_03_PRACTICA.md) — organisms, mocks, `features/` + `services/api/`, estados de pantalla.
 - Documentación HTTP actualizada del curso:
-  - [REFERENCIA_API_R8.md](../REFERENCIA_API_R8.md) (v2026-06-30)
-  - [DTOs_Y_CUERPOS_HTTP.md](../DTOs_Y_CUERPOS_HTTP.md) (v2026-06-30)
+  - [REFERENCIA_API_R8.md](../REFERENCIA_API_R8.md) (v2026-08-06)
+  - [DTOs_Y_CUERPOS_HTTP.md](../DTOs_Y_CUERPOS_HTTP.md) (v2026-08-06)
 
 **Tipo de clase:** principalmente **explicativa y de acuerdos de equipo**. No es obligatorio entregar código nuevo al final de la hora; el objetivo es que todos entiendan **qué estaba mal o desactualizado**, **qué convención adoptamos** y **cómo evitar repetir los mismos bloqueos** al conectar stage y al mergear ramas.
 
@@ -38,12 +38,12 @@
 ## 0. Mensaje central de la clase
 
 > El repo **r8-mobile** tiene buena documentación de producto y un **esqueleto de navegación** en `main`, pero el trabajo de los equipos está **fragmentado en ramas** y parte de la documentación **no reflejaba** ni el estado del código ni el contrato HTTP vigente de **r8-api**.  
-> A partir de esta clase, la **fuente de verdad del HTTP** son `REFERENCIA_API_R8.md` y `DTOs_Y_CUERPOS_HTTP.md` (junio 2026). El resto de los `.md` se irán alineando después; si hay duda, **ganan esos dos archivos** y el cliente web `r8-site/src/api/`.
+> A partir de esta clase, la **fuente de verdad del HTTP** son `REFERENCIA_API_R8.md` y `DTOs_Y_CUERPOS_HTTP.md` (agosto 2026). El resto de los `.md` se irán alineando después; si hay duda, **ganan esos dos archivos** y el cliente web `r8-site/src/api/`.
 
 **API Stage del curso:**
 
 ```text
-https://api-stage.technopremieres.com
+https://api.stage.r8.audio
 ```
 
 Comprobar que responde: `GET /health` → **200**.
@@ -51,7 +51,7 @@ Comprobar que responde: `GET /health` → **200**.
 Variable sugerida en el proyecto (cuando conecten HTTP real):
 
 ```bash
-EXPO_PUBLIC_API_URL=https://api-stage.technopremieres.com
+EXPO_PUBLIC_API_URL=https://api.stage.r8.audio
 ```
 
 ---
@@ -352,7 +352,7 @@ El middleware asigna rol **`guest`**. El token debe estar **habilitado** (`token
 
 ### Problema 4.1 — Refresh con cookie httpOnly
 
-Web (`r8-site`): `credentials: 'include'` en login/register/refresh.
+Web (`r8-site`): `credentials: 'include'` en login, verify-email, register promo, refresh. El registro abierto (`POST /users/register`) **no** emite sesión: hay que completar `POST /users/verify-email` con PIN.
 
 React Native **no** trae cookies automáticamente como el navegador.
 
@@ -398,7 +398,7 @@ En una rama `chore/clase-3b-checklist`, cada pareja completa **solo** esta tabla
 
 | # | Respuesta esperada |
 |---|------------------|
-| 1 | `https://api-stage.technopremieres.com` |
+| 1 | `https://api.stage.r8.audio` |
 | 2 | `GET /promos/for-label?labelId=<uuid>` |
 | 3 | `src/constants/design.ts` |
 | 4 | Parsear en cliente → `POST .../recipients/batch` con `recipients[]` |
@@ -441,4 +441,4 @@ Usar después de explicar en vivo; guía la actualización del resto de la docum
 
 ---
 
-*Documento para la cátedra — Práctica 3B, alineación post-revisión r8-api / r8-site (2026-06-30).*
+*Documento para la cátedra — Práctica 3B, alineación post-revisión r8-api / r8-site (actualizado 2026-08-06: DNS `api.stage.r8.audio` + registro con PIN).*
