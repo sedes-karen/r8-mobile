@@ -4,7 +4,9 @@
 
 **Prerrequisito:** haber leído o trabajado [CLASE_02_PRACTICA.md](./CLASE_02_PRACTICA.md) (componentes, `useState`, `useEffect`, idea de navegación).
 
-**Objetivo de esta práctica:** pasar del `App.tsx` mínimo a una **base de carpetas** alineada al plan del curso ([PLAN_TRABAJO_ALUMNOS_RN.md](../PLAN_TRABAJO_ALUMNOS_RN.md) y [ATOMIC_DESIGN.md](../ATOMIC_DESIGN.md)), con **una pantalla estática por equipo** (sin API, sin datos reales) y los **primeros controles reutilizables** (atoms y molecules).
+**Objetivo de esta práctica:** pasar del entrypoint mínimo a una **base de carpetas** alineada al plan del curso ([PLAN_TRABAJO_ALUMNOS_RN.md](../PLAN_TRABAJO_ALUMNOS_RN.md) y [ATOMIC_DESIGN.md](../ATOMIC_DESIGN.md)), con **una pantalla estática por equipo** (sin API, sin datos reales) y los **primeros controles reutilizables** (atoms y molecules).
+
+> **Aviso de legado (jun 2026):** este documento fue escrito con `App.tsx` y `src/design/tokens/`. En **`main` actual** el entrypoint es **`index.tsx`** y los tokens viven en **`src/constants/design.ts`**. Los ejemplos de código siguen usando `design/tokens` como referencia pedagógica; al implementar en el repo del curso, **adaptá rutas de import** a la convención vigente. Ver [CLASE_03_PRACTICA_B.md](./CLASE_03_PRACTICA_B.md) §1.3.
 
 **Qué NO hace esta práctica (a propósito):**
 

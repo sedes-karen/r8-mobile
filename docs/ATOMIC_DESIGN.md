@@ -45,7 +45,7 @@ No hace falta memorizar la metáfora: lo importante es **el tamaño del componen
 - **No llaman a la API** y **no saben** si estás en “login” o en “perfil artista”.
 - Idealmente no importan otros componentes de _atoms_ salvo casos muy puntuos (mejor subir a _molecule_ si se complica).
 
-En React Native suele ser un `View` / `Text` / `TextInput` / `Pressable` con estilos sacados de tokens (colores, espaciados) definidos en `src/design/tokens/` (ver plan en [PLAN_TRABAJO_ALUMNOS_RN.md](./PLAN_TRABAJO_ALUMNOS_RN.md)).
+En React Native suele ser un `View` / `Text` / `TextInput` / `Pressable` con estilos sacados de tokens (colores, espaciados) definidos en **`src/constants/design.ts`** (ver plan en [PLAN_TRABAJO_ALUMNOS_RN.md](./PLAN_TRABAJO_ALUMNOS_RN.md)).
 
 ### 2.2 Molecules (`src/components/molecules/`)
 
@@ -339,7 +339,7 @@ Cuando el proyecto crezca, la lógica de `handleSubmit` puede mudarse a `src/fea
 | --------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------- |
 | “El botón llama a la API”                           | Difícil de reutilizar y de testear         | La API se llama en la screen o en un hook; el botón solo `onPress`                             |
 | “Este organism usa `useNavigation`”                 | Acopla un bloque de UI a una ruta concreta | Pasar callbacks (`onSuccess`, `onCancel`) desde la screen                                      |
-| “Copié y pegué 40 líneas de estilos en 6 pantallas” | Cambios de diseño dolorosos                | Tokens en `src/design/tokens/` + atoms                                                         |
+| “Copié y pegué 40 líneas de estilos en 6 pantallas” | Cambios de diseño dolorosos                | Tokens en `src/constants/design.ts` + atoms                                                         |
 | “No sé si es molecule u organism”                   | Dudas normales                             | Si cabe en una vista mental “una cosa chica” → molecule; si es media pantalla o más → organism |
 
 ---

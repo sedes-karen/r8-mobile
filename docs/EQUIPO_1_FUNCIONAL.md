@@ -46,6 +46,7 @@ Objetivo: dejar completo el flujo de entrada y el perfil del artista, asegurando
 - Criterio de aceptación:
   - redirige correctamente a stack label o artist/recipient.
   - maneja token ausente/expirado sin romper app.
+- **Desarrollo (corto plazo):** menú o flag dev en `AuthInfoProvider` con `{ isAuthenticated: true, role: 'label' | 'artist' }` para probar stacks sin login real (ver [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md) § Autenticación en React Native).
 
 ### 2.2 Perfil artista (lectura)
 
@@ -66,14 +67,19 @@ Objetivo: dejar completo el flujo de entrada y el perfil del artista, asegurando
   - `GET /users/me` (post login)
 - Criterio:
   - guarda sesión y navega según rol.
+  - si el API responde **403** `"Email verification required"`, redirigir al paso PIN (`POST /users/verify-email` / reenvío).
 
 ### 2.4 Registro
 
-- Ruta web origen: `/register`
+- Ruta web origen: `/register` (flujo en dos pasos, igual que r8-site)
 - Requests:
-  - `POST /users/register` (mismo patrón de `accessToken` + cookies que login)
-  - `GET /users/me` (post register)
+  1. `POST /users/register` → **201** `{ requiresEmailVerification: true, email }` (**sin** `accessToken`; usuario `EMAIL_NOT_VERIFIED`)
+  2. `POST /users/verify-email` con `{ email, pin }` → **200** + `accessToken` + cookie
+  3. Opcional: `POST /users/resend-verification` con `{ email }`
+  4. `GET /users/me` (tras verify)
+  - Alternativa promo: `POST /users/register?token=<jwt_contacto>` — completa cuenta **sin** PIN (solo `password` obligatorio; ver DTOs §2) y emite sesión al instante
 - Criterio:
+  - pantalla de PIN tras el alta abierta; sesión solo después de verify (o registro promo).
   - alta correcta por rol y navegación posterior.
 
 ### 2.5 Recuperación de contraseña

@@ -60,7 +60,7 @@ Objetivo: priorizar visualización de datos de label antes de CRUD avanzado.
 - Requests:
   - `GET /users/me`
   - `GET /releases` — catálogo del tenant (equivalente a “releases del label”; **no** existe `GET /labels/:labelId/releases` en el flujo web actual)
-  - `GET /feedback` — respuesta **`{ feedback, total }`**; filtros opcionales en query (ver sección 8.1 de [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md)), p. ej. `recipientId`, `releaseId`, paginación, etc.
+  - `GET /feedback` — respuesta **`{ feedback, total }`**; filtros en query según DTOs §8.1 (**sin** `dateFrom`/`dateTo` — usar `GET /feedback/analytics` para rango)
   - (Opcional) `GET /feedback/analytics?dateFrom=...&dateTo=...` — **incluir ambas** fechas si se quiere un rango explícito (mismo criterio que la API)
 - Criterio:
   - selector de release + métricas base visibles (la pantalla web cruza releases + feedback en cliente).
@@ -76,7 +76,7 @@ Objetivo: priorizar visualización de datos de label antes de CRUD avanzado.
 
 - Requests:
   - Imagen (igual patrón que artista): `POST /labels/me/profile-image` → `PUT <uploadUrl>` → `POST /labels/me/profile-image/confirm` con `{ path }`
-  - Contraseña: `PUT /users/me/change-password`
+  - Contraseña: `POST /users/me/change-password` — tras éxito, revoca cookies refresh (re-login necesario en mobile hasta implementar refresh)
 - Criterio:
   - completa flujo imagen.
   - cambio de contraseña con feedback visual.
