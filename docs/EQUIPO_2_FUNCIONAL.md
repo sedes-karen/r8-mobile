@@ -1,5 +1,20 @@
 # Equipo 2 — Especificación funcional técnica
 
+## Integrantes
+
+| Rol | Nombre |
+|-----|--------|
+| **Team Lead (TL)** | Etchepare, Mateo |
+| Integrante | Cardinaux, Daiana Elizabeth |
+| Integrante | Denoni, Verónica Camila |
+| Integrante | Galo Roig, Damián |
+| Integrante | Montechiarini, Juan Ignacio |
+| Integrante | Peralta, Maximiliano Agustín |
+| Integrante | Rodríguez, Enzo Alejandro |
+| Integrante | Romani, Nicolás |
+
+---
+
 Foco de equipo: Dashboard, Perfil Label y Analytics (label).
 
 Objetivo: priorizar visualización de datos de label antes de CRUD avanzado.

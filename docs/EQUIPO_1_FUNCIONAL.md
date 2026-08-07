@@ -1,5 +1,20 @@
 # Equipo 1 — Especificación funcional técnica
 
+## Integrantes
+
+| Rol | Nombre |
+|-----|--------|
+| **Team Lead (TL)** | Galarraga, Ignacio David |
+| Integrante | Fuchs, María Yanina |
+| Integrante | Hauscarriaga, Matías Gabriel |
+| Integrante | Martinez, Cecilia |
+| Integrante | Molina Paiva, Sebastián Ismael |
+| Integrante | Murillo, Ángel Daniel |
+| Integrante | Planchón, Tomás Eduardo |
+| Integrante | Zabala, Daniel Esteban |
+
+---
+
 Foco de equipo: Autenticación, bootstrap y Perfil Artista (prioridad máxima del proyecto).
 
 Objetivo: dejar completo el flujo de entrada y el perfil del artista, asegurando navegación por rol.
