@@ -31,11 +31,13 @@ Salvo que el Pull Request completo haya sido coordinado con el resto del curso, 
 
 > Esto se pide para reducir el tiempo de revisión.
 
-Los átomos y moléculas deben ser tan generales y flexibles como sea necesario para el resto del proyecto. A veces conviene listar los componentes necesarios _antes_ de realizarlos, a fin de obtener un mejor panorama sobre lo que se necesita.
+Los átomos y moléculas deben ser tan generales y flexibles como sea necesario para el resto del proyecto. A veces conviene listar los componentes necesarios _antes_ de realizarlos, a fin de obtener un mejor panorama sobre lo que se necesita. Una vez listados estos componentes, es importante revisar si ya existen (en `src/components/`) o si están en progreso (en los PRs del repositorio), y reutilizarlos si es el caso.
 
 Los estilos de un componente deben estar en el mismo archivo que el resto del mismo. Si alguna de las partes se vuelve muy grande, *quizás* sea momento de separar el componente en otros más pequeños.
 
 Los átomos y moléculas **no deben** utilizar ningún servicio. Tienen el propósito expreso de poderse reutilizar tanto como sea necesario, cosa que su interfaz debe reflejar. Los organismos que estén atados a una pantalla particular (generalmente provenientes de un refactoreo) pueden utilizar servicios. Las pantallas pueden hacer uso de servicios tanto como sea conveniente (ese es el punto).
+
+Salvo absolutamente necesario, se debe utilizar navegación declarativa, mediante `Link`s en lugar de `useNavigation`.
 
 **Bajo ninguna circunstancia** puede un componente (cualquiera sea su naturaleza) "saltarse" los servicios proveídos para llamar a la API o similar. Este tipo de efectos secundarios se considera crítico y debe aislarse lo más posible (utilizando servicios, con validación de datos completa). Nótese que el uso de `console.log`/`console.table`/`console.error` para depuración está permitido, siempre y cuando esto no llegue a la versión final (siendo removido en el mismo PR).
 

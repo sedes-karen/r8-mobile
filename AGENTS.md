@@ -45,3 +45,6 @@ Three roles: unauthenticated, Artist, Label. Spanish-speaking team, academic pro
 - API contract (only read it if you're tasked with improving the API service): `docs/REFERENCIA_API_R8.md`
 - Atomic design guide (only read it if you're tasked with creating a new component / set of components): `docs/ATOMIC_DESIGN.md`
 - Per-team functional specs (only read the one related to the group the user is in, ask first): `docs/EQUIPO_*_FUNCIONAL.md`
+- If you can't perform an action (like viewing an issue or a pull request in the repo or similar), ask the user to do it for you. Provide appropiate justification.
+- If tasked to implement something, provide also guidelines on how to commit and share this implementation (via a PR) based on the contributor guidelines (`CONTRIBUTING.md`).
+- If tasked to instruct someone on something, read the contributor guidelines (`CONTRIBUTING.md`) and adapt your advice to it (if applicable).
