@@ -1,5 +1,7 @@
 import { createStaticNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { colors } from '../constants/design';
 
 // Los providers
 import { AuthInfoProvider, useIsArtist, useIsAuthenticated, useIsLabel, useIsNotAuthenticated } from '../features/auth/info';
@@ -42,6 +44,19 @@ import { LabelRecipientListsBulkUploadScreen } from '../screens/Label/RecipientL
 // header nativo queda redundante — lo apagamos acá en vez de pantalla por pantalla.
 const NO_HEADER = { headerShown: false } as const;
 
+// Tab bar mínima para poder navegar entre pantallas dentro de un rol — hasta este batch no
+// existía ninguna forma de llegar a nada más allá de la screen inicial de cada stack (sin tabs
+// ni menú, nada llamaba a navigation.navigate). Sigue la forma ya documentada en
+// docs/screens.md § "Navegación" para Fase 3+ (Artist: Promos/Profile; Label: Dashboard/
+// Releases/Lists), adelantada acá solo para que este batch se pueda probar — no reemplaza el
+// rediseño de navegación real que hagan los equipos más adelante.
+const TAB_BAR_OPTIONS = {
+  headerShown: false,
+  tabBarActiveTintColor: colors.primary.default,
+  tabBarInactiveTintColor: colors.onSurface.variant,
+  tabBarStyle: { backgroundColor: colors.surface.containerLowest, borderTopColor: colors.surface.border },
+} as const;
+
 const AuthStack = createNativeStackNavigator({
   initialRouteName: 'Login',
   screenOptions: NO_HEADER,
@@ -52,9 +67,9 @@ const AuthStack = createNativeStackNavigator({
   }
 } as const);
 
-const ArtistStack = createNativeStackNavigator({
+const ArtistStack = createBottomTabNavigator({
   initialRouteName: 'Promos',
-  screenOptions: NO_HEADER,
+  screenOptions: TAB_BAR_OPTIONS,
   screens: {
     Promos: createNativeStackNavigator({
       initialRouteName: 'Player',
@@ -66,7 +81,11 @@ const ArtistStack = createNativeStackNavigator({
         LikedTracks: ArtistPromosLikedTracksScreen,
       },
     }),
-    Profile: createNativeStackNavigator({
+    // Acceso directo además de la ruta anidada de arriba (Promos > LikedTracks): así se puede
+    // llegar a Favoritos sin depender de que Player (todavía placeholder, no es de este batch)
+    // tenga un link hacia ahí.
+    Favoritos: ArtistPromosLikedTracksScreen,
+    Perfil: createNativeStackNavigator({
       initialRouteName: 'View',
       screenOptions: NO_HEADER,
       screens: {
@@ -77,12 +96,28 @@ const ArtistStack = createNativeStackNavigator({
   }
 } as const);
 
-const LabelStack = createNativeStackNavigator({
+const LabelStack = createBottomTabNavigator({
   initialRouteName: 'Dashboard',
-  screenOptions: NO_HEADER,
+  screenOptions: TAB_BAR_OPTIONS,
   screens: {
     Dashboard: LabelDashboardScreen,
     Analytics: LabelAnalyticsScreen,
+    // Acceso directo a Releases > Promos > List — más abajo el tab "Releases" también llega
+    // acá anidado, pero como Releases en sí sigue siendo placeholder (no es de este batch),
+    // conviene un atajo directo para no depender de que alguien navegue Releases > Promos.
+    Promos: LabelReleasesPromosListScreen,
+    Recipients: createNativeStackNavigator({
+      initialRouteName: 'List',
+      screenOptions: NO_HEADER,
+      screens: {
+        List: LabelRecipientListsListScreen,
+        New: LabelRecipientListsNewScreen,
+        Details: LabelRecipientListsDetailsScreen,
+        Edit: LabelRecipientListsEditScreen,
+        Feedback: LabelRecipientListsFeedbackScreen,
+        BulkUpload: LabelRecipientListsBulkUploadScreen,
+      }
+    }),
     Profile: createNativeStackNavigator({
       initialRouteName: 'View',
       screenOptions: NO_HEADER,
@@ -109,18 +144,6 @@ const LabelStack = createNativeStackNavigator({
             Edit: LabelReleasesPromosEditScreen,
           },
         }),
-      }
-    }),
-    RecipientLists: createNativeStackNavigator({
-      initialRouteName: 'List',
-      screenOptions: NO_HEADER,
-      screens: {
-        List: LabelRecipientListsListScreen,
-        New: LabelRecipientListsNewScreen,
-        Details: LabelRecipientListsDetailsScreen,
-        Edit: LabelRecipientListsEditScreen,
-        Feedback: LabelRecipientListsFeedbackScreen,
-        BulkUpload: LabelRecipientListsBulkUploadScreen,
       }
     }),
   }
