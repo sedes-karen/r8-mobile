@@ -35,8 +35,16 @@ import { LabelRecipientListsFeedbackScreen } from '../screens/Label/RecipientLis
 import { LabelRecipientListsBulkUploadScreen } from '../screens/Label/RecipientLists/BulkUpload';
 // Fin de las pantallas
 
+// headerShown: false en todos los niveles: con 2-3 navigators nativos anidados (Root > Artist >
+// Promos, por ejemplo), cada uno mostraba su propio header por defecto apilado arriba del
+// siguiente (se ve como una lista "Artist / Promos / Player" en vez de un solo header). Cada
+// screen de este batch ya trae su propio título (AppText variant="headline-lg"), así que el
+// header nativo queda redundante — lo apagamos acá en vez de pantalla por pantalla.
+const NO_HEADER = { headerShown: false } as const;
+
 const AuthStack = createNativeStackNavigator({
   initialRouteName: 'Login',
+  screenOptions: NO_HEADER,
   screens: {
     Login: AuthLoginScreen,
     SignUp: AuthSignUpScreen,
@@ -46,9 +54,11 @@ const AuthStack = createNativeStackNavigator({
 
 const ArtistStack = createNativeStackNavigator({
   initialRouteName: 'Promos',
+  screenOptions: NO_HEADER,
   screens: {
     Promos: createNativeStackNavigator({
       initialRouteName: 'Player',
+      screenOptions: NO_HEADER,
       screens: {
         Player: ArtistPromosPlayerScreen,
         Details: ArtistPromosDetailsScreen,
@@ -58,6 +68,7 @@ const ArtistStack = createNativeStackNavigator({
     }),
     Profile: createNativeStackNavigator({
       initialRouteName: 'View',
+      screenOptions: NO_HEADER,
       screens: {
         View: ArtistProfileViewScreen,
         Edit: ArtistProfileEditScreen,
@@ -68,11 +79,13 @@ const ArtistStack = createNativeStackNavigator({
 
 const LabelStack = createNativeStackNavigator({
   initialRouteName: 'Dashboard',
+  screenOptions: NO_HEADER,
   screens: {
     Dashboard: LabelDashboardScreen,
     Analytics: LabelAnalyticsScreen,
     Profile: createNativeStackNavigator({
       initialRouteName: 'View',
+      screenOptions: NO_HEADER,
       screens: {
         View: LabelProfileViewScreen,
         Edit: LabelProfileEditScreen,
@@ -80,6 +93,7 @@ const LabelStack = createNativeStackNavigator({
     }),
     Releases: createNativeStackNavigator({
       initialRouteName: 'List',
+      screenOptions: NO_HEADER,
       screens: {
         List: LabelReleasesListScreen,
         New: LabelReleasesNewScreen,
@@ -87,6 +101,7 @@ const LabelStack = createNativeStackNavigator({
         Edit: LabelReleasesEditScreen,
         Promos: createNativeStackNavigator({
           initialRouteName: 'List',
+          screenOptions: NO_HEADER,
           screens: {
             List: LabelReleasesPromosListScreen,
             New: LabelReleasesPromosNewScreen,
@@ -98,6 +113,7 @@ const LabelStack = createNativeStackNavigator({
     }),
     RecipientLists: createNativeStackNavigator({
       initialRouteName: 'List',
+      screenOptions: NO_HEADER,
       screens: {
         List: LabelRecipientListsListScreen,
         New: LabelRecipientListsNewScreen,
@@ -111,6 +127,7 @@ const LabelStack = createNativeStackNavigator({
 } as const);
 
 const RootStack = createNativeStackNavigator({
+  screenOptions: NO_HEADER,
   screens: {
     Auth: {
       screen: AuthStack,
