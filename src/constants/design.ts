@@ -85,6 +85,21 @@ export const typography = {
 
 export type TypographyVariant = keyof typeof typography.variants;
 
+/**
+ * Cada peso de IBM Plex Mono es una fuente distinta para RN (no un fontWeight sobre una sola
+ * familia) — por eso no se combina fontFamily custom con fontWeight numérico (en Android eso
+ * termina "fake-bold"eando la fuente del sistema en vez de usar el peso real cargado).
+ * Si por lo que sea la fuente no llegó a cargar (ver useAppFonts), RN no crashea: renderiza con
+ * la fuente por defecto de la plataforma para ese nombre no resuelto — no hace falta ningún
+ * chequeo manual acá.
+ */
+export function fontFamilyForVariant(variant: TypographyVariant): string {
+  const weight = typography.variants[variant].fontWeight;
+  if (weight === '600') return typography.fontFamily.semibold;
+  if (weight === '500') return typography.fontFamily.medium;
+  return typography.fontFamily.regular;
+}
+
 // Casi todo en 0 en r8-site salvo los pills — se replica igual acá.
 export const borderRadius = {
   none: 0,

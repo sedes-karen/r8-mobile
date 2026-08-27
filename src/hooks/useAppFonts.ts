@@ -7,8 +7,9 @@ import {
 
 /**
  * Carga IBM Plex Mono (mismo criterio tipográfico que r8-site) antes del primer render con
- * contenido real. Mientras no cargó (o si falla), los AppText caen al fallback `monospace` del
- * sistema — ver src/constants/design.ts `typography.fontFamily.fallback`.
+ * contenido real. Si falla la carga, no bloqueamos el arranque — ver el manejo de fontError
+ * abajo — y los AppText simplemente renderizan con la fuente por defecto de la plataforma,
+ * porque RN no rompe cuando el fontFamily pedido no está registrado.
  */
 export function useAppFonts() {
   const [fontsLoaded, fontError] = useFonts({

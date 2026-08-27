@@ -1,15 +1,31 @@
-import { View, Text } from 'react-native';
+import { useState } from 'react';
+import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors, spacing } from '../../constants/design';
+import { AppText } from '../../components/atoms/AppText';
+import { LoginForm } from '../../components/organisms/LoginForm';
+import { useLogin } from '../../features/auth/useLogin';
 
-/**
- * Pantalla Login — placeholder.
- * TODO (Clase 4): importar useLogin desde '../../features/auth/useLogin',
- * armar el formulario (email/password) y llamar submit() en el botón.
- * Ver docs/_Clases_Practicas/CLASE_04_PRACTICA.md § "Referencia: login y request autenticado".
- */
+/** Pantalla Login — arma el estado local de los inputs y delega el request a useLogin. */
 export function AuthLoginScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { submit, loading, error } = useLogin();
+
   return (
-    <View style={{ flex: 1 }}>
-      <Text>Edite la pantalla AuthLoginScreen para cambiar esto</Text>
-    </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <View style={{ flex: 1, justifyContent: 'center', padding: spacing.lg, gap: spacing.xl }}>
+        <AppText variant="headline-lg">Iniciar sesión</AppText>
+        <LoginForm
+          email={email}
+          password={password}
+          onChangeEmail={setEmail}
+          onChangePassword={setPassword}
+          onSubmit={() => submit(email, password)}
+          loading={loading}
+          error={error}
+        />
+      </View>
+    </SafeAreaView>
   );
 }
