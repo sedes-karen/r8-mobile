@@ -1,79 +1,119 @@
-// Archivo de ejemplo con constantes de diseño para que se entienda que va acá
-// LA IDEA ES CAMBIARLO
+// Tokens de diseño — espejo del tema oscuro de r8-site (tailwind.config.js).
+// Fuente de verdad: r8-site/tailwind.config.js. Si cambia allá, sincronizar acá a mano
+// (no compartimos build system entre mobile y web).
 
-// Los nombres son similares a los que se usan en la práctica
-// ESTOS SI O SI SE CAMBIAN
 export const colors = {
-  primary: '#2563EB',    // blue-600
-  primaryDark: '#1E40AF', // blue-800
-  onPrimary: '#FFFFFF',
-  secondary: '#9333EA',   // purple-600
-  secondaryDark: '#6B21A5', // purple-800
-  onSecondary: '#FFFFFF',
-  neutral: '#6B7280',     // gray-500
-  neutralLight: '#F3F4F6', // gray-100
-  neutralDark: '#374151', // gray-700
-  error: '#EF4444',       // red-500
-  onError: '#FFFFFF',
-  background: '#FFFFFF',
-  surface: '#F9FAFB',     // gray-50
-  text: '#111827',        // gray-900
-  textMuted: '#6B7280',   // gray-500
+  background: '#000000',
+  surface: {
+    default: '#131313',
+    dim: '#131313',
+    bright: '#393939',
+    containerLowest: '#0e0e0e',
+    containerLow: '#1c1b1b',
+    container: '#201f1f',
+    containerHigh: '#2a2a2a',
+    containerHighest: '#353534',
+    variant: '#353534',
+    border: '#1a1a1a',
+  },
+  onSurface: {
+    default: '#e5e2e1',
+    variant: '#c4c7c8',
+  },
+  primary: {
+    default: '#ffffff',
+    foreground: '#2f3131',
+    container: '#e2e2e2',
+  },
+  secondary: {
+    default: '#c7c6c6',
+    container: '#464747',
+  },
+  error: {
+    default: '#ffb4ab',
+    container: '#93000a',
+    onContainer: '#ffdad6',
+  },
+  gray: {
+    50: '#f9fafb',
+    100: '#e5e2e1',
+    200: '#c4c7c8',
+    300: '#8e9192',
+    400: '#8e9192',
+    500: '#6b7280',
+    600: '#444748',
+    700: '#353534',
+    800: '#2a2a2a',
+    900: '#131313',
+    950: '#0e0e0e',
+  },
+  white: '#ffffff',
 } as const;
 
-// Estos capaz ni hace falta cambiarlos
 export const spacing = {
-  // Semantic spacing (based on 4dp grid)
-  px: 1,
   none: 0,
-  xs: 4,    // 4dp
-  sm: 8,    // 8dp
-  md: 16,   // 16dp
-  lg: 24,   // 24dp
-  xl: 32,   // 32dp
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
   '2xl': 40,
   '3xl': 48,
-  // Mientras menos se usen las de abajo, mejor. Conviene cambiarlas por las de arriba
-  s1: 4,
-  s2: 8,
-  s3: 12,
-  s4: 16,
-  s5: 20,
-  s6: 24,
-  s8: 32,
-  s10: 40,
-  s12: 48,
 } as const;
 
-export const fontSizes = {
-  xs: 12,
-  sm: 14,
-  md: 16,
-  lg: 18,
-  xl: 20,
-  '2xl': 24,
-  '3xl': 30,
+// Escala de tipografía — espejo de tailwind.config.js `fontSize`.
+// lineHeight y letterSpacing vienen convertidos a px (RN no acepta unitless ni `em`).
+export const typography = {
+  fontFamily: {
+    // IBM Plex Mono cargada vía @expo-google-fonts/ibm-plex-mono (ver src/hooks/useAppFonts.ts).
+    // Fallback a monospace del sistema mientras carga o si falla la carga.
+    regular: 'IBMPlexMono_400Regular',
+    medium: 'IBMPlexMono_500Medium',
+    semibold: 'IBMPlexMono_600SemiBold',
+    fallback: 'monospace',
+  },
+  variants: {
+    'display-lg': { fontSize: 48, lineHeight: 53, letterSpacing: -1.92, fontWeight: '600' },
+    'headline-lg': { fontSize: 32, lineHeight: 38, letterSpacing: -0.64, fontWeight: '500' },
+    'title-md': { fontSize: 18, lineHeight: 25, letterSpacing: 0, fontWeight: '500' },
+    'body-lg': { fontSize: 16, lineHeight: 26, letterSpacing: 0, fontWeight: '400' },
+    'body-sm': { fontSize: 14, lineHeight: 21, letterSpacing: 0, fontWeight: '400' },
+    'label-caps': { fontSize: 12, lineHeight: 12, letterSpacing: 1.2, fontWeight: '600' },
+    'label-micro': { fontSize: 10, lineHeight: 10, letterSpacing: 2, fontWeight: '500' },
+  },
 } as const;
 
-export const fontWeights = {
-  normal: '400' as const,
-  medium: '500' as const,
-  semibold: '600' as const,
-  bold: '700' as const,
-} as const;
+export type TypographyVariant = keyof typeof typography.variants;
 
+/**
+ * Cada peso de IBM Plex Mono es una fuente distinta para RN (no un fontWeight sobre una sola
+ * familia) — por eso no se combina fontFamily custom con fontWeight numérico (en Android eso
+ * termina "fake-bold"eando la fuente del sistema en vez de usar el peso real cargado).
+ * Si por lo que sea la fuente no llegó a cargar (ver useAppFonts), RN no crashea: renderiza con
+ * la fuente por defecto de la plataforma para ese nombre no resuelto — no hace falta ningún
+ * chequeo manual acá.
+ */
+export function fontFamilyForVariant(variant: TypographyVariant): string {
+  const weight = typography.variants[variant].fontWeight;
+  if (weight === '600') return typography.fontFamily.semibold;
+  if (weight === '500') return typography.fontFamily.medium;
+  return typography.fontFamily.regular;
+}
+
+// Casi todo en 0 en r8-site salvo los pills — se replica igual acá.
 export const borderRadius = {
   none: 0,
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  '2xl': 20,
+  sm: 0,
+  md: 0,
+  lg: 0,
+  xl: 0,
+  '2xl': 0,
   full: 9999,
 } as const;
 
-// Es posible que este no se use así, sino como parte de un componente card
-// Este componente card simularía elevaciones positivas y negativas usando colores y sombras
+// RN no tiene box-shadow con blur/spread declarativo simple: se usa elevación (Android) +
+// shadow* (iOS) por nivel. Estos valores son un punto de partida, no vienen 1:1 de tailwind
+// (que en web resuelve elevación con color de superficie, no con shadow).
 export const elevations = {
   none: 0,
   sm: 2,
