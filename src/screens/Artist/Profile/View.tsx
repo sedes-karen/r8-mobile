@@ -8,10 +8,12 @@ import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { ProfileField } from '../../../components/molecules/ProfileField';
 import { useArtistProfile } from '../../../features/artist/useArtistProfile';
+import { useAuthActions } from '../../../features/auth/info';
 
 /** Perfil de artista — solo lectura. La edición queda para el Equipo 1 (botón visible, sin acción). */
 export function ArtistProfileViewScreen() {
   const state = useArtistProfile();
+  const { logout } = useAuthActions();
 
   if (state.status === 'loading') {
     return <LoadingBlock label="Cargando perfil..." />;
@@ -40,6 +42,7 @@ export function ArtistProfileViewScreen() {
         </View>
 
         <Button label="Editar" variant="secondary" disabled onPress={() => {}} />
+        <Button label="Cerrar sesión" variant="secondary" onPress={logout} />
       </ScrollView>
     </SafeAreaView>
   );
