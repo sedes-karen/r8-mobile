@@ -1,9 +1,25 @@
 import { registerRootComponent } from 'expo';
+import { StatusBar } from 'expo-status-bar';
+import { View } from 'react-native';
 import { Navigation } from './src/navigation/index';
+import { useAppFonts } from './src/hooks/useAppFonts';
+import { colors } from './src/constants/design';
 
 // Main component moved here because it was trivial
 function App() {
-  return <Navigation />;
+  // Gate mínimo de carga de fuentes (IBM Plex Mono) — no es la pantalla de Splash del roadmap
+  // (esa sigue pendiente), solo evita un parpadeo con la fuente del sistema en el primer render.
+  const fontsReady = useAppFonts();
+  if (!fontsReady) {
+    return <View style={{ flex: 1, backgroundColor: colors.background }} />;
+  }
+
+  return (
+    <>
+      <StatusBar style="light" />
+      <Navigation />
+    </>
+  );
 }
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
