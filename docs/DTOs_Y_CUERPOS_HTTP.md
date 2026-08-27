@@ -46,7 +46,7 @@
 | `POST` | `/users/verify-email` | **VerifyEmailDto** | **200** `{ "success": true, "user": <perfil>, "accessToken": string }` + cookie refresh |
 | `POST` | `/users/resend-verification` | `{ "email": string }` | **200** `{ "message": "If an unverified account exists..." }` (genérico; rate-limited) |
 | `POST` | `/users/register?token=` | Completar cuenta promo — ver abajo | **201** con `accessToken` (sin paso PIN) |
-| `GET` | `/users/me` | — | Usuario enriquecido (`labels[]`, `artist`, URLs firmadas, `labelId` derivable) |
+| `GET` | `/users/me` | — | Usuario enriquecido (`labels[]`, `artist`, URLs firmadas) — **no** trae `labelId` plano, ver nota abajo |
 | `PUT` | `/users/me` | **UpdateUserDto** | Usuario actualizado |
 | `POST` | `/users/me/change-password` | `{ "currentPassword": string, "newPassword": string }` | `{ "message": "Password changed successfully" }` — revoca **todas** las cookies refresh del usuario (re-login o refresh necesario) |
 | `GET` | `/users/me/recipient` | — | Vista recipient (email, displayName, flags) |
@@ -89,6 +89,44 @@ Para contactos promo que reciben un link de alta (sin registro previo completo):
 | `artistName`, `firstName`, `lastName` | string | no | Perfil artista opcional al completar |
 
 Respuesta **201** con `accessToken` + cookie refresh (mismo patrón que login). **No** requiere `verify-email`. El `role` del body **no** aplica en este flujo.
+
+### Entidad usuario (respuesta real de `GET /users/me`, verificado en stage 2026-08-27)
+
+```json
+{
+  "id": "uuid",
+  "email": "string",
+  "authProvider": "password",
+  "plan": "FREEMIUM",
+  "status": "ACTIVE",
+  "displayName": "string | null",
+  "country": "string | null",
+  "mailStatus": "string",
+  "labels": [
+    {
+      "id": "uuid", "userId": "uuid", "name": "string",
+      "profileImagePath": null, "profileImageUrl": null,
+      "instagramUrl": null, "soundcloudUrl": null, "bandcampUrl": null, "twitterUrl": null,
+      "description": null, "createdAt": "ISO", "updatedAt": "ISO"
+    }
+  ],
+  "artist": {
+    "id": "uuid", "userId": "uuid",
+    "firstName": "string", "lastName": "string", "artistName": "string | null", "bio": "string | null",
+    "profileImagePath": null, "profileImageUrl": null,
+    "instagramUrl": null, "soundcloudUrl": null, "bandcampUrl": null, "twitterUrl": null,
+    "createdAt": "ISO", "updatedAt": "ISO"
+  },
+  "systemSettings": { "maxRecipientsPerListAndPromo": 500 },
+  "features": {}
+}
+```
+
+> **No existe un campo `labelId` plano.** El label activo del usuario se deriva de `labels[0]?.id`
+> (así lo hace `deriveAvailableRoles` en `sessionService.ts`; un usuario puede en teoría tener más
+> de un label, pero el flujo actual del curso asume uno solo). `artist` viene en **camelCase**
+> (`firstName`/`lastName`), no en snake_case como el `CreateArtistDto` de request — no confundir
+> el shape de request con el de response.
 
 ### UpdateUserDto (`PUT /users/me`)
 
@@ -152,6 +190,24 @@ Opcionales: `name`, `description`, `bandcampUrl`, `soundcloudUrl`, `instagramUrl
 ### UpdateArtistDto
 
 Opcionales: `first_name`, `last_name`, `artist_name`, `bio`, `instagramUrl`, `soundcloudUrl`, `bandcampUrl`, `twitterUrl`, `profileImagePath`.
+
+### Entidad artista (respuesta real de `GET /artists/me`, verificado en stage 2026-08-27)
+
+```json
+{
+  "id": "uuid", "userId": "uuid",
+  "firstName": "string", "lastName": "string", "artistName": "string | null", "bio": "string | null",
+  "profileImagePath": "string | null", "profileImageUrl": "string | null",
+  "instagramUrl": null, "soundcloudUrl": null, "bandcampUrl": null, "twitterUrl": null,
+  "createdAt": "ISO", "updatedAt": "ISO"
+}
+```
+
+> A diferencia de `CreateArtistDto`/`UpdateArtistDto` (que piden `first_name`/`last_name` en
+> snake_case en el **request**), la **respuesta** de `GET /artists/me` viene en camelCase
+> (`firstName`/`lastName`) — no son el mismo shape, no reusar el tipo de request para el response.
+> `profileImageUrl` ya viene resuelto acá: para una pantalla de solo lectura **no hace falta** el
+> call aparte a `GET /artists/me/profile-image`, alcanza con este único request.
 
 ---
 
@@ -240,7 +296,7 @@ Opcionales: `title`, `artist`, `artistId`, `artistEmail`, `releaseDate`, `type` 
 
 | Método | Ruta | Query / cuerpo | Respuesta |
 |--------|------|----------------|-----------|
-| `GET` | `/promos/for-label` | `?labelId=<uuid>` si el usuario tiene varios labels | Array de promos listado |
+| `GET` | `/promos/for-label` | `?labelId=<uuid>` si el usuario tiene varios labels | **PromoForLabelItemDto[]** |
 | `GET` | `/promos/dashboard/:labelId` | — | Dashboard (label o artist según rol) |
 | `GET` | `/promos/inbox` | `?token=`, `?no-feedback-only=true` | **PromoInboxItemDto[]** |
 | `GET` | `/promos/inbox/pending-count` | `?token=` | `{ "count": number }` |
@@ -271,6 +327,25 @@ Opcionales: `scheduledAt`, `useCuratedDb`, `sendType`, `recipientListIds`, `expi
 ### Estados de promo (solo lectura)
 
 `DRAFT`, `SCHEDULED`, `SENDING`, `SENT`, `CANCELLED`, `FAILED`, `EXPIRED` — **no** existe `DELETED` (delete físico).
+
+### PromoForLabelItemDto (respuesta real de `GET /promos/for-label`, verificado en stage 2026-08-27)
+
+```json
+{
+  "id": "uuid", "labelId": "uuid", "releaseId": "uuid",
+  "release": {
+    "id": "uuid", "title": "string", "catalogNumber": "string | null",
+    "artistName": "string | null", "artistEmail": "string | null",
+    "releaseDate": "ISO", "type": "EP", "notes": "string | null", "coverUrl": "string"
+  },
+  "scheduledAt": "ISO | null", "sentAt": "ISO | null", "status": "SENT",
+  "isActive": true, "useCuratedDb": false,
+  "recipientListIds": ["uuid"],
+  "recipientLists": [{ "id": "uuid", "name": "string", "recipientCount": 0, "hasNonValidMailRecipients": false }],
+  "createdAt": "ISO", "updatedAt": "ISO",
+  "feedbackCount": 0, "averageRating": 5
+}
+```
 
 ### PromoInboxItemDto (resumen `GET /promos/inbox`)
 
@@ -317,7 +392,8 @@ Sin `:labelId` en la URL; el tenant lo resuelve el JWT.
   "total": 0,
   "deliverySummary": {
     "totalUniqueEmails": 0,
-    "deliveredUniqueEmails": 0
+    "deliveredUniqueEmails": 0,
+    "unsubscribedUniqueEmails": 0
   }
 }
 ```
@@ -364,9 +440,9 @@ Opcionales: `name`, `recipientIds` (array único de IDs).
 |--------|------|--------|-----------|
 | `GET` | `/feedback` | `releaseId`, `recipientId`, `rating`, `supported`, `status`, `priority`, `sentiment`, `category`, `search`, `limit`, `offset`, `sortBy`, `sortOrder` — **sin** `dateFrom`/`dateTo` (rango solo en analytics) | **`{ "feedback": Feedback[], "total": number }`** |
 | `GET` | `/feedback/pending-count` | — | `{ "count": number }` |
-| `GET` | `/feedback/analytics` | **`dateFrom` y `dateTo` juntos** para rango | Objeto analytics |
+| `GET` | `/feedback/analytics` | **`dateFrom` y `dateTo` juntos** para rango | **LabelFeedbackAnalyticsDto** (ver abajo) |
 | `GET` | `/feedback/:feedbackId` | — | `Feedback` — label dueño del release, o el **propio recipient** (Bearer o `?token=`) |
-| `GET` | `/feedback/liked-tracks` | `?token=` | **LikedTracksReleaseItemDto[]** |
+| `GET` | `/feedback/liked-tracks` | `?token=` | **LikedTracksReleaseItemDto[]** — todo lo que aparece en la respuesta ya está likeado (no hay booleano `liked` por track); es la lista de favoritos, no un catálogo con estado toggleable |
 | `PATCH` | `/feedback/track-stats/downloaded` | `?token=` | **Feedback[]** |
 
 **Forma de `Feedback` en `GET /feedback`** (entidad cruda; distinta de `GET /releases/:releaseId/feedback`):
@@ -374,6 +450,31 @@ Opcionales: `name`, `recipientIds` (array único de IDs).
 - Campos habituales: `id`, `releaseId`, `userId`, `rating`, `comment`, `willPlay`, `supported`, `status`, `trackStats[]` en **snake_case** (`track_id`, `play_count`, `listening_time`, `liked`, `downloaded`).
 - Puede incluir join `release` según consulta.
 - **No** incluye objeto `recipient` anidado (eso solo en listado por release, §8.2).
+
+### LabelFeedbackAnalyticsDto (respuesta real de `GET /feedback/analytics`, verificado en stage 2026-08-27)
+
+```json
+{
+  "overall": { "totalFeedback": 0, "averageRating": 0, "supportRate": 0, "responseRate": 0, "recentFeedback": 0 },
+  "trends": { "daily": [], "weekly": [], "monthly": [] },
+  "byRelease": [
+    { "releaseId": "uuid", "releaseTitle": "string", "ratings": [5], "supported": 0, "total": 0,
+      "feedbackCount": 0, "averageRating": 0, "supportRate": 0 }
+  ],
+  "byRating": [{ "rating": 5, "count": 0, "percentage": 0 }],
+  "byStatus": [{ "status": "PENDING", "count": 0, "percentage": 0 }],
+  "byPriority": [{ "priority": "MEDIUM", "count": 0, "percentage": 0 }],
+  "bySentiment": [],
+  "topPerformers": [ "mismo shape que byRelease" ],
+  "engagement": { "averageListeningTime": 0, "averagePlayCount": 0, "highEngagementCount": 0, "lowEngagementCount": 0 },
+  "funnelCounts": { "sentDelivered": 0, "opened": 0, "played": 0, "feedbackSubmitted": 0,
+    "downloaded": 0, "supported": 0, "willPlay": 0, "totalPlays": 0, "averageRating": 0 }
+}
+```
+
+> No documentamos el shape exacto de cada item de `trends.daily/weekly/monthly` porque el usuario
+> de prueba no tenía datos históricos suficientes al momento de verificar — quedan como array
+> vacío confirmado, forma interna pendiente para quien construya esa parte de la pantalla.
 
 ### LikedTracksReleaseItemDto (resumen)
 
@@ -492,3 +593,8 @@ Contrato completo: **r8-api** `docs/MODULES.md` (lectura opcional docentes).
 ---
 
 *Documento sincronizado con r8-api y r8-site — 2026-08-06.*
+
+*2026-08-27 — alineado contra respuestas reales de Stage para el subset tocado por el batch
+Login + 5 pantallas de lectura: `GET /users/me`, `GET /artists/me`, `GET /feedback/analytics`,
+`GET /promos/for-label`, `GET /feedback/liked-tracks`, `GET /recipient-lists`. Pendiente: auditar
+el resto de las rutas de este documento contra stage real (no se hizo en esta pasada).*
