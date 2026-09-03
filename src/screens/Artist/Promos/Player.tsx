@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View, FlatList, Pressable, StyleSheet, RefreshControl } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 
 import { colors, spacing, borderRadius } from '../../../constants/design';
 import { AppText } from '../../../components/atoms/AppText';
@@ -9,14 +8,8 @@ import { EmptyState } from '../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { getPromosInbox, getPromosPendingCount } from '../../../services/api/promos';
 import type { PromoInboxItem } from '../../../types/promo';
-
-// ParamList menos de stack de promos del artista; hace que la navegación del
-// componente Player quede tipada por el tipo de pantalla recibido como prop.
-export type PromosStackParamList = {
-  Player: undefined;
-  Details: { promoId: string };
-  LikedTracks: undefined;
-};
+import { InvisibleLink } from '../../../components/atoms/InvisibleLink';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface PromoState {
   inbox: PromoInboxItem[];
@@ -39,9 +32,7 @@ function isPending(item: PromoInboxItem): boolean {
   return item.status === 'SENT' && !item.hasFeedback;
 }
 
-type PlayerProps = NativeStackScreenProps<PromosStackParamList, 'Player'>;
-
-export function ArtistPromosPlayerScreen({ navigation }: PlayerProps) {
+export function ArtistPromosPlayerScreen() {
   const [state, setState] = useState<PromoState>(initialState);
 
   const load = useCallback(async (refresh = false) => {
@@ -60,9 +51,10 @@ export function ArtistPromosPlayerScreen({ navigation }: PlayerProps) {
   }, [load]);
 
   const renderItem = ({ item }: { item: PromoInboxItem }) => (
-    <Pressable
+    <InvisibleLink
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-      onPress={() => navigation.navigate('Details', { promoId: item.id })}
+      screen="Details"
+      params={{ promoId: item.id }}
     >
       <View style={styles.cardHeader}>
         <AppText variant="title-md" numberOfLines={1}>
@@ -88,19 +80,19 @@ export function ArtistPromosPlayerScreen({ navigation }: PlayerProps) {
           </View>
         ) : null}
       </View>
-    </Pressable>
+    </InvisibleLink>
   );
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen}>
       <View style={styles.header}>
         <AppText variant="headline-lg">Bandeja de promos</AppText>
         {!state.loading ? (
-          <Pressable onPress={() => navigation.navigate('LikedTracks')} accessibilityRole="button">
+          <InvisibleLink screen="LikedTracks" params={{}}>
             <AppText variant="body-lg" color={colors.primary.default}>
-              Mis favoritas
+              Favoritos
             </AppText>
-          </Pressable>
+          </InvisibleLink>
         ) : null}
       </View>
 
@@ -130,7 +122,7 @@ export function ArtistPromosPlayerScreen({ navigation }: PlayerProps) {
           }
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
