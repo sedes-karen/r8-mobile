@@ -8,7 +8,7 @@ import { EmptyState } from '../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { getPromosInbox, getPromosPendingCount } from '../../../services/api/promos';
 import type { PromoInboxItem } from '../../../types/promo';
-import { InvisibleLink } from '../../../components/atoms/InvisibleLink';
+import { LinkButton } from '../../../components/atoms/LinkButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface PromoState {
@@ -51,7 +51,7 @@ export function ArtistPromosPlayerScreen() {
   }, [load]);
 
   const renderItem = ({ item }: { item: PromoInboxItem }) => (
-    <InvisibleLink
+    <LinkButton
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
       screen="Details"
       params={{ promoId: item.id }}
@@ -80,7 +80,7 @@ export function ArtistPromosPlayerScreen() {
           </View>
         ) : null}
       </View>
-    </InvisibleLink>
+    </LinkButton>
   );
 
   return (
@@ -88,11 +88,11 @@ export function ArtistPromosPlayerScreen() {
       <View style={styles.header}>
         <AppText variant="headline-lg">Bandeja de promos</AppText>
         {!state.loading ? (
-          <InvisibleLink screen="LikedTracks" params={{}}>
+          <LinkButton screen="LikedTracks" params={{}}>
             <AppText variant="body-lg" color={colors.primary.default}>
               Favoritos
             </AppText>
-          </InvisibleLink>
+          </LinkButton>
         ) : null}
       </View>
 
