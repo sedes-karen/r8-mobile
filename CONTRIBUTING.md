@@ -37,7 +37,7 @@ Los estilos de un componente deben estar en el mismo archivo que el resto del mi
 
 Los átomos y moléculas **no deben** utilizar ningún servicio. Tienen el propósito expreso de poderse reutilizar tanto como sea necesario, cosa que su interfaz debe reflejar. Los organismos que estén atados a una pantalla particular (generalmente provenientes de un refactoreo) pueden utilizar servicios. Las pantallas pueden hacer uso de servicios tanto como sea conveniente (ese es el punto).
 
-Salvo absolutamente necesario, se debe utilizar navegación declarativa, mediante `Link`s en lugar de `useNavigation`.
+Salvo absolutamente necesario, se debe utilizar navegación declarativa, mediante `InvisibleLink`s en lugar de `useNavigation`.
 
 **Bajo ninguna circunstancia** puede un componente (cualquiera sea su naturaleza) "saltarse" los servicios proveídos para llamar a la API o similar. Este tipo de efectos secundarios se considera crítico y debe aislarse lo más posible (utilizando servicios, con validación de datos completa). Nótese que el uso de `console.log`/`console.table`/`console.error` para depuración está permitido, siempre y cuando esto no llegue a la versión final (siendo removido en el mismo PR).
 
