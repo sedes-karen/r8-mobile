@@ -5,7 +5,7 @@ import { AppText } from '../atoms/AppText';
 
 type MetaDataRowProps = {
   label: string;
-  value?: string | number | null;
+  value?: string | number;
   /** Permite pasar un componente custom en lugar de texto plano para el valor (ej: un Badge o Tag). */
   children?: ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
@@ -15,11 +15,11 @@ type MetaDataRowProps = {
 
 /**
  * Fila de metadata de solo lectura (label + valor), pensada para los detalles de release y promo.
- * Acepta un valor en texto plano o un componente custom vía `children`.
+ * Se debe pasar al menos uno de `value` (texto plano) o `children` (componente custom).
  */
 export function MetaDataRow({ label, value, children, containerStyle, labelStyle, valueStyle }: MetaDataRowProps) {
   if (children === undefined && value === undefined) {
-    return null;
+    throw new Error('MetaDataRow requiere al menos un valor: pasa `value` o `children`.');
   }
 
   return (
