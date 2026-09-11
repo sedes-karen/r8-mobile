@@ -1,18 +1,15 @@
+
 import { apiClient } from './apiClient';
 import { readApiError } from './apiErrors';
 import type { PromoInboxItem, PromoDetail } from '../../types/promo';
 
 /**
- * GET /promos/inbox
- *
- * Obtiene las promos recibidas por el artista/receptor.
+ * GET /promos/inbox — bandeja del receptor/artista.
  */
 export async function getPromosInbox(
   recipientToken?: string,
 ): Promise<PromoInboxItem[]> {
-  const response = await apiClient('/promos/inbox', {
-    recipientToken,
-  });
+  const response = await apiClient('/promos/inbox', { recipientToken });
 
   if (!response.ok) {
     throw await readApiError(
@@ -25,9 +22,7 @@ export async function getPromosInbox(
 }
 
 /**
- * GET /promos/inbox/pending-count
- *
- * Obtiene la cantidad de promos pendientes.
+ * GET /promos/inbox/pending-count — cantidad de promos pendientes.
  */
 export async function getPromosPendingCount(
   recipientToken?: string,
@@ -47,18 +42,12 @@ export async function getPromosPendingCount(
 }
 
 /**
- * GET /promos/:id
- *
- * Obtiene la información completa de una promo
- * para mostrarla en la pantalla de detalles.
+ * GET /promos/:id — detalle de una promo.
  */
-export async function getPromoById(
+export async function getPromoDetails(
   promoId: string,
-  recipientToken?: string,
 ): Promise<PromoDetail> {
-  const response = await apiClient(`/promos/${promoId}`, {
-    recipientToken,
-  });
+  const response = await apiClient(`/promos/${promoId}`);
 
   if (!response.ok) {
     throw await readApiError(
@@ -69,3 +58,4 @@ export async function getPromoById(
 
   return response.json() as Promise<PromoDetail>;
 }
+
