@@ -1,130 +1,94 @@
-import { useCallback, useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import { StyleSheet, View, FlatList } from 'react-native';
 
 import { colors, spacing, borderRadius } from '../../../constants/design';
 import { AppText } from '../../../components/atoms/AppText';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { EmptyState } from '../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../components/molecules/ErrorState';
-import { getPromosInbox, getPromosPendingCount } from '../../../services/api/promos';
-import type { PromoInboxItem } from '../../../types/promo';
+import { useArtistPromos } from '../../../features/artist/useArtistPromos';
 import { LinkButton } from '../../../components/atoms/LinkButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-interface PromoState {
-  inbox: PromoInboxItem[];
-  pendingCount: number;
-  loading: boolean;
-  refreshing: boolean;
-  error: string | null;
-}
-
-const initialState: PromoState = {
-  inbox: [],
-  pendingCount: 0,
-  loading: true,
-  refreshing: false,
-  error: null,
-};
-
-/** Decide si una promo debe marcarse pendiente de atención (sin feedback aún). */
-function isPending(item: PromoInboxItem): boolean {
-  return item.status === 'SENT' && !item.hasFeedback;
-}
+import type { PromoInboxItem } from '../../../types/promo';
 
 export function ArtistPromosPlayerScreen() {
-  const [state, setState] = useState<PromoState>(initialState);
+  const state = useArtistPromos();
 
-  const load = useCallback(async (refresh = false) => {
-    setState((prev) => ({ ...prev, error: null, loading: !refresh, refreshing: refresh }));
-    try {
-      const [inbox, pending] = await Promise.all([getPromosInbox(), getPromosPendingCount()]);
-      setState({ inbox, pendingCount: pending.count, loading: false, refreshing: false, error: null });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'No se pudo cargar la bandeja.';
-      setState((prev) => ({ ...prev, loading: false, refreshing: false, error: message }));
-    }
-  }, []);
+  if (state.status === 'loading') {
+    return <LoadingBlock label="Cargando bandeja..." />;
+  }
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  if (state.status === 'error') {
+    return <ErrorState message="No se pudo cargar la bandeja." onRetry={state.reload} />;
+  }
 
-  const renderItem = ({ item }: { item: PromoInboxItem }) => (
-    <LinkButton
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-      screen="Details"
-      params={{ promoId: item.id }}
-    >
-      <View style={styles.cardHeader}>
-        <AppText variant="title-md" numberOfLines={1}>
-          {item.release.title}
-        </AppText>
-        {item.labelName ? (
-          <AppText variant="body-sm" color={colors.onSurface.variant} numberOfLines={1}>
-            {item.labelName}
-          </AppText>
-        ) : null}
-      </View>
-      <View style={styles.cardFooter}>
-        {item.expiresAt ? (
-          <AppText variant="body-sm" color={colors.onSurface.variant}>
-            Vence: {new Date(item.expiresAt).toLocaleDateString()}
-          </AppText>
-        ) : null}
-        {isPending(item) ? (
-          <View style={styles.pendingBadge}>
-            <AppText variant="label-caps" color={colors.onSurface.default}>
-              Pendiente
-            </AppText>
-          </View>
-        ) : null}
-      </View>
-    </LinkButton>
-  );
+  const { inbox, pendingCount } = state.data || {};
 
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.header}>
         <AppText variant="headline-lg">Bandeja de promos</AppText>
-        {!state.loading ? (
-          <LinkButton screen="LikedTracks" params={{}}>
-            <AppText variant="body-lg" color={colors.primary.default}>
-              Favoritos
-            </AppText>
-          </LinkButton>
-        ) : null}
+        <LinkButton screen="LikedTracks" params={{}}>
+          <AppText variant="body-lg" color={colors.primary.default}>
+            Favoritos
+          </AppText>
+        </LinkButton>
       </View>
 
-      {state.pendingCount > 0 ? (
+      {pendingCount > 0 ? (
         <View style={styles.pendingBanner}>
           <AppText variant="body-sm" color={colors.onSurface.default}>
-            Tenés {state.pendingCount} promo{state.pendingCount === 1 ? '' : 's'} pendiente
-            {state.pendingCount === 1 ? '' : 's'} de atención.
+            Tenés {pendingCount} promo{pendingCount === 1 ? '' : 's'} pendiente
+            {pendingCount === 1 ? '' : 's'} de atención.
           </AppText>
         </View>
       ) : null}
 
-      {state.loading ? (
-        <LoadingBlock label="Cargando bandeja..." />
-      ) : state.error ? (
-        <ErrorState message={state.error} onRetry={() => load()} />
-      ) : state.inbox.length === 0 ? (
+      {!inbox?.length ? (
         <EmptyState message="No tenés promos en tu bandeja por ahora." />
       ) : (
         <FlatList
-          data={state.inbox}
+          data={inbox}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl refreshing={state.refreshing} onRefresh={() => load(true)} tintColor={colors.primary.default} />
-          }
         />
       )}
     </SafeAreaView>
   );
 }
+
+const renderItem = ({ item }: { item: PromoInboxItem }) => (
+  <LinkButton
+    style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+    screen="Details"
+    params={{ promoId: item.id }}
+  >
+    <View style={styles.cardHeader}>
+      <AppText variant="title-md" numberOfLines={1}>
+        {item.release.title}
+      </AppText>
+      {item.labelName ? (
+        <AppText variant="body-sm" color={colors.onSurface.variant} numberOfLines={1}>
+          {item.labelName}
+        </AppText>
+      ) : null}
+    </View>
+    <View style={styles.cardFooter}>
+      {item.expiresAt ? (
+        <AppText variant="body-sm" color={colors.onSurface.variant}>
+          Vence: {new Date(item.expiresAt).toLocaleDateString()}
+        </AppText>
+      ) : null}
+      {item.status === 'SENT' && !item.hasFeedback ? (
+        <View style={styles.pendingBadge}>
+          <AppText variant="label-caps" color={colors.onSurface.default}>
+            Pendiente
+          </AppText>
+        </View>
+      ) : null}
+    </View>
+  </LinkButton>
+);
 
 const styles = StyleSheet.create({
   screen: {
