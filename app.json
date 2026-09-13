@@ -23,21 +23,31 @@
     },
     "plugins": [
       "expo-font",
-      ["expo-splash-screen", {
-        "backgroundColor": "#000000",
-        "image": "./assets/splash-icon.png",
-        "imageWidth": 200,
-        "resizeMode": "contain"
-      }],
-      ["expo-navigation-bar", {
-        "hidden": false,
-        "style": "dark",
-        "enforceContrast": false
-      }],
-      ["expo-status-bar", {
-        "hidden": false,
-        "style": "dark"
-      }]
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#000000",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "hidden": false,
+          "style": "dark",
+          "enforceContrast": false
+        }
+      ],
+      [
+        "expo-status-bar",
+        {
+          "hidden": false,
+          "style": "dark"
+        }
+      ],
+      "expo-audio"
     ]
   }
 }

@@ -137,6 +137,27 @@ npm run ios
 npm run web
 ```
 
+### Scripts adicionales usados en el desarrollo
+
+Verificar tipos TypeScript sin compilar (requerido antes de abrir un PR):
+
+```bash
+npx tsc --noEmit
+```
+
+Instalar dependencias nativas compatibles con la versión de Expo SDK del proyecto (usar en lugar de `npm install` para paquetes Expo):
+
+```bash
+npx expo install <paquete>
+```
+
+Dependencias nativas introducidas por el Equipo 3:
+
+```bash
+# Reproductor de audio para la pantalla de detalle de promos
+npx expo install expo-audio
+```
+
 ## Limpieza de caché (si algo queda raro)
 
 Cuando haya problemas con cambios o assets, podés forzar limpieza:
