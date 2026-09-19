@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 
 import { colors, spacing, borderRadius } from '../../../constants/design';
@@ -6,26 +5,10 @@ import { AppText } from '../../../components/atoms/AppText';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { EmptyState } from '../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../components/molecules/ErrorState';
-import { getPromosInbox, getPromosPendingCount } from '../../../services/api/promos';
+import { useArtistPromos } from '../../../features/artist/useArtistPromos';
 import type { PromoInboxItem } from '../../../types/promo';
 import { LinkButton } from '../../../components/atoms/LinkButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-interface PromoState {
-  inbox: PromoInboxItem[];
-  pendingCount: number;
-  loading: boolean;
-  refreshing: boolean;
-  error: string | null;
-}
-
-const initialState: PromoState = {
-  inbox: [],
-  pendingCount: 0,
-  loading: true,
-  refreshing: false,
-  error: null,
-};
 
 /** Decide si una promo debe marcarse pendiente de atención (sin feedback aún). */
 function isPending(item: PromoInboxItem): boolean {
@@ -33,22 +16,12 @@ function isPending(item: PromoInboxItem): boolean {
 }
 
 export function ArtistPromosPlayerScreen() {
-  const [state, setState] = useState<PromoState>(initialState);
+  const state = useArtistPromos();
 
-  const load = useCallback(async (refresh = false) => {
-    setState((prev) => ({ ...prev, error: null, loading: !refresh, refreshing: refresh }));
-    try {
-      const [inbox, pending] = await Promise.all([getPromosInbox(), getPromosPendingCount()]);
-      setState({ inbox, pendingCount: pending.count, loading: false, refreshing: false, error: null });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'No se pudo cargar la bandeja.';
-      setState((prev) => ({ ...prev, loading: false, refreshing: false, error: message }));
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const isLoading = state.status === 'loading';
+  const inbox = state.status === 'success' ? state.data.inbox : [];
+  const pendingCount = state.status === 'success' ? state.data.pendingCount : 0;
+  const error = state.status === 'error' ? state.message : null;
 
   const renderItem = ({ item }: { item: PromoInboxItem }) => (
     <LinkButton
@@ -87,7 +60,7 @@ export function ArtistPromosPlayerScreen() {
     <SafeAreaView style={styles.screen}>
       <View style={styles.header}>
         <AppText variant="headline-lg">Bandeja de promos</AppText>
-        {!state.loading ? (
+        {!isLoading ? (
           <LinkButton screen="LikedTracks" params={{}}>
             <AppText variant="body-lg" color={colors.primary.default}>
               Favoritos
@@ -96,29 +69,31 @@ export function ArtistPromosPlayerScreen() {
         ) : null}
       </View>
 
-      {state.pendingCount > 0 ? (
+      {pendingCount > 0 ? (
         <View style={styles.pendingBanner}>
           <AppText variant="body-sm" color={colors.onSurface.default}>
-            Tenés {state.pendingCount} promo{state.pendingCount === 1 ? '' : 's'} pendiente
-            {state.pendingCount === 1 ? '' : 's'} de atención.
+            Tenés {pendingCount} promo{pendingCount === 1 ? '' : 's'} pendiente
+            {pendingCount === 1 ? '' : 's'} de atención.
           </AppText>
         </View>
       ) : null}
 
-      {state.loading ? (
+      {isLoading ? (
         <LoadingBlock label="Cargando bandeja..." />
-      ) : state.error ? (
-        <ErrorState message={state.error} onRetry={() => load()} />
-      ) : state.inbox.length === 0 ? (
+      ) : error ? (
+        <ErrorState message={error} onRetry={state.reload} />
+      ) : inbox.length === 0 ? (
         <EmptyState message="No tenés promos en tu bandeja por ahora." />
       ) : (
         <FlatList
-          data={state.inbox}
+          data={inbox}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
           refreshControl={
-            <RefreshControl refreshing={state.refreshing} onRefresh={() => load(true)} tintColor={colors.primary.default} />
+            // El hook expone la recarga como un estado `loading` completo, sin flag separado,
+            // así que el pull-to-refresh dispara `reload` aunque no muestre spinner propio.
+            <RefreshControl refreshing={false} onRefresh={state.reload} tintColor={colors.primary.default} />
           }
         />
       )}
