@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,26 +7,12 @@ import { AppText } from '../../../components/atoms/AppText';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { colors, spacing } from '../../../constants/design';
-import { getPromoDetails } from '../../../services/api/promos';
-import type { PromoDetail } from '../../../types/promo';
+import { usePromoDetails } from '../../../features/promos/usePromoDetails';
 
 export function ArtistPromosDetailsScreen({ route }: any) {
   const { promoId } = route.params;
 
-  const [promo, setPromo] = useState<PromoDetail | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    getPromoDetails(promoId)
-      .then(setPromo)
-      .catch((err) => {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'No se pudo cargar la promo.',
-        );
-      });
-  }, [promoId]);
+  const { promo, error } = usePromoDetails(promoId);
 
   if (error) {
     return <ErrorState message={error} />;
