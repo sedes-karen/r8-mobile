@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import type { StaticScreenProps } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '../../../components/atoms/AppText';
@@ -11,8 +11,9 @@ import { colors, spacing } from '../../../constants/design';
 import { getPromoDetails } from '../../../services/api/promos';
 import type { PromoDetail } from '../../../types/promo';
 
-export function ArtistPromosDetailsScreen() {
-  const route = useRoute<any>();
+type Props = StaticScreenProps<{ promoId: string }>;
+
+export function ArtistPromosDetailsScreen({ route }: Props) {
   const { promoId } = route.params;
 
   const [promo, setPromo] = useState<PromoDetail | null>(null);
