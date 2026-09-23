@@ -1,20 +1,32 @@
 
+import { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import type { StaticScreenProps } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '../../../components/atoms/AppText';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { colors, spacing } from '../../../constants/design';
-import { usePromoDetails } from '../../../features/promos/usePromoDetails';
+import { getPromoDetails } from '../../../services/api/promos';
+import type { PromoDetail } from '../../../types/promo';
 
-type Props = StaticScreenProps<{ promoId: string }>;
-
-export function ArtistPromosDetailsScreen({ route }: Props) {
+export function ArtistPromosDetailsScreen({ route }: any) {
   const { promoId } = route.params;
 
-  const { promo, error } = usePromoDetails(promoId);
+  const [promo, setPromo] = useState<PromoDetail | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getPromoDetails(promoId)
+      .then(setPromo)
+      .catch((err) => {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'No se pudo cargar la promo.',
+        );
+      });
+  }, [promoId]);
 
   if (error) {
     return <ErrorState message={error} />;
