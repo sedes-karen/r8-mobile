@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '../../../components/atoms/AppText';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { ErrorState } from '../../../components/molecules/ErrorState';
+import { LinkButton } from '../../../components/atoms/LinkButton';
 import { colors, spacing } from '../../../constants/design';
 import { usePromoDetails } from '../../../features/promos/usePromoDetails';
 
@@ -86,6 +87,9 @@ export function ArtistPromosDetailsScreen({ route }: ScreenProps) {
             </AppText>
           ) : null}
         </View>
+        <LinkButton screen="Feedback" params={{ promoId: route.params.promoId! }}>
+          <AppText variant="body-lg">Dejar feedback</AppText>
+        </LinkButton>
       </ScrollView>
     </SafeAreaView>
   );
