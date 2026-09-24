@@ -1,5 +1,3 @@
-
-
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,18 +7,26 @@ import { ErrorState } from '../../../components/molecules/ErrorState';
 import { colors, spacing } from '../../../constants/design';
 import { usePromoDetails } from '../../../features/promos/usePromoDetails';
 
-export function ArtistPromosDetailsScreen({ route }: any) {
-  const { promoId } = route.params;
+type ScreenProps = {
+  route: {
+    params: {
+      promoId?: string;
+    };
+  };
+};
 
-  const { promo, error } = usePromoDetails(promoId);
+export function ArtistPromosDetailsScreen({ route }: ScreenProps) {
+  const state = usePromoDetails(route.params?.promoId);
 
-  if (error) {
-    return <ErrorState message={error} />;
-  }
-
-  if (!promo) {
+  if (state.status === 'loading') {
     return <LoadingBlock label="Cargando promo..." />;
   }
+
+  if (state.status === 'error') {
+    return <ErrorState message={state.message} onRetry={state.reload} />;
+  }
+
+  const promo = state.data;
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -102,4 +108,3 @@ const styles = StyleSheet.create({
     borderColor: colors.surface.border,
   },
 });
-
