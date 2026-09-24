@@ -1,11 +1,11 @@
 # DTOs y cuerpos HTTP — API Stage (r8-api)
 
-**Versión:** 2026-09-24  
+**Versión:** 2026-08-06  
 **Audiencia:** alumnos **sin acceso al código** de r8-api; consumirán la API en **stage**.  
 **URL base:** `https://api.stage.r8.audio`  
 **Mapa de rutas y flujos:** [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)
 
-> Revisión alineada con `r8-api` (`MODULES.md` v1.7 + `src/modules/*/routes.ts`) y cliente `r8-site/src/api/`. DNS canónico: `*.r8.audio` (el host legacy `technopremieres.com` ya no aplica).
+> Revisión alineada con `r8-api` y cliente `r8-site/src/api/` (ago 2026). DNS canónico: `*.r8.audio` (el host legacy `technopremieres.com` ya no aplica).
 
 ---
 
@@ -46,15 +46,13 @@
 | `POST` | `/users/verify-email` | **VerifyEmailDto** | **200** `{ "success": true, "user": <perfil>, "accessToken": string }` + cookie refresh |
 | `POST` | `/users/resend-verification` | `{ "email": string }` | **200** `{ "message": "If an unverified account exists..." }` (genérico; rate-limited) |
 | `POST` | `/users/register?token=` | Completar cuenta promo — ver abajo | **201** con `accessToken` (sin paso PIN) |
-| `GET` | `/users/me` | — | Usuario enriquecido (`labels[]`, `artist`, `features`, URLs firmadas) — **no** trae `labelId` plano, ver nota abajo |
+| `GET` | `/users/me` | — | Usuario enriquecido (`labels[]`, `artist`, URLs firmadas) — **no** trae `labelId` plano, ver nota abajo |
 | `PUT` | `/users/me` | **UpdateUserDto** | Usuario actualizado |
 | `POST` | `/users/me/change-password` | `{ "currentPassword": string, "newPassword": string }` | `{ "message": "Password changed successfully" }` — revoca **todas** las cookies refresh del usuario (re-login o refresh necesario) |
-| `POST` | `/users/me/activate-profile` | **ActivateProfileDto** | **201** — mismo shape que `GET /users/me`. **409** si ese perfil ya existe de verdad |
 | `GET` | `/users/me/recipient` | — | Vista recipient (email, displayName, flags) |
 | `GET` | `/users/recipient-by-token?token=` | — | Contacto promo por token (sin Bearer) |
 | `POST` | `/users/password/request-reset` | `{ "email": string }` | `{ "message": "If an account exists..." }` |
 | `POST` | `/users/password/reset` | **ResetPasswordDto** | `{ "message": string, "accessToken": string }` |
-| `GET` | `/users/unsubscribe/token-status` | — (Bearer artist/label/guest) | **204** si el link/sesión de baja es válido (no cambia el mailing) |
 | `POST` | `/users/unsubscribe` | — (Bearer: artist/label/guest) | **204** |
 | `POST` | `/users/resubscribe` | — (Bearer: artist/label/guest) | **204** |
 
@@ -129,17 +127,6 @@ Respuesta **201** con `accessToken` + cookie refresh (mismo patrón que login). 
 > de un label, pero el flujo actual del curso asume uno solo). `artist` viene en **camelCase**
 > (`firstName`/`lastName`), no en snake_case como el `CreateArtistDto` de request — no confundir
 > el shape de request con el de response.
-
-### ActivateProfileDto (`POST /users/me/activate-profile`)
-
-Activa el **otro** perfil sobre una cuenta que ya existe (pasar de solo artist a “both”, o al revés).
-
-| Campo | Tipo | Obligatorio | Notas |
-|-------|------|-------------|--------|
-| `type` | `"label"` \| `"artist"` | sí | El perfil que falta |
-| `name` | string | sí | Nombre del label o del artista |
-
-Respuesta **201**: el mismo payload que `GET /users/me`. **409** `"Label profile already exists"` / `"Artist profile already exists"` si ese lado ya está activo.
 
 ### UpdateUserDto (`PUT /users/me`)
 
@@ -230,11 +217,10 @@ Opcionales: `first_name`, `last_name`, `artist_name`, `bio`, `instagramUrl`, `so
 
 | Método | Ruta | Cuerpo / query | Respuesta |
 |--------|------|----------------|-----------|
+| `GET` | `/releases/all` | — | Array público (`status = CREATED`) |
 | `GET` | `/releases` | — | Ver **ReleasesListResponse** |
 | `POST` | `/releases` | **CreateReleaseUnderLabelDto** | **201** release |
-| `GET` | `/releases/shared/:token` | — (público) | **SharedFeedbackDashboardDto** |
 | `GET` | `/releases/:releaseId` | `?token=` opcional | Release + `coverUrl`, `tracks[].audioUrl`, `releaseAudioQuota` |
-| `GET` | `/releases/:releaseId/share-token` | — (label dueño) | `{ "token": string }` |
 | `PATCH` | `/releases/:releaseId` | **UpdateReleaseDto** | Release actualizado |
 | `DELETE` | `/releases/:releaseId` | — | **204** o **409** `DELETE_DEPENDENCY_ERROR` |
 | `GET` | `/releases/:releaseId/files` | — | Lista de descriptores |
@@ -253,41 +239,6 @@ Opcionales: `first_name`, `last_name`, `artist_name`, `bio`, `instagramUrl`, `so
 `hostingQuota.used` = conteo informativo de releases activos con audio del label (**no** bytes; sin límite duro en API).
 
 Si el usuario no tiene label, la API puede responder `[]` (array vacío) en lugar del objeto envuelto.
-
-### SharedFeedbackDashboardDto (`GET /releases/shared/:token`)
-
-Público. El `:token` lo emite `GET /releases/:releaseId/share-token` (payload JWT `{ releaseId, purpose: "public_feedback_share" }`; la API lo verifica **sin** exigir expiración).
-
-```json
-{
-  "release": {
-    "id": "uuid",
-    "title": "string",
-    "artistName": "string",
-    "releaseDate": "YYYY-MM-DD",
-    "coverUrl": "string | undefined",
-    "labelName": "string"
-  },
-  "analytics": {
-    "supportRate": 0,
-    "topTrack": "string | null",
-    "averageRating": 0,
-    "totalFeedback": 0
-  },
-  "feedbacks": [
-    {
-      "id": "uuid",
-      "rating": 5,
-      "comment": "string | null",
-      "supported": false,
-      "willPlay": null,
-      "recipient": { "displayName": "string" }
-    }
-  ]
-}
-```
-
-Hasta **200** ítems en `feedbacks`. Token inválido → **404**.
 
 ### CreateReleaseUnderLabelDto (`POST /releases`)
 
@@ -350,8 +301,6 @@ Opcionales: `title`, `artist`, `artistId`, `artistEmail`, `releaseDate`, `type` 
 | `GET` | `/promos/inbox` | `?token=`, `?no-feedback-only=true` | **PromoInboxItemDto[]** |
 | `GET` | `/promos/inbox/pending-count` | `?token=` | `{ "count": number }` |
 | `GET` | `/promos/:id` | `?token=` | **PromoDetailDto** (slim) |
-| `GET` | `/promos/:id/public` | — | **PublicPromoDto** (sin sesión) |
-| `POST` | `/promos/:id/public-access` | — (Bearer artist/label/guest) | `{ "ok": true }` |
 | `POST` | `/promos` | **CreatePromoDto** | **201** |
 | `PATCH` | `/promos/:id` | **UpdatePromoDto** | Actualizado |
 | `DELETE` | `/promos/:id` | — | **204** o **409** |
@@ -406,30 +355,6 @@ Campos habituales: `id`, `labelId`, `labelName`, `release` (con `tracks[].src` p
 
 Incluye: `id`, `release` (slim: `id`, `title`, `artistName`, `labelName`, `catalogNumber`, `artwork`, `releaseDate`, `type`, `notes`), `scheduledAt` (**`string \| null`**), `status`, `isActive`, `useCuratedDb`, `recipientLists`, `createdAt`, `updatedAt`, `errorMessage?`.  
 **No** incluye: `labelId`, `releaseId`, `recipientListIds`, `release.tracks` (para audio usar `GET /releases/:releaseId`).
-
-### PublicPromoDto (`GET /promos/:id/public`)
-
-Sin autenticación. Datos para el gate (nombre/email) del enlace público:
-
-```json
-{
-  "id": "uuid",
-  "status": "SENT",
-  "isActive": true,
-  "expired": false,
-  "release": {
-    "id": "uuid",
-    "title": "string",
-    "artistName": "string | null",
-    "labelName": "string",
-    "artwork": "string | undefined",
-    "bandcampUrl": "string | null",
-    "soundcloudUrl": "string | null"
-  }
-}
-```
-
-`POST /promos/:id/public-access` no lleva body: asocia al `userId` del JWT con la promo. Idempotente (`{ ok: true }` si ya tenía acceso).
 
 ---
 
@@ -513,10 +438,9 @@ Opcionales: `name`, `recipientIds` (array único de IDs).
 
 | Método | Ruta | Query | Respuesta |
 |--------|------|--------|-----------|
-| `GET` | `/feedback` | `releaseId`, `recipientId`, `rating`, `supported`, `status`, `priority`, `sentiment`, `category`, `search`, `limit`, `offset`, `sortBy`, `sortOrder`, **`dateFrom`+`dateTo` juntos** (acotan `createdAt`), `submittedOnly=true` | **`{ "feedback": Feedback[], "total": number }`** |
+| `GET` | `/feedback` | `releaseId`, `recipientId`, `rating`, `supported`, `status`, `priority`, `sentiment`, `category`, `search`, `limit`, `offset`, `sortBy`, `sortOrder` — **sin** `dateFrom`/`dateTo` (rango solo en analytics) | **`{ "feedback": Feedback[], "total": number }`** |
 | `GET` | `/feedback/pending-count` | — | `{ "count": number }` |
 | `GET` | `/feedback/analytics` | **`dateFrom` y `dateTo` juntos** para rango | **LabelFeedbackAnalyticsDto** (ver abajo) |
-| `GET` | `/feedback/geo-density` | — | **FeedbackGeoDensityResponseDto** |
 | `GET` | `/feedback/:feedbackId` | — | `Feedback` — label dueño del release, o el **propio recipient** (Bearer o `?token=`) |
 | `GET` | `/feedback/liked-tracks` | `?token=` | **LikedTracksReleaseItemDto[]** — todo lo que aparece en la respuesta ya está likeado (no hay booleano `liked` por track); es la lista de favoritos, no un catálogo con estado toggleable |
 | `PATCH` | `/feedback/track-stats/downloaded` | `?token=` | **Feedback[]** |
@@ -551,29 +475,6 @@ Opcionales: `name`, `recipientIds` (array único de IDs).
 > No documentamos el shape exacto de cada item de `trends.daily/weekly/monthly` porque el usuario
 > de prueba no tenía datos históricos suficientes al momento de verificar — quedan como array
 > vacío confirmado, forma interna pendiente para quien construya esa parte de la pantalla.
-
-### FeedbackGeoDensityResponseDto (`GET /feedback/geo-density`)
-
-Label autenticado (tenant por JWT). Buckets para un mapa:
-
-```json
-{
-  "buckets": [
-    {
-      "country": "AR",
-      "city": "Buenos Aires",
-      "displayLabel": "Buenos Aires, AR",
-      "lat": -34.6,
-      "lng": -58.38,
-      "plays": 0,
-      "feedback": 0,
-      "downloads": 0,
-      "supports": 0,
-      "likes": 0
-    }
-  ]
-}
-```
 
 ### LikedTracksReleaseItemDto (resumen)
 
@@ -674,10 +575,9 @@ Cuerpo = **array**:
 
 No forman parte del núcleo equipos 1–5; existen en stage pero no se documentan DTOs aquí:
 
-- **Admin:** `/admins`, `/admins/auth`, `GET /promos`, `GET /promos/schedules`, `GET /promos/:id/deliveries`, `GET /releases/admin`, `GET /labels/admin`, `GET /feedback/admin`, `/features`, `/system-settings`
+- **Admin:** `/admins`, `GET /promos`, `/features`, `/system-settings`
 - **Promo codes Bandcamp:** `/promo-codes/...`
-- **Label features:** `/label-features/...` (el mapa activo ya viene en `GET /users/me` → `features`)
-- **Client reports:** `POST /client-reports` (público, rate-limited; telemetría de r8-site)
+- **Label features:** `/label-features/...`
 - **Security tests:** `/security/tests/...`
 
 Contrato completo: **r8-api** `docs/MODULES.md` (lectura opcional docentes).
@@ -692,8 +592,9 @@ Contrato completo: **r8-api** `docs/MODULES.md` (lectura opcional docentes).
 
 ---
 
-*Documento sincronizado con r8-api (`MODULES.md` v1.7 + `routes.ts`) y r8-site — 2026-09-24.*
+*Documento sincronizado con r8-api y r8-site — 2026-08-06.*
 
-*2026-08-27 — subset Stage (login + 5 lecturas). 2026-09-24 — altas: `activate-profile`,
-`unsubscribe/token-status`, share de feedback, promo pública, `GET /feedback/geo-density`,
-y `dateFrom`/`dateTo`/`submittedOnly` en `GET /feedback`.*
+*2026-08-27 — alineado contra respuestas reales de Stage para el subset tocado por el batch
+Login + 5 pantallas de lectura: `GET /users/me`, `GET /artists/me`, `GET /feedback/analytics`,
+`GET /promos/for-label`, `GET /feedback/liked-tracks`, `GET /recipient-lists`. Pendiente: auditar
+el resto de las rutas de este documento contra stage real (no se hizo en esta pasada).*

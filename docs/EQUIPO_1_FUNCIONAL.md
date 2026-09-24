@@ -2,16 +2,16 @@
 
 ## Integrantes
 
-| Rol | Nombre | Usuario GitHub |
-|-----|--------|----------------|
-| **Team Lead (TL)** | Galarraga, Ignacio David | David-Galarraga |
-| Integrante | Fuchs, María Yanina | Fuchs-Yani |
-| Integrante | Hauscarriaga, Matías Gabriel | MatiasHauscarriaga |
-| Integrante | Martinez, Cecilia | ceciliamartinez24 |
-| Integrante | Molina Paiva, Sebastián Ismael | ismaelpascal |
-| Integrante | Murillo, Ángel Daniel | AngelMurillo1 |
-| Integrante | Planchón, Tomás Eduardo | PlanchonTomas |
-| Integrante | Zabala, Daniel Esteban | DanielEZabala |
+| Rol | Nombre |
+|-----|--------|
+| **Team Lead (TL)** | Galarraga, Ignacio David |
+| Integrante | Fuchs, María Yanina |
+| Integrante | Hauscarriaga, Matías Gabriel |
+| Integrante | Martinez, Cecilia |
+| Integrante | Molina Paiva, Sebastián Ismael |
+| Integrante | Murillo, Ángel Daniel |
+| Integrante | Planchón, Tomás Eduardo |
+| Integrante | Zabala, Daniel Esteban |
 
 ---
 
@@ -102,7 +102,6 @@ Objetivo: dejar completo el flujo de entrada y el perfil del artista, asegurando
 - Criterio:
   - persiste cambios de texto.
   - subida de imagen completa (presign + upload + confirm).
-- Si la cuenta ya es label y quiere perfil artista (o al revés): `POST /users/me/activate-profile` con `{ "type": "artist" | "label", "name" }` → **201** (mismo shape que `GET /users/me`).
 
 ---
 
@@ -119,48 +118,6 @@ Objetivo: dejar completo el flujo de entrada y el perfil del artista, asegurando
 - Pantallas implementadas con manejo de errores.
 - Pruebas manuales smoke.
 - Nota técnica de endpoints y casos borde.
-
----
-
-## 5. Evaluación de código (borrador)
-
-Corte: **16 sep 2026**. Fuente: PRs y commits en `sedes-karen/r8-mobile` (no es participación ni asistencia). Criterio de tercer año: evidencia de aprendizaje, no listón de Jr.
-
-Niveles: **Sin evidencia** · **En camino** · **Cumple** · **Destaca**.  
-Sin rastro en GitHub, el resto de ejes queda en — (no se evalúa lo que no está).  
-**Rastro:** aparecen PRs o commits tuyos en este repo.  
-**Intención:** se entiende qué quisiste hacer (título, descripción o el propio diff).  
-**DoD (definición de listo):** el recorte cumple lo pedido en este documento (se ve, hay datos o mock, no rompe el flujo).  
-**Claridad:** un tema por PR, se puede revisar, sin ruido (lockfile, archivos de otro recorte).
-
-| Integrante | PRs / commits | Rastro | Intención | DoD | Claridad |
-|------------|---------------|--------|-----------|-----|----------|
-| Galarraga, Ignacio David | 1 merge · 1 cerrado | Cumple | Cumple | Cumple | En camino |
-| Fuchs, María Yanina | 1 abierto | Cumple | Cumple | En camino | En camino |
-| Hauscarriaga, Matías Gabriel | 0 PRs · 1 commit | En camino | En camino | En camino | En camino |
-| Martinez, Cecilia | 1 merge · 1 abierto · 1 cerrado | Cumple | En camino | Cumple | En camino |
-| Molina Paiva, Sebastián Ismael | 3 merge · 2 abiertos · 1 cerrado | Destaca | Cumple | Cumple | En camino |
-| Murillo, Ángel Daniel | 0 | Sin evidencia | — | — | — |
-| Planchón, Tomás Eduardo | 0 | Sin evidencia | — | — | — |
-| Zabala, Daniel Esteban | 0 | Sin evidencia | — | — | — |
-
-### Notas y recomendaciones
-
-**Galarraga, Ignacio David** (`David-Galarraga`) — Avatar mergeado (#9) está bien acotado. El #10 (ErrorMessage) quedó cerrado: o lo reabrís limpio (sin volver a mandar Avatar) o confirmamos que el átomo ya está en `main` por otro lado.
-
-**Fuchs, María Yanina** (`Fuchs-Yani`) — El #47 conecta PasswordReset y avisa las dependencias (#37 y #44): buena intención. No hace falta reenviar los organismos que ya están en esos PRs; cuando mergeen, tu PR puede quedar solo con la pantalla.
-
-**Hauscarriaga, Matías Gabriel** (`MatiasHauscarriaga`) — Hay un commit suelto en `auth/info.tsx` y ningún PR a tu nombre. Abrí un PR aunque sea chico (un átomo o un ajuste de sesión) para que el rastro sea revisable.
-
-**Martinez, Cecilia** (`ceciliamartinez24`) — RegisterForm ya mergeó (#41). El #44 parece el mismo archivo otra vez y el Login (#28) quedó cerrado: unificá. Completá la descripción del PR (qué hace, cómo probarlo).
-
-**Molina Paiva, Sebastián Ismael** (`ismaelpascal`) — El rastro es el más claro del equipo (Button, Input, auth UI). El #38 (`preview.html`) no entra al producto RN: dejalo como referencia fuera del repo. Coordiná con Fuchs y Martinez: hay solapamiento de archivos entre #37, #44 y #47.
-
-**Murillo, Ángel Daniel** (`AngelMurillo1`) — Sin PRs ni commits. Traé un primer PR esta semana aunque sea un átomo o un estado (loading/error); lo vemos en clase.
-
-**Planchón, Tomás Eduardo** (`PlanchonTomas`) — Sin PRs ni commits. Mismo pedido: un PR chico y revisable, no un bloque enorme.
-
-**Zabala, Daniel Esteban** (`DanielEZabala`) — Sin PRs ni commits. Hablemos en clase del recorte (por ejemplo Splash o un estado de Auth) para que aparezca en GitHub.
 
 ---
 
