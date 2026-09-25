@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@expo-google-fonts/ibm-plex-mono": "^0.4.1",
+    "@react-native-vector-icons/fontawesome-free-brands": "^1.1.4",
+    "@react-native-vector-icons/lucide": "^13.1.4",
     "@react-navigation/bottom-tabs": "^7.18.18",
     "@react-navigation/elements": "^2.9.19",
     "@react-navigation/native": "^7.2.5",
@@ -42,5 +44,10 @@
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
     ]
+  },
+  "expo": {
+    "autolinking": {
+      "exclude": ["@react-native-vector-icons/fontawesome-free-brands", "@react-native-vector-icons/lucide"]
+    }
   }
 }
