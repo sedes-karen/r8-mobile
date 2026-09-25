@@ -17,11 +17,11 @@
     "@react-navigation/elements": "^2.9.19",
     "@react-navigation/native": "^7.2.5",
     "@react-navigation/native-stack": "^7.16.0",
-    "expo": "^57.0.0",
+    "expo": "~57.0.25",
     "expo-font": "~57.0.3",
     "expo-modules-core": "~57.0.17",
     "expo-navigation-bar": "~57.0.2",
-    "expo-splash-screen": "~57.0.8",
+    "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -47,7 +47,10 @@
   },
   "expo": {
     "autolinking": {
-      "exclude": ["@react-native-vector-icons/fontawesome-free-brands", "@react-native-vector-icons/lucide"]
+      "exclude": [
+        "@react-native-vector-icons/fontawesome-free-brands",
+        "@react-native-vector-icons/lucide"
+      ]
     }
   }
 }
