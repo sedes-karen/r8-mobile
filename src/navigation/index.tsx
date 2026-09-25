@@ -35,6 +35,8 @@ import { LabelRecipientListsDetailsScreen } from '../screens/Label/RecipientList
 import { LabelRecipientListsEditScreen } from '../screens/Label/RecipientLists/Edit';
 import { LabelRecipientListsFeedbackScreen } from '../screens/Label/RecipientLists/Feedback';
 import { LabelRecipientListsBulkUploadScreen } from '../screens/Label/RecipientLists/BulkUpload';
+import { LucideIcon } from '../components/atoms/LucideIcon';
+import { LucideIconName } from '@react-native-vector-icons/lucide';
 // Fin de las pantallas
 
 // headerShown: false en todos los niveles: con 2-3 navigators nativos anidados (Root > Artist >
@@ -60,6 +62,12 @@ const TAB_BAR_OPTIONS = {
   contentStyle: { backgroundColor: colors.background },
 } as const;
 
+function NavigationIcon(name: string) {
+  return ((props: {focused: boolean, color: string, size: number}) => (
+    <LucideIcon name={name as LucideIconName} color={props.color} style={{fontSize: props.size}} />
+  ))
+}
+
 const AuthStack = createNativeStackNavigator({
   initialRouteName: 'Login',
   screenOptions: COMMON_CONFIG,
@@ -74,28 +82,37 @@ const ArtistStack = createBottomTabNavigator({
   initialRouteName: 'Promos',
   screenOptions: TAB_BAR_OPTIONS,
   screens: {
-    Promos: createNativeStackNavigator({
-      initialRouteName: 'Player',
-      screenOptions: COMMON_CONFIG,
-      screens: {
-        Player: ArtistPromosPlayerScreen,
-        Details: ArtistPromosDetailsScreen,
-        Feedback: ArtistPromosFeedbackScreen,
-        LikedTracks: ArtistPromosLikedTracksScreen,
-      },
-    }),
+    Promos: {
+      options: { tabBarIcon: NavigationIcon('disc-3') },
+      screen: createNativeStackNavigator({
+        initialRouteName: 'Player',
+        screenOptions: COMMON_CONFIG,
+        screens: {
+          Player: ArtistPromosPlayerScreen,
+          Details: ArtistPromosDetailsScreen,
+          Feedback: ArtistPromosFeedbackScreen,
+          LikedTracks: ArtistPromosLikedTracksScreen,
+        },
+      })
+    },
     // Acceso directo además de la ruta anidada de arriba (Promos > LikedTracks): así se puede
     // llegar a Favoritos sin depender de que Player (todavía placeholder, no es de este batch)
     // tenga un link hacia ahí.
-    Favoritos: ArtistPromosLikedTracksScreen,
-    Perfil: createNativeStackNavigator({
-      initialRouteName: 'View',
-      screenOptions: COMMON_CONFIG,
-      screens: {
-        View: ArtistProfileViewScreen,
-        Edit: ArtistProfileEditScreen,
-      },
-    }),
+    Favoritos: {
+      options: {tabBarIcon: NavigationIcon('heart')},
+      screen: ArtistPromosLikedTracksScreen
+    },
+    Perfil: {
+      options: {tabBarIcon: NavigationIcon('user')},
+      screen: createNativeStackNavigator({
+        initialRouteName: 'View',
+        screenOptions: COMMON_CONFIG,
+        screens: {
+          View: ArtistProfileViewScreen,
+          Edit: ArtistProfileEditScreen,
+        },
+      }),
+    }
   }
 } as const);
 
