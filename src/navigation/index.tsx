@@ -83,7 +83,7 @@ const ArtistStack = createBottomTabNavigator({
   screenOptions: TAB_BAR_OPTIONS,
   screens: {
     Promos: {
-      options: { tabBarIcon: NavigationIcon('disc-3') },
+      options: { tabBarIcon: NavigationIcon('mail') },
       screen: createNativeStackNavigator({
         initialRouteName: 'Player',
         screenOptions: COMMON_CONFIG,
@@ -96,8 +96,7 @@ const ArtistStack = createBottomTabNavigator({
       })
     },
     // Acceso directo además de la ruta anidada de arriba (Promos > LikedTracks): así se puede
-    // llegar a Favoritos sin depender de que Player (todavía placeholder, no es de este batch)
-    // tenga un link hacia ahí.
+    // llegar a Favoritos más rápido
     Favoritos: {
       options: {tabBarIcon: NavigationIcon('heart')},
       screen: ArtistPromosLikedTracksScreen
@@ -120,52 +119,70 @@ const LabelStack = createBottomTabNavigator({
   initialRouteName: 'Dashboard',
   screenOptions: TAB_BAR_OPTIONS,
   screens: {
-    Dashboard: LabelDashboardScreen,
-    Analytics: LabelAnalyticsScreen,
+    Dashboard: {
+      options: {tabBarIcon: NavigationIcon('info')},
+      screen: LabelDashboardScreen,
+    },
+    Analytics: {
+      options: {tabBarIcon: NavigationIcon('chart-line')},
+      screen: LabelAnalyticsScreen,
+    },
     // Acceso directo a Releases > Promos > List — más abajo el tab "Releases" también llega
     // acá anidado, pero como Releases en sí sigue siendo placeholder (no es de este batch),
     // conviene un atajo directo para no depender de que alguien navegue Releases > Promos.
-    Promos: LabelReleasesPromosListScreen,
-    Recipients: createNativeStackNavigator({
-      initialRouteName: 'List',
-      screenOptions: COMMON_CONFIG,
-      screens: {
-        List: LabelRecipientListsListScreen,
-        New: LabelRecipientListsNewScreen,
-        Details: LabelRecipientListsDetailsScreen,
-        Edit: LabelRecipientListsEditScreen,
-        Feedback: LabelRecipientListsFeedbackScreen,
-        BulkUpload: LabelRecipientListsBulkUploadScreen,
-      }
-    }),
-    Profile: createNativeStackNavigator({
-      initialRouteName: 'View',
-      screenOptions: COMMON_CONFIG,
-      screens: {
-        View: LabelProfileViewScreen,
-        Edit: LabelProfileEditScreen,
-      },
-    }),
-    Releases: createNativeStackNavigator({
-      initialRouteName: 'List',
-      screenOptions: COMMON_CONFIG,
-      screens: {
-        List: LabelReleasesListScreen,
-        New: LabelReleasesNewScreen,
-        Details: LabelReleasesDetailsScreen,
-        Edit: LabelReleasesEditScreen,
-        Promos: createNativeStackNavigator({
-          initialRouteName: 'List',
-          screenOptions: COMMON_CONFIG,
-          screens: {
-            List: LabelReleasesPromosListScreen,
-            New: LabelReleasesPromosNewScreen,
-            Details: LabelReleasesPromosDetailsScreen,
-            Edit: LabelReleasesPromosEditScreen,
-          },
-        }),
-      }
-    }),
+    Promos: {
+      options: {tabBarIcon: NavigationIcon('mails')},
+      screen: LabelReleasesPromosListScreen,
+    },
+    Recipients: {
+      options: {tabBarIcon: NavigationIcon('contact-round')},
+      screen: createNativeStackNavigator({
+        initialRouteName: 'List',
+        screenOptions: COMMON_CONFIG,
+        screens: {
+          List: LabelRecipientListsListScreen,
+          New: LabelRecipientListsNewScreen,
+          Details: LabelRecipientListsDetailsScreen,
+          Edit: LabelRecipientListsEditScreen,
+          Feedback: LabelRecipientListsFeedbackScreen,
+          BulkUpload: LabelRecipientListsBulkUploadScreen,
+        }
+      })
+    },
+    Releases: {
+      options: {tabBarIcon: NavigationIcon('disc-3')},
+      screen: createNativeStackNavigator({
+        initialRouteName: 'List',
+        screenOptions: COMMON_CONFIG,
+        screens: {
+          List: LabelReleasesListScreen,
+          New: LabelReleasesNewScreen,
+          Details: LabelReleasesDetailsScreen,
+          Edit: LabelReleasesEditScreen,
+          Promos: createNativeStackNavigator({
+            initialRouteName: 'List',
+            screenOptions: COMMON_CONFIG,
+            screens: {
+              List: LabelReleasesPromosListScreen,
+              New: LabelReleasesPromosNewScreen,
+              Details: LabelReleasesPromosDetailsScreen,
+              Edit: LabelReleasesPromosEditScreen,
+            },
+          }),
+        }
+      })
+    },
+    Profile: {
+      options: {tabBarIcon: NavigationIcon('user')},
+      screen: createNativeStackNavigator({
+        initialRouteName: 'View',
+        screenOptions: COMMON_CONFIG,
+        screens: {
+          View: LabelProfileViewScreen,
+          Edit: LabelProfileEditScreen,
+        },
+      }),
+    }
   }
 } as const);
 
