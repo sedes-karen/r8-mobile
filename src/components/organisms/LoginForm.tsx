@@ -14,13 +14,15 @@ type LoginFormProps = {
   onSubmit: () => void;
   loading: boolean;
   error: string | null;
+  emailError: string | null;
+  passwordError: string | null;
 };
 
 /**
  * Organismo de layout — arma el formulario de login a partir de átomos/moléculas.
  * Sin HTTP acá: la screen es quien conecta esto con useLogin (ver ATOMIC_DESIGN.md §3).
  */
-export function LoginForm({ email, password, onChangeEmail, onChangePassword, onSubmit, loading, error }: LoginFormProps) {
+export function LoginForm({ email, password, onChangeEmail, onChangePassword, onSubmit, loading, error, emailError, passwordError }: LoginFormProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   return (
@@ -33,6 +35,7 @@ export function LoginForm({ email, password, onChangeEmail, onChangePassword, on
         autoComplete="email"
         keyboardType="email-address"
         placeholder="tu@email.com"
+        error={emailError ?? undefined}
         editable={!loading}
       />
       <LabeledInput
@@ -43,6 +46,7 @@ export function LoginForm({ email, password, onChangeEmail, onChangePassword, on
         autoComplete="password"
         secureTextEntry={!isPasswordVisible}
         placeholder="••••••••"
+        error={passwordError ?? undefined}
         editable={!loading}
       />
       <Pressable
@@ -64,7 +68,7 @@ export function LoginForm({ email, password, onChangeEmail, onChangePassword, on
         </AppText>
       </Pressable>
       {error ? <ErrorMessage message={error} /> : null}
-      <Button label="Ingresar" onPress={onSubmit} loading={loading} disabled={!email || !password} />
+      <Button label="Ingresar" onPress={onSubmit} loading={loading} />
     </View>
   );
 }
