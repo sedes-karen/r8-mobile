@@ -23,8 +23,8 @@ export function useRegistration() {
         throw new Error('El registro no inició la verificación del correo.');
       }
       return response.email || body.email;
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'No se pudo crear la cuenta.');
+    } catch {
+      setError('No se pudo crear la cuenta.');
       return null;
     } finally {
       setLoading(false);
@@ -42,8 +42,8 @@ export function useRegistration() {
       const session = await establishSession(response.accessToken, role);
       applySession(session.accessToken, session.role, session.user);
       return true;
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'No se pudo verificar el correo.');
+    } catch {
+      setError('No se pudo verificar el correo.');
       return false;
     } finally {
       setLoading(false);
@@ -56,8 +56,8 @@ export function useRegistration() {
     try {
       await resendEmailVerification(email);
       return true;
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'No se pudo reenviar el código.');
+    } catch {
+      setError('No se pudo reenviar el código.');
       return false;
     } finally {
       setLoading(false);

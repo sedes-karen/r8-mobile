@@ -16,10 +16,10 @@ export function usePasswordReset() {
     setSuccessMessage(null);
     try {
       await requestPasswordReset(email);
-      setSuccessMessage('Si existe una cuenta con ese correo, enviamos un código de verificación.');
+      setSuccessMessage('Si el correo está registrado, enviamos un código.');
       return true;
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'No se pudo solicitar el código.');
+    } catch {
+      setError('No se pudo solicitar el código.');
       return false;
     } finally {
       setLoading(false);
@@ -32,10 +32,10 @@ export function usePasswordReset() {
     setSuccessMessage(null);
     try {
       await resetPassword(body);
-      setSuccessMessage('La contraseña se actualizó correctamente. Ya podés iniciar sesión.');
+      setSuccessMessage('Contraseña actualizada.');
       return true;
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'No se pudo restablecer la contraseña.');
+    } catch {
+      setError('No se pudo cambiar la contraseña.');
       return false;
     } finally {
       setLoading(false);
