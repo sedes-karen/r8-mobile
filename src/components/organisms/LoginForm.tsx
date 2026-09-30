@@ -4,6 +4,7 @@ import { colors, spacing } from '../../constants/design';
 import { AppText } from '../atoms/AppText';
 import { Button } from '../atoms/Button';
 import { ErrorMessage } from '../atoms/ErrorMessage';
+import { LinkButton } from '../atoms/LinkButton';
 import { LabeledInput } from '../molecules/LabeledInput';
 
 type LoginFormProps = {
@@ -69,6 +70,38 @@ export function LoginForm({ email, password, onChangeEmail, onChangePassword, on
       </Pressable>
       {error ? <ErrorMessage message={error} /> : null}
       <Button label="Ingresar" onPress={onSubmit} loading={loading} />
+      <View style={{ alignItems: 'center', gap: spacing.xs }}>
+        <LinkButton
+          screen="PasswordReset"
+          params={{}}
+          style={({ pressed }) => ({
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 44,
+            paddingHorizontal: spacing.sm,
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <AppText variant="body-sm" color={colors.primary.default}>
+            ¿Olvidaste tu contraseña?
+          </AppText>
+        </LinkButton>
+        <LinkButton
+          screen="SignUp"
+          params={{}}
+          style={({ pressed }) => ({
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 44,
+            paddingHorizontal: spacing.sm,
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <AppText variant="body-sm" color={colors.primary.default}>
+            Crear una cuenta
+          </AppText>
+        </LinkButton>
+      </View>
     </View>
   );
 }
