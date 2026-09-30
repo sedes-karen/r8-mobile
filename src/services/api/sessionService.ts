@@ -40,11 +40,14 @@ export function resolveNavigationRole(
  * Guarda el accessToken y revalida la sesión contra GET /users/me.
  * Si el token no es aceptado, limpia el store y propaga el error.
  */
-export async function establishSession(accessToken: string): Promise<EstablishedSession> {
+export async function establishSession(
+  accessToken: string,
+  preferredRole?: AppRole,
+): Promise<EstablishedSession> {
   setAccessToken(accessToken);
   try {
     const user = await fetchUsersMe();
-    const role = resolveNavigationRole(user);
+    const role = resolveNavigationRole(user, preferredRole);
     return { accessToken: getAccessToken() ?? accessToken, role, user };
   } catch (error) {
     clearAccessToken();

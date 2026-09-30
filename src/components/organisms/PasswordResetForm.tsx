@@ -44,7 +44,7 @@ export function PasswordResetForm({
             ) : null}
 
             <Button
-                label="Enviar enlace de recuperación"
+                label="Enviar código de recuperación"
                 onPress={onSubmit}
                 loading={loading}
                 disabled={!email || loading}
