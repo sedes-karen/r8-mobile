@@ -10,7 +10,7 @@ type LoadingBlockProps = {
  * que cada una arme el suyo. */
 export function LoadingBlock({ label }: LoadingBlockProps) {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.sm }}>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.sm, backgroundColor: colors.background }}>
       <ActivityIndicator color={colors.primary.default} />
       {label ? (
         <AppText variant="body-sm" color={colors.onSurface.variant}>
