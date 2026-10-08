@@ -1,45 +1,16 @@
-import { apiClient } from "./apiClient";
-import { readApiError } from "./apiErrors";
-import type { LabelProfile } from "../../types/label";
+import { apiClient } from './apiClient';
+import { readApiError } from './apiErrors';
+import type { LabelProfile } from '../../types/label';
 
-export type UpdateLabelProfileInput= Partial<Pick<
-        LabelProfile,
-        |"name"
-        | "description"
-        |"instagramUrl"
-        |"soundcloudUrl"
-        |"bandcampUrl"
-        |"twitterUrl"
-    >
->;
-
-export type LabelPorfileImageResponse={
-    url:string|null;
-    expiresAt?:string;  
-};
-
-export type CreateLabelImageUploadInput={
-    contentType:string;
-};
-
-export type CreateLabelImageUploadResponse={
-    uploadUrl:string;
-    expiresIn:number;
-    path:string;
+/**
+ * GET /labels/me — requiere sesión label (Bearer). Ya trae profileImageUrl resuelto, no
+ * hace falta el call aparte a /labels/me/profile-image para una pantalla de solo lectura.
+ * TODO(Equipo 2 / Juani): ampliar acá el PUT /labels/me y el flujo profile-image (subida) en edición.
+ */
+export async function fetchLabelMe(): Promise<LabelProfile> {
+  const response = await apiClient('/labels/me');
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo cargar el perfil del label');
+  }
+  return response.json() as Promise<LabelProfile>;
 }
-
-export type ConfirmLabelImageInput={
-    path:string;
-}
-
-/* GET , para obtener el perfil del sello*/
-
-export async function getLabelProfile(): Promise<LabelProfile> {
-        const response= await apiClient("/labels/me");
-
-        if(!response.ok){
-            throw await readApiError(response, " No se ha podido cargar el perfil del sello ")
-        };
-
-        return response.json() as Promise<LabelProfile>;
-    }
