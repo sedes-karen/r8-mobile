@@ -1,5 +1,4 @@
 import { apiConfig } from './config';
-import { readApiError } from './apiErrors';
 
 export type LoginBody = {
   email: string;
@@ -34,7 +33,7 @@ export async function login(body: LoginBody): Promise<LoginResponse> {
   });
 
   if (!response.ok) {
-    throw await readApiError(response, 'Login failed');
+    throw new Error('No se pudo iniciar sesión. Intentá nuevamente.');
   }
 
   const data = (await response.json()) as LoginResponse;
