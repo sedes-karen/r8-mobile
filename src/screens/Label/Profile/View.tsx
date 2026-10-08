@@ -1,5 +1,7 @@
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { colors, spacing } from '../../../constants/design';
 import { AppText } from '../../../components/atoms/AppText';
 import { Avatar } from '../../../components/atoms/Avatar';
@@ -10,10 +12,20 @@ import { ProfileField } from '../../../components/molecules/ProfileField';
 import { useLabelProfile } from '../../../features/label/useLabelProfile';
 import { useAuthActions } from '../../../features/auth/info';
 
-/** Perfil del label — solo lectura. La edición (incluida imagen y password) queda en Edit.tsx (TL). */
+type LabelProfileStackParamList = {
+  View: undefined;
+  Edit: undefined;
+};
+
+/**
+ * Placeholder — la pantalla real (lectura/edición de perfil label) sigue siendo trabajo del
+ * Equipo 2. Acá ya está coordinado el botón "Editar" que navega al formulario de edición
+ * (LabelProfileEditScreen).
+ */
 export function LabelProfileViewScreen() {
   const state = useLabelProfile();
   const { logout } = useAuthActions();
+  const navigation = useNavigation<NativeStackNavigationProp<LabelProfileStackParamList>>();
 
   if (state.status === 'loading') {
     return <LoadingBlock label="Cargando perfil..." />;

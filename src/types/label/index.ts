@@ -6,14 +6,24 @@
 export type LabelProfile = {
   id: string;
   userId: string;
-  name: string;
+  name: string | null;
   description: string | null;
   profileImagePath: string | null;
   profileImageUrl: string | null;
-  instagramUrl: string | null;
-  soundcloudUrl: string | null;
   bandcampUrl: string | null;
+  soundcloudUrl: string | null;
+  instagramUrl: string | null;
   twitterUrl: string | null;
   createdAt: string;
   updatedAt: string;
+};
+
+//Input del PUT /labels/me (UpdateLabelDto), todos opcionales
+export type UpdateLabelProfileInput = {
+  name?: string;
+  description?: string;
+  bandcampUrl?: string;
+  soundcloudUrl?: string;
+  instagramUrl?: string;
+  twitterUrl?: string;
 };
