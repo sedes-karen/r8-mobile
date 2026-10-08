@@ -13,7 +13,7 @@ export type UpdateLabelProfileInput= Partial<Pick<
     >
 >;
 
-export type LabelPorfileImageResponse={
+export type LabelProfileImageResponse={
     url:string|null;
     expiresAt?:string;  
 };
@@ -34,7 +34,7 @@ export type ConfirmLabelImageInput={
 
 /* GET , para obtener el perfil del sello*/
 
-export async function getLabelProfile(): Promise<LabelProfile> {
+export async function fetchLabelMe(): Promise<LabelProfile> {
         const response= await apiClient("/labels/me");
 
         if(!response.ok){
@@ -43,3 +43,80 @@ export async function getLabelProfile(): Promise<LabelProfile> {
 
         return response.json() as Promise<LabelProfile>;
     }
+
+/* Actualizar el perfil  */
+export async function updateLabelProfile(
+    data: UpdateLabelProfileInput
+): Promise<LabelProfile> {
+    const response = await apiClient("/labels/me", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        throw await readApiError(
+            response,
+            "No se ha podido actualizar el perfil del sello"
+        );
+    }
+
+    return response.json() as Promise<LabelProfile>;
+}
+
+/* URL de la imagen actual */
+export async function getLabelProfileImage(): Promise<LabelProfileImageResponse> {
+    const response = await apiClient("/labels/me/profile-image");
+
+    if (!response.ok) {
+        throw await readApiError(
+            response,
+            "No se ha podido obtener la imagen del sello"
+        );
+    }
+
+    return response.json() as Promise<LabelProfileImageResponse>;
+}
+
+/* Pedir una URL temporal para subir una imagen */
+export async function createLabelImageUpload(
+    data: CreateLabelImageUploadInput
+): Promise<CreateLabelImageUploadResponse> {
+    const response = await apiClient("/labels/me/profile-image", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        throw await readApiError(
+            response,
+            "No se ha podido preparar la subida de la imagen"
+        );
+    }
+
+    return response.json() as Promise<CreateLabelImageUploadResponse>;
+}
+
+export async function confirmLabelImage(
+    data: ConfirmLabelImageInput
+): Promise<void> {
+    const response = await apiClient("/labels/me/profile-image/confirm", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        throw await readApiError(
+            response,
+            "No se ha podido confirmar la imagen del sello"
+        );
+    }
+}
