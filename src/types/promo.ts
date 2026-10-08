@@ -1,9 +1,16 @@
+
 /**
  * Ítem de la bandeja del receptor/artista (resumen `GET /promos/inbox`).
- * Solo se tipa lo que consume la pantalla Player de promos (ver
- * docs/DTOs_Y_CUERPOS_HTTP.md §6 → PromoInboxItemDto).
+ * Solo se tipa lo que consume la pantalla Player de promos.
  */
-export type PromoStatus = 'DRAFT' | 'SCHEDULED' | 'SENDING' | 'SENT' | 'CANCELLED' | 'FAILED' | 'EXPIRED';
+export type PromoStatus =
+  | 'DRAFT'
+  | 'SCHEDULED'
+  | 'SENDING'
+  | 'SENT'
+  | 'CANCELLED'
+  | 'FAILED'
+  | 'EXPIRED';
 
 export type PromoInboxItem = {
   id: string;
