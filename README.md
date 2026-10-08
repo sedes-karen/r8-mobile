@@ -47,11 +47,6 @@ git --version
 ### macOS (recomendado para iOS)
 
 - Xcode (para simulador y/o builds).
-- (Opcional) Watchman:
-
-```bash
-brew install watchman
-```
 
 ### Android (simulador)
 

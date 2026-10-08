@@ -1,7 +1,7 @@
 /**
- * Respuesta de GET /labels/me — Label primario (camelCase en la respuesta, ver
- * docs/DTOs_Y_CUERPOS_HTTP.md §3). Stub inicial: lo definir en detalle quien lo tenga
- * asignado; acá ya está el shape que consume Edit/View.
+ * Respuesta real de GET /labels/me — verificado contra stage (ver
+ * docs/DTOs_Y_CUERPOS_HTTP.md §3 y dto de GET /users/me.labels[0]).
+ * CamelCase, no confundir con UpdateLabelDto de request (PUT /labels/me).
  */
 export type LabelProfile = {
   id: string;

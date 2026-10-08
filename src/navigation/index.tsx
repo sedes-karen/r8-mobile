@@ -42,7 +42,8 @@ import { LabelRecipientListsBulkUploadScreen } from '../screens/Label/RecipientL
 // siguiente (se ve como una lista "Artist / Promos / Player" en vez de un solo header). Cada
 // screen de este batch ya trae su propio título (AppText variant="headline-lg"), así que el
 // header nativo queda redundante — lo apagamos acá en vez de pantalla por pantalla.
-const NO_HEADER = { headerShown: false } as const;
+// También incluye el fondo oscuro
+const COMMON_CONFIG = { headerShown: false, contentStyle: { backgroundColor: colors.background } } as const;
 
 // Tab bar mínima para poder navegar entre pantallas dentro de un rol — hasta este batch no
 // existía ninguna forma de llegar a nada más allá de la screen inicial de cada stack (sin tabs
@@ -50,16 +51,18 @@ const NO_HEADER = { headerShown: false } as const;
 // docs/screens.md § "Navegación" para Fase 3+ (Artist: Promos/Profile; Label: Dashboard/
 // Releases/Lists), adelantada acá solo para que este batch se pueda probar — no reemplaza el
 // rediseño de navegación real que hagan los equipos más adelante.
+// También incluye el fondo oscuro
 const TAB_BAR_OPTIONS = {
   headerShown: false,
   tabBarActiveTintColor: colors.primary.default,
   tabBarInactiveTintColor: colors.onSurface.variant,
   tabBarStyle: { backgroundColor: colors.surface.containerLowest, borderTopColor: colors.surface.border },
+  contentStyle: { backgroundColor: colors.background },
 } as const;
 
 const AuthStack = createNativeStackNavigator({
   initialRouteName: 'Login',
-  screenOptions: NO_HEADER,
+  screenOptions: COMMON_CONFIG,
   screens: {
     Login: AuthLoginScreen,
     SignUp: AuthSignUpScreen,
@@ -73,7 +76,7 @@ const ArtistStack = createBottomTabNavigator({
   screens: {
     Promos: createNativeStackNavigator({
       initialRouteName: 'Player',
-      screenOptions: NO_HEADER,
+      screenOptions: COMMON_CONFIG,
       screens: {
         Player: ArtistPromosPlayerScreen,
         Details: ArtistPromosDetailsScreen,
@@ -87,7 +90,7 @@ const ArtistStack = createBottomTabNavigator({
     Favoritos: ArtistPromosLikedTracksScreen,
     Perfil: createNativeStackNavigator({
       initialRouteName: 'View',
-      screenOptions: NO_HEADER,
+      screenOptions: COMMON_CONFIG,
       screens: {
         View: ArtistProfileViewScreen,
         Edit: ArtistProfileEditScreen,
@@ -108,7 +111,7 @@ const LabelStack = createBottomTabNavigator({
     Promos: LabelReleasesPromosListScreen,
     Recipients: createNativeStackNavigator({
       initialRouteName: 'List',
-      screenOptions: NO_HEADER,
+      screenOptions: COMMON_CONFIG,
       screens: {
         List: LabelRecipientListsListScreen,
         New: LabelRecipientListsNewScreen,
@@ -120,7 +123,7 @@ const LabelStack = createBottomTabNavigator({
     }),
     Profile: createNativeStackNavigator({
       initialRouteName: 'View',
-      screenOptions: NO_HEADER,
+      screenOptions: COMMON_CONFIG,
       screens: {
         View: LabelProfileViewScreen,
         Edit: LabelProfileEditScreen,
@@ -128,7 +131,7 @@ const LabelStack = createBottomTabNavigator({
     }),
     Releases: createNativeStackNavigator({
       initialRouteName: 'List',
-      screenOptions: NO_HEADER,
+      screenOptions: COMMON_CONFIG,
       screens: {
         List: LabelReleasesListScreen,
         New: LabelReleasesNewScreen,
@@ -136,7 +139,7 @@ const LabelStack = createBottomTabNavigator({
         Edit: LabelReleasesEditScreen,
         Promos: createNativeStackNavigator({
           initialRouteName: 'List',
-          screenOptions: NO_HEADER,
+          screenOptions: COMMON_CONFIG,
           screens: {
             List: LabelReleasesPromosListScreen,
             New: LabelReleasesPromosNewScreen,
@@ -150,7 +153,7 @@ const LabelStack = createBottomTabNavigator({
 } as const);
 
 const RootStack = createNativeStackNavigator({
-  screenOptions: NO_HEADER,
+  screenOptions: COMMON_CONFIG,
   screens: {
     Auth: {
       screen: AuthStack,
