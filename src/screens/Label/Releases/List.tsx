@@ -1,8 +1,8 @@
 import { ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../../../constants/design';
+import { borderRadius, colors, spacing } from '../../../constants/design';
 import { AppText } from '../../../components/atoms/AppText';
-import { Button } from '../../../components/atoms/Button';
+import { LinkButton } from '../../../components/atoms/LinkButton';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { EmptyState } from '../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../components/molecules/ErrorState';
@@ -34,7 +34,22 @@ export function LabelReleasesListScreen() {
           <ReleasesListContent releases={releases} />
         )}
 
-        <Button label="Nuevo release" variant="secondary" disabled onPress={() => {}} />
+        <LinkButton
+          screen="New"
+          params={{}}
+          style={({ pressed }) => ({
+            backgroundColor: colors.surface.containerHigh,
+            opacity: pressed ? 0.7 : 1,
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.lg,
+            borderRadius: borderRadius.full,
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 44,
+          })}
+        >
+          <AppText variant="title-md">Nuevo release</AppText>
+        </LinkButton>
       </ScrollView>
     </SafeAreaView>
   );
