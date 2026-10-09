@@ -1,5 +1,7 @@
+import { useCallback, useRef } from 'react';
 import { ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { borderRadius, colors, spacing } from '../../../constants/design';
 import { AppText } from '../../../components/atoms/AppText';
 import { LinkButton } from '../../../components/atoms/LinkButton';
@@ -12,6 +14,20 @@ import { useReleases } from '../../../features/releases/useReleases';
 /** Releases del label — solo lectura. */
 export function LabelReleasesListScreen() {
   const state = useReleases();
+  const { reload } = state;
+
+  // Al volver de "Nuevo release" la lista tiene que reflejar el alta; el primer foco se saltea
+  // porque useReleases ya hace la carga inicial al montar.
+  const isFirstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFocus.current) {
+        isFirstFocus.current = false;
+        return;
+      }
+      reload();
+    }, [reload]),
+  );
 
   if (state.status === 'loading') {
     return <LoadingBlock label="Cargando releases..." />;
