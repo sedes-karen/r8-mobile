@@ -47,7 +47,7 @@ export function TrackStatsRow({
           {track.title}
         </AppText>
         <AppText variant="body-sm" color={colors.onSurface.variant}>
-          {formatDuration(track.duration)}
+          {formatDuration(track.duration ?? null)}
         </AppText>
       </View>
 
