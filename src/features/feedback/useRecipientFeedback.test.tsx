@@ -40,6 +40,7 @@ const RELEASE: ReleaseDetail = {
   id: 'release-1',
   title: 'Rpruebas Test Release',
   artist: 'Rpruebas Artist',
+  status: 'CREATED',
   catalogNumber: null,
   releaseDate: '1970-01-01',
   type: 'EP',
