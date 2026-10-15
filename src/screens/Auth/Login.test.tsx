@@ -4,6 +4,12 @@ import * as useLoginModule from '../../features/auth/useLogin';
 
 jest.mock('../../features/auth/useLogin');
 
+// LoginForm usa LinkButton (useLinkProps), que necesita un NavigationContainer; acá solo se
+// prueba el formulario, así que el link se reemplaza por sus hijos (mismo criterio que Player.test).
+jest.mock('../../components/atoms/LinkButton', () => ({
+  LinkButton: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 function mockUseLogin(overrides: Partial<ReturnType<typeof useLoginModule.useLogin>>) {
   jest.spyOn(useLoginModule, 'useLogin').mockReturnValue({
     submit: jest.fn(),

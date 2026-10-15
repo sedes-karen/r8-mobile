@@ -1,7 +1,10 @@
-import { View } from 'react-native';
-import { spacing } from '../../constants/design';
+import { useState } from 'react';
+import { Pressable, View } from 'react-native';
+import { colors, spacing } from '../../constants/design';
+import { AppText } from '../atoms/AppText';
 import { Button } from '../atoms/Button';
 import { ErrorMessage } from '../atoms/ErrorMessage';
+import { LinkButton } from '../atoms/LinkButton';
 import { LabeledInput } from '../molecules/LabeledInput';
 
 type LoginFormProps = {
@@ -12,13 +15,17 @@ type LoginFormProps = {
   onSubmit: () => void;
   loading: boolean;
   error: string | null;
+  emailError: string | null;
+  passwordError: string | null;
 };
 
 /**
  * Organismo de layout — arma el formulario de login a partir de átomos/moléculas.
  * Sin HTTP acá: la screen es quien conecta esto con useLogin (ver ATOMIC_DESIGN.md §3).
  */
-export function LoginForm({ email, password, onChangeEmail, onChangePassword, onSubmit, loading, error }: LoginFormProps) {
+export function LoginForm({ email, password, onChangeEmail, onChangePassword, onSubmit, loading, error, emailError, passwordError }: LoginFormProps) {
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
   return (
     <View style={{ gap: spacing.md }}>
       <LabeledInput
@@ -29,6 +36,7 @@ export function LoginForm({ email, password, onChangeEmail, onChangePassword, on
         autoComplete="email"
         keyboardType="email-address"
         placeholder="tu@email.com"
+        error={emailError ?? undefined}
         editable={!loading}
       />
       <LabeledInput
@@ -37,12 +45,63 @@ export function LoginForm({ email, password, onChangeEmail, onChangePassword, on
         onChangeText={onChangePassword}
         autoCapitalize="none"
         autoComplete="password"
-        secureTextEntry
+        secureTextEntry={!isPasswordVisible}
         placeholder="••••••••"
+        error={passwordError ?? undefined}
         editable={!loading}
       />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+        accessibilityHint={isPasswordVisible ? 'Oculta los caracteres de la contraseña' : 'Muestra los caracteres de la contraseña'}
+        disabled={loading}
+        onPress={() => setIsPasswordVisible((isVisible) => !isVisible)}
+        style={({ pressed }) => ({
+          alignSelf: 'flex-end',
+          justifyContent: 'center',
+          minHeight: 44,
+          paddingVertical: spacing.xs,
+          opacity: pressed || loading ? 0.6 : 1,
+        })}
+      >
+        <AppText variant="body-sm" color={colors.primary.default}>
+          {isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+        </AppText>
+      </Pressable>
       {error ? <ErrorMessage message={error} /> : null}
-      <Button label="Ingresar" onPress={onSubmit} loading={loading} disabled={!email || !password} />
+      <Button label="Ingresar" onPress={onSubmit} loading={loading} />
+      <View style={{ alignItems: 'center', gap: spacing.xs }}>
+        <LinkButton
+          screen="PasswordReset"
+          params={{}}
+          style={({ pressed }) => ({
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 44,
+            paddingHorizontal: spacing.sm,
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <AppText variant="body-sm" color={colors.primary.default}>
+            ¿Olvidaste tu contraseña?
+          </AppText>
+        </LinkButton>
+        <LinkButton
+          screen="SignUp"
+          params={{}}
+          style={({ pressed }) => ({
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 44,
+            paddingHorizontal: spacing.sm,
+            opacity: pressed ? 0.6 : 1,
+          })}
+        >
+          <AppText variant="body-sm" color={colors.primary.default}>
+            Crear una cuenta
+          </AppText>
+        </LinkButton>
+      </View>
     </View>
   );
 }
