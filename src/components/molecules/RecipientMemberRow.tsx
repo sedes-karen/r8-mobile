@@ -2,10 +2,13 @@ import { View } from 'react-native';
 import { colors, spacing } from '../../constants/design';
 import { AppText } from '../atoms/AppText';
 import { Badge } from '../atoms/Badge';
+import { Button } from '../atoms/Button';
 import type { RecipientListMember } from '../../types/recipients';
 
 type RecipientMemberRowProps = {
   member: RecipientListMember;
+  onRemove?: () => void;
+  isRemoving?: boolean;
 };
 
 // La API solo devolvió 'VALID' en stage y no hay enum documentado, así que cualquier otro valor
@@ -16,7 +19,7 @@ const VALID_MAIL_STATUS = 'VALID';
  * Fila de un destinatario dentro de una lista.
  * No confundir con RecipientListRow, que representa una lista entera en el índice.
  */
-export function RecipientMemberRow({ member }: RecipientMemberRowProps) {
+export function RecipientMemberRow({ member, onRemove, isRemoving = false }: RecipientMemberRowProps) {
   const hasValidMail = member.status === VALID_MAIL_STATUS;
   // Un display_name vacío (CSV sin columna de nombre) se trata igual que ausente: el email pasa a
   // ser el título en vez de dejar la fila sin texto visible.
@@ -25,23 +28,38 @@ export function RecipientMemberRow({ member }: RecipientMemberRowProps) {
   return (
     <View
       style={{
-        gap: spacing.xs,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         paddingVertical: spacing.sm,
         borderBottomWidth: 1,
         borderBottomColor: colors.surface.border,
       }}
     >
-      <AppText variant="body-lg" numberOfLines={1}>
-        {displayName ?? member.email}
-      </AppText>
-
-      {displayName ? (
-        <AppText variant="body-sm" color={colors.onSurface.variant} numberOfLines={1}>
-          {member.email}
+      <View style={{ flex: 1, gap: spacing.xs, marginRight: onRemove ? spacing.sm : 0 }}>
+        <AppText variant="body-lg" numberOfLines={1}>
+          {displayName ?? member.email}
         </AppText>
-      ) : null}
 
-      {hasValidMail ? null : <Badge label="Email inválido" />}
+        {displayName ? (
+          <AppText variant="body-sm" color={colors.onSurface.variant} numberOfLines={1}>
+            {member.email}
+          </AppText>
+        ) : null}
+
+        {hasValidMail ? null : <Badge label="Email inválido" />}
+      </View>
+
+      {onRemove ? (
+        <Button
+          label="Quitar"
+          variant="secondary"
+          loading={isRemoving}
+          disabled={isRemoving}
+          onPress={onRemove}
+          accessibilityLabel={`Quitar a ${displayName ?? member.email} de la lista`}
+        />
+      ) : null}
     </View>
   );
 }
