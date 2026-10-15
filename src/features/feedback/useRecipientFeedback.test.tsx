@@ -78,8 +78,8 @@ function wrapper({ children }: { children: ReactNode }) {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.spyOn(promosApi, 'getPromoDetail').mockResolvedValue(PROMO);
-  jest.spyOn(releasesApi, 'fetchReleaseDetail').mockResolvedValue(RELEASE);
+  jest.spyOn(promosApi, 'getPromoDetails').mockResolvedValue(PROMO);
+  jest.spyOn(releasesApi, 'fetchReleaseById').mockResolvedValue(RELEASE);
   jest.spyOn(feedbackApi, 'ensureFeedback').mockResolvedValue(feedbackWith(null));
   jest.spyOn(feedbackApi, 'addTrackPlayStats').mockResolvedValue(feedbackWith(null));
   jest.spyOn(feedbackApi, 'markTracksDownloaded').mockResolvedValue([]);
@@ -94,8 +94,8 @@ describe('useRecipientFeedback', () => {
 
     await waitFor(() => expect(result.current.status).toBe('success'));
 
-    expect(promosApi.getPromoDetail).toHaveBeenCalledWith('promo-1');
-    expect(releasesApi.fetchReleaseDetail).toHaveBeenCalledWith('release-1');
+    expect(promosApi.getPromoDetails).toHaveBeenCalledWith('promo-1');
+    expect(releasesApi.fetchReleaseById).toHaveBeenCalledWith('release-1');
     expect(feedbackApi.ensureFeedback).toHaveBeenCalledWith('release-1', 'user-1');
     expect(result.current.tracks).toHaveLength(2);
   });
@@ -169,7 +169,7 @@ describe('useRecipientFeedback', () => {
   });
 
   it('propaga el error cuando falla la carga de la promo', async () => {
-    jest.spyOn(promosApi, 'getPromoDetail').mockRejectedValue(new Error('No se pudo cargar la promo'));
+    jest.spyOn(promosApi, 'getPromoDetails').mockRejectedValue(new Error('No se pudo cargar la promo'));
 
     const { result } = await renderHook(() => useRecipientFeedback('promo-1'), { wrapper });
 

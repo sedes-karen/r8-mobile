@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthUser } from '../auth/info';
 import { fetchUsersMe } from '../../services/api/userApi';
-import { getPromoDetail } from '../../services/api/promos';
-import { fetchReleaseDetail } from '../../services/api/releasesApi';
+import { getPromoDetails } from '../../services/api/promos';
+import { fetchReleaseById } from '../../services/api/releasesApi';
 import { addTrackPlayStats, ensureFeedback, markTracksDownloaded } from '../../services/api/feedbackApi';
 import { setTrackLiked } from '../../services/api/likedTracksApi';
 import { useAsyncData, type AsyncState } from '../../hooks/useAsyncData';
@@ -83,8 +83,8 @@ export function useRecipientFeedback(promoId: string | undefined) {
       throw new Error('No se recibió el identificador de la promo');
     }
 
-    const promo = await getPromoDetail(promoId);
-    const release = await fetchReleaseDetail(promo.release.id);
+    const promo = await getPromoDetails(promoId);
+    const release = await fetchReleaseById(promo.release.id);
     const userId = await resolveUserId();
     const feedback = await ensureFeedback(release.id, userId);
 
