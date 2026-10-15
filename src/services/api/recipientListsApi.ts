@@ -4,6 +4,7 @@ import type {
   RecipientListDetail,
   RecipientListMember,
   RecipientListsIndexResponse,
+  RecipientListSummary,
 } from '../../types/recipients';
 
 /** GET /recipient-lists — requiere sesión label (Bearer). Sin paginado en este batch. */
@@ -34,4 +35,24 @@ export async function fetchRecipientListMembers(listId: string): Promise<Recipie
     throw await readApiError(response, 'No se pudieron cargar los destinatarios de la lista');
   }
   return response.json() as Promise<RecipientListMember[]>;
+}
+
+/** POST /recipient-lists — crea una lista vacía. */
+export async function createRecipientList(
+  name: string,
+): Promise<RecipientListSummary> {
+  const response = await apiClient('/recipient-lists', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    throw await readApiError(
+      response,
+      'No se pudo crear la lista',
+    );
+  }
+
+  return response.json() as Promise<RecipientListSummary>;
 }
