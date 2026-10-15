@@ -9,10 +9,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { StaticScreenProps } from '@react-navigation/native';
-import { colors, spacing } from '../../../constants/design';
+import { borderRadius, colors, spacing } from '../../../constants/design';
 import { AppText } from '../../../components/atoms/AppText';
 import { Button } from '../../../components/atoms/Button';
 import { ErrorMessage } from '../../../components/atoms/ErrorMessage';
+import { LinkButton } from '../../../components/atoms/LinkButton';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { EmptyState } from '../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../components/molecules/ErrorState';
@@ -194,7 +195,24 @@ export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsD
             disabled={isRemoving}
             onPress={handleOpenAddModal}
           />
-          <Button label="Editar lista" variant="secondary" disabled onPress={() => {}} />
+          {/* LinkButton con el mismo aspecto que un Button secondary: un Button adentro de un
+              LinkButton no sirve porque el Pressable de adentro se queda con el toque. */}
+          <LinkButton
+            screen="Edit"
+            params={{ listId, name: list.name }}
+            style={({ pressed }) => ({
+              backgroundColor: colors.surface.containerHigh,
+              opacity: pressed ? 0.6 : 1,
+              paddingVertical: spacing.sm,
+              paddingHorizontal: spacing.lg,
+              borderRadius: borderRadius.full,
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 44,
+            })}
+          >
+            <AppText variant="title-md">Editar lista</AppText>
+          </LinkButton>
           <Button label="Cargar CSV" variant="secondary" disabled onPress={() => {}} />
         </View>
       </ScrollView>
