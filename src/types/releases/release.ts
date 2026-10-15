@@ -13,3 +13,24 @@ export type ReleasesListResponse = {
   hostingQuota: { used: number };
   releaseAudioQuota?: { maxBytes: number };
 };
+
+/**
+ * Track de un release con el audio resuelto. Solo aparece en `GET /releases/:releaseId`
+ * (`tracks[].audioUrl`), no en los listados ni en el release slim de `GET /promos/:id`.
+ */
+export type ReleaseTrack = {
+  id: string;
+  title: string;
+  trackNumber: number;
+  duration?: number | null; // segundos
+  audioUrl?: string | null;
+};
+
+/** GET /releases/:releaseId — detalle de un release (lectura). */
+export type ReleaseDetail = ReleaseListItem & {
+  status: string; // 'DRAFT' | 'CREATED' según la API
+  catalogNumber?: string | null;
+  notes?: string | null;
+  coverUrl?: string | null;
+  tracks: ReleaseTrack[];
+};
