@@ -24,7 +24,7 @@ function formatDuration(seconds: number | null): string {
 }
 
 /**
- * Fila de una pista con su consumo: cuántos plays lleva, si leaggusta al receptor y si la
+ * Fila de una pista con su consumo: cuántos plays lleva, si le gusta al receptor y si la
  * descargó, más los botones que disparan cada PATCH. Es la versión "de carga" de `TrackRow` (esa
  * es solo para quitar de favoritos), porque acá hay tres acciones y dos contadores que mostrar.
  *
