@@ -54,3 +54,23 @@ export type RecipientListMember = {
   status: string;
   display_name: string | null;
 };
+
+/**
+ * Contacto del pool general del sello — `GET /recipient-lists/recipients`.
+ * La doc (DTOs_Y_CUERPOS_HTTP.md §7) indica que devuelve un array plano `Recipient[]`.
+ */
+export type RecipientPoolItem = {
+  id: string;
+  email: string;
+  display_name?: string | null;
+  status?: string;
+};
+
+/**
+ * Respuesta de `POST /recipient-lists/:listId/recipients` (200 OK).
+ * Documentado en docs/DTOs_Y_CUERPOS_HTTP.md §7 como `{ "recipientId": string }`.
+ */
+export type AddRecipientResponse = {
+  recipientId: string;
+};
+

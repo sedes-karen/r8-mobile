@@ -41,8 +41,8 @@ export function LabelProfileViewScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
         <View style={{ alignItems: 'center', gap: spacing.sm }}>
-          <Avatar imageUrl={label.profileImageUrl} fallbackName={label.name} size={96} />
-          <AppText variant="headline-lg">{label.name}</AppText>
+          <Avatar imageUrl={label.profileImageUrl} fallbackName={label.name ?? ''} size={96} />
+          <AppText variant="headline-lg">{label.name ?? 'Sin nombre'}</AppText>
         </View>
 
         <View style={{ gap: spacing.md }}>
