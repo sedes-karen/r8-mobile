@@ -6,6 +6,16 @@ import type { LabelProfile } from '../../../types/label';
 
 jest.mock('../../../features/label/useLabelProfile');
 jest.mock('../../../features/auth/info');
+jest.mock('../../../components/atoms/LinkButton', () => {
+  const React = require('react');
+  const { Pressable } = require('react-native');
+
+  return {
+    LinkButton: ({ children, style }: any) =>
+      React.createElement(Pressable, { style }, children),
+  };
+});
+
 
 const LABEL: LabelProfile = {
   id: 'label-1',
