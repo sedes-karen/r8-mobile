@@ -1,7 +1,7 @@
 # Referencia HTTP — alineación con r8-site y r8-api
 
-**Versión:** 2026-08-06  
-**Sincronizado con:** `r8-api` (`docs/MODULES.md` v1.6 + auth PIN / DNS `r8.audio`) y cliente web `r8-site` (`src/api/`).  
+**Versión:** 2026-09-24  
+**Sincronizado con:** `r8-api` (`docs/MODULES.md` v1.7, rutas Express actuales) y cliente web `r8-site` (`src/api/`).  
 **Propósito:** La app móvil debe ofrecer las **mismas capacidades funcionales** que **r8-site** (`src/app/router.tsx`), consumiendo **r8-api** (Express). El contrato vigente usa **prefijos por dominio**; el **tenant (label / usuario)** lo resuelve el **JWT** (y en flujos de destinatario, `?token=`), no rutas anidadas del estilo `/labels/:labelId/releases`.
 
 **DTOs, cuerpos JSON y enums por endpoint:** [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md).
@@ -76,10 +76,12 @@ Auth, usuarios, labels, artists, releases (+ artwork/tracks), promos (label + in
 
 | Prefijo | Motivo |
 |---------|--------|
-| `GET /promos` (sin sufijo) | Solo **admin** global |
-| `/admins`, `/features`, `/system-settings` | Panel admin |
+| `GET /promos` (sin sufijo), `GET /promos/schedules`, `GET /promos/:id/deliveries` | Solo **admin** |
+| `GET /releases/admin`, `GET /labels/admin`, `GET /feedback/admin` | Listados admin cross-tenant |
+| `/admins`, `/admins/auth`, `/features`, `/system-settings` | Panel admin |
 | `/promo-codes` | Campañas Bandcamp (módulo aparte en r8-site) |
-| `/label-features` | Features por label (admin/ops) |
+| `/label-features` | Features por label; el mapa activo ya viene en `GET /users/me` → `features` |
+| `POST /client-reports` | Telemetría de r8-site (público, rate-limited); no es flujo de equipos 1–5 |
 | `/security/tests` | Tests de seguridad internos |
 | `POST /mails-queue/webhook` | Webhook SendGrid (servidor) |
 | Rutas legacy `PUT /releases/label/:labelId/...` | Sustituidas por `/releases/:releaseId/...` |
@@ -119,7 +121,9 @@ Auth, usuarios, labels, artists, releases (+ artwork/tracks), promos (label + in
 | `POST` | `/users/password/request-reset` | — | Paso 1 reset por email |
 | `POST` | `/users/password/reset` | — | Paso 2 reset (PIN + nueva contraseña); devuelve `accessToken` |
 | `GET` | `/users/me/recipient` | Bearer | Vista recipient del usuario |
+| `POST` | `/users/me/activate-profile` | Bearer | Activar el **segundo** perfil (`label` o `artist`) sobre la misma cuenta → **201** + `GET /users/me` |
 | `GET` | `/users/recipient-by-token?token=` | — | Contacto promo por token (sin Bearer) |
+| `GET` | `/users/unsubscribe/token-status` | Bearer (artist/label/guest) | **204** si el token/sesión de baja es válido; **no** aplica el unsubscribe |
 | `POST` | `/users/unsubscribe` | Bearer (roles artist/label/guest) | Baja de mailing del usuario/contacto |
 | `POST` | `/users/resubscribe` | Bearer (roles artist/label/guest) | Reactivar mailing |
 
@@ -179,10 +183,11 @@ React Native **no** persiste cookies httpOnly como el navegador. El curso adopta
 
 | Método | Ruta | Notas |
 |--------|------|--------|
-| `GET` | `/releases/all` | Público: releases en estado **CREATED** |
 | `GET` | `/releases` | Lista del label del JWT → `{ releases, hostingQuota: { used }, releaseAudioQuota }` — `used` = conteo de releases con audio, no bytes |
 | `POST` | `/releases` | Crear (label asignado por servidor) |
+| `GET` | `/releases/shared/:token` | **Público.** Dashboard de feedback compartido (JWT de `GET .../share-token`) |
 | `GET` | `/releases/:releaseId` | Detalle; `?token=` para receptor; incluye `coverUrl`, `tracks[].audioUrl` |
+| `GET` | `/releases/:releaseId/share-token` | Label dueño → `{ token }` para armar el enlace público |
 | `PATCH` | `/releases/:releaseId` | Actualizar |
 | `DELETE` | `/releases/:releaseId` | Hard delete; **409** si hay promos activas |
 | `PUT` | `/releases/:releaseId/artwork` | Presign artwork |
@@ -203,6 +208,8 @@ React Native **no** persiste cookies httpOnly como el navegador. El curso adopta
 | `GET` | `/promos/inbox` | Artist/guest | Inbox receptor; `?token=`, `?no-feedback-only=true` |
 | `GET` | `/promos/inbox/pending-count` | Artist/guest | `{ count }` |
 | `GET` | `/promos/:id` | Artist/label/guest | Detalle; `?token=`; payload **slim** (sin tracks en detalle estándar — ver DTOs) |
+| `GET` | `/promos/:id/public` | — | Vista pública (gate nombre/email); sin sesión |
+| `POST` | `/promos/:id/public-access` | Artist/label/guest | Asociar al visitante del enlace público (`{ ok: true }`); rate-limited |
 | `POST` | `/promos` | Label* | Crear — *la ruta admite `artist`, pero el servidor exige ownership del label del release → artista sin label propio recibe **403** |
 | `PATCH` | `/promos/:id` | Label | Editar (típicamente solo `DRAFT`) |
 | `DELETE` | `/promos/:id` | Label | Hard delete; solo `DRAFT` o `SCHEDULED` con ventana |
@@ -235,9 +242,10 @@ Tenant por JWT; **sin** `:labelId` en la URL.
 
 | Método | Ruta | Notas |
 |--------|------|--------|
-| `GET` | `/feedback` | `{ feedback, total }` + filtros query (**sin** `dateFrom`/`dateTo`) |
+| `GET` | `/feedback` | `{ feedback, total }` + filtros query; `dateFrom`+`dateTo` **juntos** acotan `createdAt`; `submittedOnly=true` opcional |
 | `GET` | `/feedback/pending-count` | `{ count }` |
 | `GET` | `/feedback/analytics` | `?dateFrom=&dateTo=` (**ambos** para rango) |
+| `GET` | `/feedback/geo-density` | Buckets de mapa (país/ciudad + contadores) |
 | `GET` | `/feedback/:feedbackId` | Detalle — label dueño del release o **propio recipient** |
 | `GET` | `/feedback/liked-tracks` | Favoritos agrupados por release; `?token=` |
 | `PATCH` | `/feedback/track-stats/downloaded` | Marcar descargas en lote (receptor) |
@@ -264,15 +272,15 @@ Tenant por JWT; **sin** `:labelId` en la URL.
 | `/login`, `/register` (+ paso PIN), `/password-reset` | Sección Auth (register → verify-email) |
 | `/dashboard` | `GET /users/me`, `GET /promos/for-label?labelId=<id>` |
 | `/profile` (label) | `GET /users/me`, `GET /labels/me`, `GET /labels/me/profile-image`, `PUT /labels/me` |
-| `/analytics` | `GET /releases`, `GET /feedback`, `GET /feedback/analytics?dateFrom=&dateTo=` |
+| `/analytics` | `GET /releases`, `GET /feedback` (filtros; `dateFrom`+`dateTo` opcionales), `GET /feedback/analytics?dateFrom=&dateTo=`, `GET /feedback/geo-density` (mapa) |
 | `/promo` (lista) | `GET /promos/for-label?labelId=` |
 | `/promo/:id`, create/edit | `GET/PATCH/POST /promos/...`, `POST .../send`, `POST .../cancel` |
 | `/releases`, `/releases/:id` | `GET /releases`, `GET /releases/:releaseId` |
 | `/releases/create`, edit | `POST/PATCH /releases`, presign artwork/tracks |
 | `/audience-lists`, `/:id` | `GET /recipient-lists`, `GET /recipient-lists/:listId`, `GET .../recipients`, `GET /recipient-lists/recipients` |
 | `/recipients` | Pool: `GET /recipient-lists/recipients`; alta: `POST /recipient-lists/:listId/recipients` o `.../batch` |
-| `/feedback` | `GET /feedback`, `GET /feedback/pending-count`, `GET /feedback/analytics` |
-| `/promos-player` | `GET /promos/inbox`, `GET /promos/inbox/pending-count`, `GET /promos/:id?token=` |
+| `/feedback` | `GET /feedback`, `GET /feedback/pending-count`, `GET /feedback/analytics`, `GET /feedback/geo-density` |
+| `/promos-player` | `GET /promos/inbox`, `GET /promos/inbox/pending-count`, `GET /promos/:id?token=` (o `GET /promos/:id/public` + `POST .../public-access` si el visitante entra por enlace público) |
 | `/promo/:id/feedback` | `GET /promos/:id`, `POST/PATCH /releases/:releaseId/feedback/...`, track-stats |
 | Perfil artista (player) | `GET/PUT /artists/me`, imagen `/artists/me/profile-image` |
 | Liked tracks | `GET /feedback/liked-tracks?token=` |
@@ -306,13 +314,24 @@ Tenant por JWT; **sin** `:labelId` en la URL.
 
 **Dos listados distintos:** `GET /feedback` (label) devuelve entidades `Feedback` crudas; `GET /releases/:releaseId/feedback` devuelve `{ summary, total, items }` con `recipient` anidado por ítem.
 
-### 5.4 Recipient lists y carga masiva
+### 5.4 Dashboard de feedback compartido (label)
+
+1. Label dueño: `GET /releases/:releaseId/share-token` → `{ token }`.
+2. Quien abre el enlace (sin login): `GET /releases/shared/:token` → release slim + analytics + hasta 200 feedbacks. El JWT se verifica con `ignoreExpiration: true`.
+
+### 5.5 Promo pública (sin `?token=` de contacto)
+
+1. `GET /promos/:id/public` — datos del release para el gate (sin sesión).
+2. Tras identificar al visitante (sesión artist/label/guest): `POST /promos/:id/public-access` → `{ ok: true }`.
+3. El inbox clásico con JWT de contacto sigue siendo `?token=` + `GET /promos/inbox`.
+
+### 5.6 Recipient lists y carga masiva
 
 - La pantalla mobile **BulkUpload** debe **parsear el archivo en el dispositivo** y llamar a **`POST /recipient-lists/:listId/recipients/batch`**.
 - Enviar **exactamente uno** de: `recipientIds[]` **o** `recipients: [{ email, display_name? }]`.
 - Respuesta batch: `{ added: [{ recipientId, email }], skipped: number }`.
 
-### 5.5 Errores frecuentes
+### 5.7 Errores frecuentes
 
 | Código | Situación |
 |--------|-----------|
@@ -332,4 +351,4 @@ Tenant por JWT; **sin** `:labelId` en la URL.
 
 ---
 
-*Documento sincronizado con r8-api y r8-site — 2026-08-06.*
+*Documento sincronizado con r8-api (`MODULES.md` v1.7 + `routes.ts`) y r8-site — 2026-09-24.*

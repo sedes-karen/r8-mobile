@@ -2,16 +2,16 @@
 
 ## Integrantes
 
-| Rol | Nombre |
-|-----|--------|
-| **Team Lead (TL)** | Etchepare, Mateo |
-| Integrante | Cardinaux, Daiana Elizabeth |
-| Integrante | Denoni, Verónica Camila |
-| Integrante | Galo Roig, Damián |
-| Integrante | Montechiarini, Juan Ignacio |
-| Integrante | Peralta, Maximiliano Agustín |
-| Integrante | Rodríguez, Enzo Alejandro |
-| Integrante | Romani, Nicolás |
+| Rol | Nombre | Usuario GitHub |
+|-----|--------|----------------|
+| **Team Lead (TL)** | Etchepare, Mateo | MateoEtchepareDev |
+| Integrante | Cardinaux, Daiana Elizabeth | DaianaCardinaux |
+| Integrante | Denoni, Verónica Camila | Camiladenoni |
+| Integrante | Galo Roig, Damián | galoroig |
+| Integrante | Montechiarini, Juan Ignacio | Juanimonte10 |
+| Integrante | Peralta, Maximiliano Agustín | Maximiliano-A-P |
+| Integrante | Rodríguez, Enzo Alejandro | Enzorod20 |
+| Integrante | Romani, Nicolás | NicopRomani |
 
 ---
 
@@ -60,8 +60,9 @@ Objetivo: priorizar visualización de datos de label antes de CRUD avanzado.
 - Requests:
   - `GET /users/me`
   - `GET /releases` — catálogo del tenant (equivalente a “releases del label”; **no** existe `GET /labels/:labelId/releases` en el flujo web actual)
-  - `GET /feedback` — respuesta **`{ feedback, total }`**; filtros en query según DTOs §8.1 (**sin** `dateFrom`/`dateTo` — usar `GET /feedback/analytics` para rango)
-  - (Opcional) `GET /feedback/analytics?dateFrom=...&dateTo=...` — **incluir ambas** fechas si se quiere un rango explícito (mismo criterio que la API)
+  - `GET /feedback` — respuesta **`{ feedback, total }`**; filtros en query según DTOs §8.1 (`dateFrom`+`dateTo` **juntos** acotan `createdAt`; `submittedOnly=true` opcional)
+  - (Opcional) `GET /feedback/analytics?dateFrom=...&dateTo=...` — **incluir ambas** fechas si se quiere un rango explícito
+  - (Opcional) `GET /feedback/geo-density` — buckets de mapa (país/ciudad + plays/feedback/downloads/supports/likes)
 - Criterio:
   - selector de release + métricas base visibles (la pantalla web cruza releases + feedback en cliente).
 
@@ -95,6 +96,48 @@ Objetivo: priorizar visualización de datos de label antes de CRUD avanzado.
 - Pantallas de lectura estables primero.
 - CRUD parcial luego, sin romper lectura.
 - Documentación de campos editables/no editables.
+
+---
+
+## 5. Evaluación de código (borrador)
+
+Corte: **16 sep 2026**. Fuente: PRs y commits en `sedes-karen/r8-mobile` (no es participación ni asistencia). Criterio de tercer año: evidencia de aprendizaje, no listón de Jr.
+
+Niveles: **Sin evidencia** · **En camino** · **Cumple** · **Destaca**.  
+Sin rastro en GitHub, el resto de ejes queda en — (no se evalúa lo que no está).  
+**Rastro:** aparecen PRs o commits tuyos en este repo.  
+**Intención:** se entiende qué quisiste hacer (título, descripción o el propio diff).  
+**DoD (definición de listo):** el recorte cumple lo pedido en este documento (se ve, hay datos o mock, no rompe el flujo).  
+**Claridad:** un tema por PR, se puede revisar, sin ruido (lockfile, archivos de otro recorte).
+
+| Integrante | PRs / commits | Rastro | Intención | DoD | Claridad |
+|------------|---------------|--------|-----------|-----|----------|
+| Etchepare, Mateo | 1 abierto | Cumple | Cumple | Cumple | En camino |
+| Cardinaux, Daiana Elizabeth | 1 abierto | Cumple | En camino | En camino | Cumple |
+| Denoni, Verónica Camila | 0 | Sin evidencia | — | — | — |
+| Galo Roig, Damián | 1 abierto | Cumple | Cumple | En camino | Cumple |
+| Montechiarini, Juan Ignacio | 0 | Sin evidencia | — | — | — |
+| Peralta, Maximiliano Agustín | 1 abierto · 3 cerrados | Cumple | En camino | En camino | En camino |
+| Rodríguez, Enzo Alejandro | 0 | Sin evidencia | — | — | — |
+| Romani, Nicolás | 0 | Sin evidencia | — | — | — |
+
+### Notas y recomendaciones
+
+**Etchepare, Mateo** (`MateoEtchepareDev`) — El #29 es un slice de verdad (perfil label lectura/edición + imagen + password). Sumá descripción al PR (qué endpoints, cómo probarlo) y evitá mandar `package-lock` si no hace falta. Está un paso más adelante que el orden “lectura primero”: está bien si la lectura queda usable.
+
+**Cardinaux, Daiana Elizabeth** (`DaianaCardinaux`) — Dashboard en un solo archivo (#32): alcance correcto. Falta descripción y, para el DoD, estados loading/error/vacío + datos (mock o API). Coordiná con Peralta: ustedes dos están tocando Dashboard/Card.
+
+**Denoni, Verónica Camila** (`Camiladenoni`) — Sin PRs ni commits. Un primer PR de lectura (por ejemplo Analytics o un estado vacío del dashboard) alcanza para aparecer en el rastro.
+
+**Galo Roig, Damián** (`galoroig`) — Hook + tipos de perfil (#31) bien acotados. El siguiente paso es engancharlo a `Label/Profile/View` para que deje de ser solo capa de datos. Cuidado: Etchepare también toca `useLabelProfile` en el #29.
+
+**Montechiarini, Juan Ignacio** (`Juanimonte10`) — Sin PRs ni commits. Hablemos en clase de un recorte (Analytics lectura o edición de un campo del perfil).
+
+**Peralta, Maximiliano Agustín** (`Maximiliano-A-P`) — Hay rastro de sobra (dashboard + Card), pero tres PRs cerrados y el #48 otra vez con Card. Cerrá el ciclo: un PR vigente, descripción, y que Card no duplique `ListRowCard` si ya está en `main`.
+
+**Rodríguez, Enzo Alejandro** (`Enzorod20`) — Sin PRs ni commits. Primer PR esta semana, aunque sea un átomo o el cableado de un hook que ya exista.
+
+**Romani, Nicolás** (`NicopRomani`) — Sin PRs ni commits. Mismo pedido: un cambio chico y con PR, no trabajo solo local.
 
 ---
 

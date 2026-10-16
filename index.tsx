@@ -1,5 +1,4 @@
 import { registerRootComponent } from 'expo';
-import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Navigation } from './src/navigation/index';
@@ -17,7 +16,6 @@ function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
       <Navigation />
     </SafeAreaProvider>
   );

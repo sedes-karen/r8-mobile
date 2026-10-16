@@ -2,15 +2,15 @@
 
 ## Integrantes
 
-| Rol | Nombre |
-|-----|--------|
-| **Team Lead (TL)** | Crimella, Mateo Nahuel |
-| Integrante | Bianchi, Germán |
-| Integrante | Gutiérrez, Magalí |
-| Integrante | Mai, Jeremías |
-| Integrante | Peverelli, Enzo |
-| Integrante | Rivero, Lautaro |
-| Integrante | Romero, Giuliana |
+| Rol | Nombre | Usuario GitHub |
+|-----|--------|----------------|
+| **Team Lead (TL)** | Crimella, Mateo Nahuel | Bowuigi |
+| Integrante | Bianchi, Germán | G3rm41n |
+| Integrante | Gutiérrez, Magalí | Magali0404 |
+| Integrante | Mai, Jeremías | Maisena1 |
+| Integrante | Peverelli, Enzo | EnzoPeverelli |
+| Integrante | Rivero, Lautaro | PulS3G |
+| Integrante | Romero, Giuliana | giulianaromero22 |
 
 ---
 
@@ -41,6 +41,7 @@ Objetivo: consolidar experiencia core del usuario receptor/artista.
   - `GET /promos/inbox` (query `token=` si el usuario entra sin sesión Bearer)
   - `GET /promos/inbox/pending-count`
   - `GET /promos/:id` — detalle con release embebido (puede venir **slim**, sin URLs de audio)
+  - Enlace público (sin JWT de contacto): `GET /promos/:id/public` y, con sesión artist/label/guest, `POST /promos/:id/public-access` → `{ ok: true }`
   - **Reproductor:** tomar `release.id` del detalle de promo y llamar **`GET /releases/:releaseId?token=`** para `tracks[].audioUrl` y `coverUrl` (no asumir que un solo GET de promo alcanza)
 - Criterio:
   - lista inbox, detalle promo y reproducción básica funcionando.
@@ -94,6 +95,45 @@ Objetivo: consolidar experiencia core del usuario receptor/artista.
 - Flujo de reproducción + favoritos operativo.
 - Captura de feedback sin regresiones.
 - Casos de prueba de token y sin token.
+
+---
+
+## 5. Evaluación de código (borrador)
+
+Corte: **16 sep 2026**. Fuente: PRs y commits en `sedes-karen/r8-mobile` (no es participación ni asistencia). Criterio de tercer año: evidencia de aprendizaje, no listón de Jr.
+
+Niveles: **Sin evidencia** · **En camino** · **Cumple** · **Destaca**.  
+Sin rastro en GitHub, el resto de ejes queda en — (no se evalúa lo que no está).  
+**Rastro:** aparecen PRs o commits tuyos en este repo.  
+**Intención:** se entiende qué quisiste hacer (título, descripción o el propio diff).  
+**DoD (definición de listo):** el recorte cumple lo pedido en este documento (se ve, hay datos o mock, no rompe el flujo).  
+**Claridad:** un tema por PR, se puede revisar, sin ruido (lockfile, archivos de otro recorte).
+
+| Integrante | PRs / commits | Rastro | Intención | DoD | Claridad |
+|------------|---------------|--------|-----------|-----|----------|
+| Crimella, Mateo Nahuel | 5 merge | Destaca | Destaca | Cumple | Destaca |
+| Bianchi, Germán | 0 | Sin evidencia | — | — | — |
+| Gutiérrez, Magalí | 1 abierto · 1 cerrado (draft) | En camino | En camino | En camino | En camino |
+| Mai, Jeremías | 2 merge | Destaca | Cumple | Cumple | Cumple |
+| Peverelli, Enzo | 1 abierto · 1 cerrado | Cumple | Cumple | Cumple | En camino |
+| Rivero, Lautaro | 1 abierto | Cumple | Destaca | Cumple | Destaca |
+| Romero, Giuliana | 0 | Sin evidencia | — | — | — |
+
+### Notas y recomendaciones
+
+**Crimella, Mateo Nahuel** (`Bowuigi`) — La navegación y la estructura del repo (#2, #1) son el piso de todos los equipos. Seguí empujando el dominio del Equipo 3 (player/feedback) para que el DoD no quede solo en infra.
+
+**Bianchi, Germán** (`G3rm41n`) — Sin PRs ni commits. Un primer PR (Liked Tracks lectura o un estado vacío del inbox) para aparecer en el rastro; lo vemos en clase.
+
+**Gutiérrez, Magalí** (`Magali0404`) — El draft #6 fue un cambio trivial en `App.tsx`. El #51 (tests del Player) va para el lado correcto: mantenelo verde y alineado a la pantalla actual, no a un mock viejo.
+
+**Mai, Jeremías** (`Maisena1`) — Player mergeado (#21 y #30) con tipos y `promos` API: es el recorte del equipo. El siguiente salto del DoD es loading/error/vacío e inbox real, no otra pantalla nueva.
+
+**Peverelli, Enzo** (`EnzoPeverelli`) — Detalle de promo (#40) es el recorte justo. El #39 parece el mismo trabajo cerrado: dejá uno solo. Aparecés también en el #45 del Equipo 5: si fue colaboración, mencionálo en el PR; si fue un commit cruzado, separemos repos mentales por equipo.
+
+**Rivero, Lautaro** (`PulS3G`) — El #43 (hook `useArtistPromos` + tests) es el tipo de PR que queremos: un tema, explicación y prueba. Mergealo cuando Player establezca la base, para no pelear diffs.
+
+**Romero, Giuliana** (`giulianaromero22`) — Sin PRs ni commits. Recorte posible: formulario de feedback (lectura o el PATCH) en un PR chico.
 
 ---
 
