@@ -55,6 +55,7 @@ export function LabelReleasesPromosDetailsScreen({ route }: LabelReleasesPromosD
   }
 
   const promo = state.data;
+  const recipientLists = promo.recipientLists ?? [];
   const scheduledOn = formatDate(promo.scheduledAt);
   const sentOn = formatDate(promo.sentAt);
   const releaseSubtitle = [promo.release.artistName, promo.release.labelName].filter(Boolean).join(' · ');
@@ -99,10 +100,10 @@ export function LabelReleasesPromosDetailsScreen({ route }: LabelReleasesPromosD
               Incluye la base curada de R8.
             </AppText>
           ) : null}
-          {promo.recipientLists.length === 0 ? (
+          {recipientLists.length === 0 ? (
             <EmptyState message="Esta promo no tiene listas de destinatarios." />
           ) : (
-            promo.recipientLists.map((list) => (
+            recipientLists.map((list) => (
               <View
                 key={list.id}
                 style={{

@@ -1,5 +1,5 @@
 export type {
-  PromoDetail,
+  PromoDetailForLabel,
   PromoForLabelItem,
   PromoRecipientList,
   PromoStatus,

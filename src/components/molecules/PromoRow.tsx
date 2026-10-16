@@ -1,7 +1,6 @@
 import { View } from 'react-native';
 import { colors, spacing } from '../../constants/design';
 import { AppText } from '../atoms/AppText';
-import { LinkButton } from '../atoms/LinkButton';
 import type { PromoForLabelItem } from '../../types/promos';
 
 const STATUS_LABEL: Record<PromoForLabelItem['status'], string> = {
@@ -18,28 +17,20 @@ type PromoRowProps = {
   promo: PromoForLabelItem;
 };
 
-/**
- * Fila de una promo en el listado del label: release, estado, y fecha de envío/programación.
- * Al tocarla abre el detalle de la promo (navegación declarativa, igual que en el Player artist).
- */
+/** Fila de una promo en el listado del label: release, estado, y fecha de envío/programación. */
 export function PromoRow({ promo }: PromoRowProps) {
   const date = promo.sentAt ?? promo.scheduledAt;
 
   return (
-    <LinkButton
-      screen="Details"
-      params={{ promoId: promo.id }}
-      style={({ pressed }) => [
-        {
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingVertical: spacing.sm,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.surface.border,
-        },
-        pressed && { backgroundColor: colors.surface.containerHigh },
-      ]}
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.surface.border,
+      }}
     >
       <View style={{ flex: 1 }}>
         <AppText variant="body-lg" numberOfLines={1}>
@@ -53,6 +44,6 @@ export function PromoRow({ promo }: PromoRowProps) {
       <AppText variant="body-sm" color={colors.onSurface.variant}>
         {promo.feedbackCount} feedback
       </AppText>
-    </LinkButton>
+    </View>
   );
 }
