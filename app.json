@@ -37,7 +37,9 @@
       ["expo-status-bar", {
         "hidden": false,
         "style": "dark"
-      }]
+      }],
+      "@react-native-vector-icons/fontawesome-free-brands",
+      "@react-native-vector-icons/lucide"
     ]
   }
 }

@@ -1,26 +1,33 @@
-import { ScrollView, View } from 'react-native';
+import { useCallback, useRef } from 'react';
+import { ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../../../constants/design';
+import { useFocusEffect } from '@react-navigation/native';
+import { borderRadius, colors, spacing } from '../../../constants/design';
 import { AppText } from '../../../components/atoms/AppText';
-import { Button } from '../../../components/atoms/Button';
+import { LinkButton } from '../../../components/atoms/LinkButton';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { EmptyState } from '../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../components/molecules/ErrorState';
+import { ReleasesListContent } from '../../../components/organisms/ReleasesListContent';
 import { useReleases } from '../../../features/releases/useReleases';
-import type { ReleaseType } from '../../../types/releases';
 
-const TYPE_LABEL: Record<ReleaseType, string> = {
-  EP: 'EP',
-  VA: 'VA',
-  ALBUM: 'Álbum',
-};
-
-/**
- * Releases del label — solo lectura. Las filas usan un layout provisorio inline; el Equipo 4 las
- * reemplaza por sus dos componentes dedicados en el siguiente paso.
- */
+/** Releases del label — solo lectura. */
 export function LabelReleasesListScreen() {
   const state = useReleases();
+  const { reload } = state;
+
+  // Al volver de "Nuevo release" la lista tiene que reflejar el alta; el primer foco se saltea
+  // porque useReleases ya hace la carga inicial al montar.
+  const isFirstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFocus.current) {
+        isFirstFocus.current = false;
+        return;
+      }
+      reload();
+    }, [reload]),
+  );
 
   if (state.status === 'loading') {
     return <LoadingBlock label="Cargando releases..." />;
@@ -40,36 +47,25 @@ export function LabelReleasesListScreen() {
         {releases.length === 0 ? (
           <EmptyState message="Todavía no creaste ningún release." />
         ) : (
-          releases.map((release) => (
-            <View
-              key={release.id}
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                paddingVertical: spacing.sm,
-                borderBottomWidth: 1,
-                borderBottomColor: colors.surface.border,
-              }}
-            >
-              <View style={{ flex: 1 }}>
-                <AppText variant="body-lg" numberOfLines={1}>
-                  {release.title}
-                </AppText>
-                <AppText variant="body-sm" color={colors.onSurface.variant}>
-                  {release.artist}
-                </AppText>
-              </View>
-              <AppText variant="body-sm" color={colors.onSurface.variant}>
-                {TYPE_LABEL[release.type]}
-                {' · '}
-                {new Date(release.releaseDate).toLocaleDateString()}
-              </AppText>
-            </View>
-          ))
+          <ReleasesListContent releases={releases} />
         )}
 
-        <Button label="Nuevo release" variant="secondary" disabled onPress={() => {}} />
+        <LinkButton
+          screen="New"
+          params={{}}
+          style={({ pressed }) => ({
+            backgroundColor: colors.surface.containerHigh,
+            opacity: pressed ? 0.7 : 1,
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.lg,
+            borderRadius: borderRadius.full,
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 44,
+          })}
+        >
+          <AppText variant="title-md">Nuevo release</AppText>
+        </LinkButton>
       </ScrollView>
     </SafeAreaView>
   );

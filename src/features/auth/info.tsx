@@ -1,7 +1,8 @@
-import { createContext, PropsWithChildren, useContext, useState } from 'react';
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react';
 import type { AppRole, UserMeProfile } from '../../types/auth';
-import { clearSession } from '../../services/api/sessionService';
+import { clearSession, revalidateStoredSession } from '../../services/api/sessionService';
 import { setAccessToken } from '../../services/api/tokenStore';
+import { LoadingBlock } from '../../components/atoms/LoadingBlock';
 
 export type AuthInfo =
   | { isAuthenticated: false }
@@ -36,6 +37,33 @@ function useAuthContext(): AuthContextValue {
 export function AuthInfoProvider(props: PropsWithChildren) {
   const [authInfo, setAuthInfo] = useState<AuthInfo>(defaultAuthInfo);
   const [user, setUser] = useState<UserMeProfile | null>(null);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function restoreSession() {
+      try {
+        const session = await revalidateStoredSession();
+        if (session && isActive) {
+          setAccessToken(session.accessToken);
+          setUser(session.user);
+          setAuthInfo({ isAuthenticated: true, role: session.role });
+        }
+      } catch {
+        clearSession();
+      } finally {
+        if (isActive) {
+          setIsBootstrapping(false);
+        }
+      }
+    }
+
+    void restoreSession();
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const loginDev = (role: AppRole) => {
     setUser(null);
@@ -55,9 +83,13 @@ export function AuthInfoProvider(props: PropsWithChildren) {
   };
 
   return (
-    <AuthContext.Provider value={{ authInfo, user, loginDev, logout, applySession }}>
-      {props.children}
-    </AuthContext.Provider>
+    isBootstrapping ? (
+      <LoadingBlock label="Verificando sesión..." />
+    ) : (
+      <AuthContext.Provider value={{ authInfo, user, loginDev, logout, applySession }}>
+        {props.children}
+      </AuthContext.Provider>
+    )
   );
 }
 
