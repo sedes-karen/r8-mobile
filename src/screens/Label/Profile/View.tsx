@@ -11,11 +11,6 @@ import { ProfileField } from '../../../components/molecules/ProfileField';
 import { useLabelProfile } from '../../../features/label/useLabelProfile';
 import { useAuthActions } from '../../../features/auth/info';
 
-/**
- * Placeholder — la pantalla real (lectura/edición de perfil label) sigue siendo trabajo del
- * Equipo 2. Acá ya está coordinado el botón "Editar" que navega al formulario de edición
- * (LabelProfileEditScreen).
- */
 export function LabelProfileViewScreen() {
   const state = useLabelProfile();
   const { logout } = useAuthActions();
@@ -53,7 +48,7 @@ export function LabelProfileViewScreen() {
               alignSelf: 'center',
               borderWidth: 2,
               borderColor: colors.surface.containerHigh,
-              borderRadius: 20,
+              borderRadius: borderRadius.full,
               paddingVertical: spacing.sm,
               paddingHorizontal: spacing.xl,
               alignItems: 'center',
