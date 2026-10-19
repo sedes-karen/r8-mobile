@@ -24,15 +24,16 @@ export async function fetchArtistMe(): Promise<ArtistProfile> {
 export async function updateArtistProfile(
   input: UpdateArtistProfileInput,
 ): Promise<ArtistProfile> {
-  const body: Record<string, string> = {};
-  if (input.firstName !== undefined) body.first_name = input.firstName;
-  if (input.lastName !== undefined) body.last_name = input.lastName;
-  if (input.artistName !== undefined) body.artist_name = input.artistName;
-  if (input.bio !== undefined) body.bio = input.bio;
-  if (input.instagramUrl !== undefined) body.instagramUrl = input.instagramUrl;
-  if (input.soundcloudUrl !== undefined) body.soundcloudUrl = input.soundcloudUrl;
-  if (input.bandcampUrl !== undefined) body.bandcampUrl = input.bandcampUrl;
-  if (input.twitterUrl !== undefined) body.twitterUrl = input.twitterUrl;
+  const body = {
+  first_name: input.firstName,
+  last_name: input.lastName,
+  artist_name: input.artistName,
+  bio: input.bio,
+  instagramUrl: input.instagramUrl,
+  soundcloudUrl: input.soundcloudUrl,
+  bandcampUrl: input.bandcampUrl,
+  twitterUrl: input.twitterUrl,
+};
 
   const response = await apiClient('/artists/me', {
     method: 'PUT',
