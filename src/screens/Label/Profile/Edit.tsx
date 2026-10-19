@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { colors, spacing } from '../../../constants/design';
@@ -10,6 +10,7 @@ import { ErrorMessage } from '../../../components/atoms/ErrorMessage';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { LabeledInput } from '../../../components/molecules/LabeledInput';
+import { SuccessNotice } from '../../../components/molecules/SuccessNotice';
 import { useLabelProfile } from '../../../features/label/useLabelProfile';
 import { useUpdateLabelProfile } from '../../../features/label/useUpdateLabelProfile';
 import { useLabelImage } from '../../../features/label/useLabelImage';
@@ -39,6 +40,7 @@ export function LabelProfileEditScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [profileSaved, setProfileSaved] = useState(false);
   const [passwordErrorVisible, setPasswordErrorVisible] = useState<string | null>(null);
+  const [imageSaved, setImageSaved] = useState(false);
 
   if (profile.status === 'loading') {
     return <LoadingBlock label="Cargando perfil..." />;
@@ -70,9 +72,11 @@ export function LabelProfileEditScreen() {
     });
     if (result.canceled) return;
     const asset = result.assets[0];
+    setImageSaved(false);
     const ok = await uploadImage(asset.uri, asset.mimeType ?? 'image/jpeg');
     if (ok) {
       setImageUrl(asset.uri);
+      setImageSaved(true);
     }
   };
 
@@ -88,7 +92,9 @@ export function LabelProfileEditScreen() {
     }
     const ok = await changePassword(currentPassword, newPassword);
     if (ok) {
-      logout();
+      Alert.alert('Contraseña actualizada', 'Iniciá sesión nuevamente', [
+        { text: 'OK', onPress: logout },
+      ]);
     }
   };
 
@@ -119,6 +125,7 @@ export function LabelProfileEditScreen() {
             <Button label="Cambiar imagen" variant="secondary" onPress={handlePickImage} loading={uploading} />
           </View>
           {uploadError ? <ErrorMessage message={uploadError} /> : null}
+          {imageSaved ? <SuccessNotice title="Imagen actualizada" /> : null}
         </View>
 
         {/* Cambio de contraseña */}
