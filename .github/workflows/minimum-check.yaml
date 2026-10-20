@@ -1,0 +1,58 @@
+name: Verificación mínima
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'preview.html'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'preview.html'
+
+env:
+  # Node 26.x (current), npm 11.x
+  NODE_VERSION: 26
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # `actions/setup-node` tiene cache pero es menos efectivo en nuestro caso porque solo toma `~/.npm`,
+      #   por lo que `npm ci` se ejecuta igual, lo que toma más segundos de lo necesario (consumiendo más rápido el plan gratis)
+      - name: Instalar Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Si cambia `package-lock.json`, se invalida (por convención, no se cambia salvo absolutamente necesario)
+      # Si cambia el sistema operativo del CI o la versión de Node elegida, también se invalida
+      - name: Guardar node_modules en caché
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-
+
+      # Solo instala dependencias si el cache es inválido
+      - name: Instalar dependencias
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit
+
+      # Usa el Typescript local
+      - name: Verificar tipos
+        run: npx tsc --noEmit
+
+      # Usa el Jest local
+      - name: Ejecutar pruebas automáticas
+        run: npm run test
