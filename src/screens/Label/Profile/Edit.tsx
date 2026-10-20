@@ -24,6 +24,7 @@ export function LabelProfileEditScreen() {
 
 
   const [pickedImageUri, setPickedImageUri] = useState<string | null>(null);
+  const [imageSaved, setImageSaved] = useState(false);
 
   if (profile.status === 'loading') {
     return <LoadingBlock label="Cargando perfil..." />;
@@ -42,9 +43,11 @@ export function LabelProfileEditScreen() {
     });
     if (result.canceled) return;
     const asset = result.assets[0];
+    setImageSaved(false);
     const ok = await uploadImage(asset.uri, asset.mimeType ?? 'image/jpeg');
     if (ok) {
       setPickedImageUri(asset.uri);
+      setImageSaved(true);
     }
   };
 
@@ -74,6 +77,7 @@ export function LabelProfileEditScreen() {
           fallbackName={data.name ?? 'Label'}
           uploading={uploading}
           uploadError={uploadError}
+          imageSaved={imageSaved}
           onPickImage={handlePickImage}
           changingPassword={changingPassword}
           passwordError={passwordError}
