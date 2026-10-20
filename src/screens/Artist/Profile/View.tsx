@@ -1,6 +1,7 @@
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, spacing } from '../../../constants/design';
+import { LinkButton } from '../../../components/atoms/LinkButton';
+import { borderRadius, colors, spacing } from '../../../constants/design';
 import { AppText } from '../../../components/atoms/AppText';
 import { Avatar } from '../../../components/atoms/Avatar';
 import { Button } from '../../../components/atoms/Button';
@@ -10,7 +11,7 @@ import { ProfileField } from '../../../components/molecules/ProfileField';
 import { useArtistProfile } from '../../../features/artist/useArtistProfile';
 import { useAuthActions } from '../../../features/auth/info';
 
-/** Perfil de artista — solo lectura. La edición queda para el Equipo 1 (botón visible, sin acción). */
+/** Perfil de artista — solo lectura, con acceso a la edición (ArtistProfileEditScreen). */
 export function ArtistProfileViewScreen() {
   const state = useArtistProfile();
   const { logout } = useAuthActions();
@@ -41,7 +42,23 @@ export function ArtistProfileViewScreen() {
           <ProfileField label="Bandcamp" value={artist.bandcampUrl} />
         </View>
 
-        <Button label="Editar" variant="secondary" disabled onPress={() => {}} />
+        <LinkButton
+          screen="Edit"
+          params={{}}
+          style={{
+            alignSelf: 'center',
+            borderWidth: 2,
+            borderColor: colors.surface.containerHigh,
+            borderRadius: borderRadius.full,
+            paddingVertical: spacing.sm,
+            paddingHorizontal: spacing.xl,
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 44,
+          }}
+        >
+          <AppText variant="title-md" color={colors.onSurface.default}>Editar</AppText>
+        </LinkButton>
         <Button label="Cerrar sesión" variant="secondary" onPress={logout} />
       </ScrollView>
     </SafeAreaView>
