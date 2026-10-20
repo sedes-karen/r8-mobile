@@ -14,6 +14,10 @@ export type ReleasesListResponse = {
   releaseAudioQuota?: { maxBytes: number };
 };
 
+/**
+ * Track de un release con el audio resuelto. Solo aparece en `GET /releases/:releaseId`
+ * (`tracks[].audioUrl`), no en los listados ni en el release slim de `GET /promos/:id`.
+ */
 export type ReleaseTrack = {
   id: string;
   title: string;
