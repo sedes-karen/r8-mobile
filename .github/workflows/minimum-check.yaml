@@ -37,7 +37,7 @@ jobs:
       # Si cambia el sistema operativo del CI o la versión de Node elegida, también se invalida
       - name: Guardar node_modules en caché
         id: cache-node-modules
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ env.NODE_VERSION }}-modules-${{ hashFiles('package-lock.json') }}
