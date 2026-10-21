@@ -1,11 +1,15 @@
 import { fireEvent, render } from '@testing-library/react-native';
 import { LabelProfileViewScreen } from './View';
+import * as React from 'react';
 import * as useLabelProfileModule from '../../../features/label/useLabelProfile';
 import * as authInfoModule from '../../../features/auth/info';
 import type { LabelProfile } from '../../../types/label';
 
 jest.mock('../../../features/label/useLabelProfile');
 jest.mock('../../../features/auth/info');
+jest.mock('../../../components/atoms/LinkButton', () => ({
+  LinkButton: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 const LABEL: LabelProfile = {
   id: 'label-1',
