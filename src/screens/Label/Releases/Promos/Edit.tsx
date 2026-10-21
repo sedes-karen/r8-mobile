@@ -30,8 +30,8 @@ type PromosStackParamList = {
 
 type SendType = NonNullable<UpdatePromoBody['sendType']>;
 
-// Mismo mapa que PromoRow y Details (privados de cada pantalla: se duplica acá hasta que se
-// extraiga a constants en un PR dedicado).
+// El mapa de estados está repetido en PromoRow y Details, pero ahí es privado y no se puede
+// importar. Si otra pantalla lo llega a necesitar, habría que pasarlo a un archivo de constants.
 const STATUS_LABEL: Record<PromoStatus, string> = {
   DRAFT: 'Borrador',
   SCHEDULED: 'Programada',
@@ -56,6 +56,11 @@ function formatReleaseDate(value: string): string {
   return `${day}/${month}/${year}`;
 }
 
+/**
+ * Pantalla para editar una promo del label: cambia el tipo de envío, la fecha y las listas de
+ * destinatarios (PATCH /promos/:id). El release no se puede cambiar. También deja enviar o
+ * cancelar la promo según en qué estado esté.
+ */
 export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEditScreenProps) {
   const promoState = usePromoDetail(route.params.promoId);
   const recipientListsState = useRecipientLists();
@@ -76,7 +81,11 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
 
   const promo = promoState.status === 'success' ? promoState.data : null;
 
- 
+  // Se rellena el formulario una sola vez con los datos de la promo, así si recarga la
+  // pantalla no se borra lo que el usuario ya había escrito. La promo no trae todo lo que
+  // necesita el formulario:
+  // - sendType no viene, se saca de la fecha (si tiene fecha es "programada")
+  // - recipientListIds tampoco viene solo, se arma con los ids de las listas
   useEffect(() => {
     if (!promo || seeded) return;
     setScheduledAt(promo.scheduledAt ?? '');
@@ -85,6 +94,9 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     setSeeded(true);
   }, [promo, seeded]);
 
+  // Cuando sale bien se vuelve a Details con reset en vez de goBack, porque con goBack la
+  // pantalla de Details queda como estaba y no recarga los datos. Al resetear, Details se crea
+  // de nuevo y pide la promo otra vez (mismo criterio que RecipientLists/Edit).
   useEffect(() => {
     if (!success) return;
     const timeout = setTimeout(() => {
@@ -108,7 +120,8 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     return <ErrorState message={recipientListsState.message} onRetry={recipientListsState.reload} />;
   }
 
-  // Todavía no se sembraron los campos desde el promo: evita un flash de formulario vacío.
+  // Todavía no se cargaron los datos de la promo en el formulario: se espera así no se ve un
+  // formulario vacío.
   if (!promo || !seeded) {
     return <LoadingBlock label="Cargando promo..." />;
   }
@@ -137,7 +150,10 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
   const sentOn = formatDate(promo.sentAt);
   const isBusy = isSubmitting || pendingAction !== null;
 
-
+  // En los docs no dice en qué estados se puede hacer cada cosa, así que se tomó como supuesto
+  // que guardar y enviar es solo cuando la promo está en borrador, y cancelar solo cuando está
+  // programada. En los otros estados los botones no se muestran o se deshabilitan.
+  const canSave = promo.status === 'DRAFT';
   const canSend = promo.status === 'DRAFT';
   const canCancel = promo.status === 'SCHEDULED';
 
@@ -174,6 +190,9 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     setRequestError(null);
     if (Object.keys(errors).length > 0) return;
 
+    // La fecha se manda en formato ISO, igual que en New.tsx, pero solo si el envío es
+    // programado. useCuratedDb y expiresAt no se tocan, el servidor deja como estaban esos
+    // valores si no llegan.
     setIsSubmitting(true);
     try {
       await updatePromo(route.params.promoId, {
@@ -363,7 +382,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
         <Button
           label="Guardar"
           loading={isSubmitting}
-          disabled={isBusy}
+          disabled={isBusy || !canSave}
           onPress={handleSubmit}
         />
 
