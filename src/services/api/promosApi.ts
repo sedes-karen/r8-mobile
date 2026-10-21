@@ -39,3 +39,24 @@ export async function updatePromo(promoId: string, body: UpdatePromoBody): Promi
     throw await readApiError(response, 'No se pudo actualizar la promo');
   }
 }
+
+
+export async function sendPromo(promoId: string): Promise<void> {
+  const response = await apiClient(`/promos/${encodeURIComponent(promoId)}/send`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo enviar la promo');
+  }
+}
+
+export async function cancelPromo(promoId: string): Promise<void> {
+  const response = await apiClient(`/promos/${encodeURIComponent(promoId)}/cancel`, {
+    method: 'POST',
+  });
+
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo cancelar la promo');
+  }
+}
