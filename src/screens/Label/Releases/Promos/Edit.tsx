@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, type StaticScreenProps } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -15,7 +15,7 @@ import { LabeledInput } from '../../../../components/molecules/LabeledInput';
 import { MetaDataRow } from '../../../../components/molecules/MetaDataRow';
 import { usePromoDetail } from '../../../../features/promos/usePromoDetail';
 import { useRecipientLists } from '../../../../features/recipients/useRecipientLists';
-import { updatePromo } from '../../../../services/api/promosApi';
+import { cancelPromo, sendPromo, updatePromo } from '../../../../services/api/promosApi';
 import type { PromoStatus } from '../../../../types/promos';
 import type { UpdatePromoBody } from '../../../../types/promos/updatePromoBody';
 
@@ -70,11 +70,13 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
   }>({});
   const [requestError, setRequestError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'send' | 'cancel' | null>(null);
+  const [success, setSuccess] = useState<{ title: string; message: string } | null>(null);
   const [seeded, setSeeded] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   const promo = promoState.status === 'success' ? promoState.data : null;
 
+ 
   useEffect(() => {
     if (!promo || seeded) return;
     setScheduledAt(promo.scheduledAt ?? '');
@@ -84,7 +86,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
   }, [promo, seeded]);
 
   useEffect(() => {
-    if (!saved) return;
+    if (!success) return;
     const timeout = setTimeout(() => {
       navigation.reset({
         index: 1,
@@ -92,7 +94,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
       });
     }, 1200);
     return () => clearTimeout(timeout);
-  }, [saved, navigation, route.params.promoId]);
+  }, [success, navigation, route.params.promoId]);
 
   if (promoState.status === 'loading' || recipientListsState.status === 'loading') {
     return <LoadingBlock label="Cargando promo..." />;
@@ -111,7 +113,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     return <LoadingBlock label="Cargando promo..." />;
   }
 
-  if (saved) {
+  if (success) {
     return (
       <SafeAreaView
         style={{
@@ -122,9 +124,9 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
           gap: spacing.lg,
         }}
       >
-        <AppText variant="headline-lg">Promo actualizada</AppText>
+        <AppText variant="headline-lg">{success.title}</AppText>
         <AppText variant="body-lg" color={colors.onSurface.variant}>
-          Los cambios se guardaron correctamente.
+          {success.message}
         </AppText>
       </SafeAreaView>
     );
@@ -133,6 +135,11 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
   const recipientLists = recipientListsState.data.lists;
   const releaseSubtitle = [promo.release.artistName, promo.release.labelName].filter(Boolean).join(' · ');
   const sentOn = formatDate(promo.sentAt);
+  const isBusy = isSubmitting || pendingAction !== null;
+
+
+  const canSend = promo.status === 'DRAFT';
+  const canCancel = promo.status === 'SCHEDULED';
 
   const toggleRecipientList = (listId: string) => {
     setRecipientListIds((currentIds) =>
@@ -143,7 +150,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     setFieldErrors((currentErrors) => ({ ...currentErrors, recipients: undefined }));
   };
 
-
+  // Mismas reglas que New.tsx, solo para los campos editables que acepta el PATCH.
   function validate(): typeof fieldErrors {
     const errors: typeof fieldErrors = {};
     const normalizedScheduledAt = scheduledAt.trim();
@@ -167,7 +174,6 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     setRequestError(null);
     if (Object.keys(errors).length > 0) return;
 
-    
     setIsSubmitting(true);
     try {
       await updatePromo(route.params.promoId, {
@@ -177,12 +183,49 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
           ? { scheduledAt: new Date(scheduledAt.trim()).toISOString() }
           : {}),
       });
-      setSaved(true);
+      setSuccess({ title: 'Promo actualizada', message: 'Los cambios se guardaron correctamente.' });
     } catch (error: unknown) {
       setRequestError(error instanceof Error ? error.message : 'No se pudo guardar la promo');
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  async function handleSend() {
+    setPendingAction('send');
+    setRequestError(null);
+    try {
+      await sendPromo(route.params.promoId);
+      setSuccess({ title: 'Promo enviada', message: 'El envío manual se inició correctamente.' });
+    } catch (error: unknown) {
+      setRequestError(error instanceof Error ? error.message : 'No se pudo enviar la promo');
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function handleCancel() {
+    setPendingAction('cancel');
+    setRequestError(null);
+    try {
+      await cancelPromo(route.params.promoId);
+      setSuccess({ title: 'Promo cancelada', message: 'La promo programada se canceló.' });
+    } catch (error: unknown) {
+      setRequestError(error instanceof Error ? error.message : 'No se pudo cancelar la promo');
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  function handleCancelPress() {
+    Alert.alert(
+      'Cancelar promo',
+      '¿Seguro que querés cancelar esta promo programada? No se puede deshacer.',
+      [
+        { text: 'Volver', style: 'cancel' },
+        { text: 'Cancelar promo', style: 'destructive', onPress: handleCancel },
+      ],
+    );
   }
 
   return (
@@ -244,7 +287,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
             <Button
               label="Inmediato"
               variant={sendType === 'IMMEDIATE' ? 'primary' : 'secondary'}
-              disabled={isSubmitting}
+              disabled={isBusy}
               onPress={() => {
                 setSendType('IMMEDIATE');
                 setScheduledAt('');
@@ -257,7 +300,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
             <Button
               label="Programado"
               variant={sendType === 'SCHEDULED' ? 'primary' : 'secondary'}
-              disabled={isSubmitting}
+              disabled={isBusy}
               onPress={() => setSendType('SCHEDULED')}
             />
           </View>
@@ -275,7 +318,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
               }}
               autoCapitalize="none"
               autoCorrect={false}
-              editable={!isSubmitting}
+              editable={!isBusy}
               error={fieldErrors.scheduledAt}
             />
           ) : null}
@@ -299,7 +342,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
                   key={list.id}
                   label={`${list.name} · ${recipientLabel}`}
                   status={
-                    isSubmitting
+                    isBusy
                       ? isSelected
                         ? 'disabledMarked'
                         : 'disabledUnmarked'
@@ -317,7 +360,35 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
 
         {requestError ? <ErrorMessage message={requestError} /> : null}
 
-        <Button label="Guardar" loading={isSubmitting} onPress={handleSubmit} />
+        <Button
+          label="Guardar"
+          loading={isSubmitting}
+          disabled={isBusy}
+          onPress={handleSubmit}
+        />
+
+        {canSend || canCancel ? (
+          <View style={{ gap: spacing.sm }}>
+            {canSend ? (
+              <Button
+                label="Enviar"
+                variant="secondary"
+                loading={pendingAction === 'send'}
+                disabled={isBusy}
+                onPress={handleSend}
+              />
+            ) : null}
+            {canCancel ? (
+              <Button
+                label="Cancelar promo"
+                variant="secondary"
+                loading={pendingAction === 'cancel'}
+                disabled={isBusy}
+                onPress={handleCancelPress}
+              />
+            ) : null}
+          </View>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
