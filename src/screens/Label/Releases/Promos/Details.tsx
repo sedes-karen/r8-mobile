@@ -86,7 +86,7 @@ export function LabelReleasesPromosDetailsScreen({ route }: LabelReleasesPromosD
           {promo.release.catalogNumber ? (
             <MetaDataRow label="Catálogo" value={promo.release.catalogNumber} />
           ) : null}
-          <MetaDataRow label="Tipo" value={promo.release.type} />
+          <MetaDataRow label="Tipo" value={promo.release.type ?? '—'} />
           {promo.release.releaseDate ? (
             <MetaDataRow label="Fecha de lanzamiento" value={formatReleaseDate(promo.release.releaseDate)} />
           ) : null}
@@ -116,7 +116,9 @@ export function LabelReleasesPromosDetailsScreen({ route }: LabelReleasesPromosD
               >
                 <AppText variant="body-lg">{list.name}</AppText>
                 <AppText variant="body-sm" color={colors.onSurface.variant}>
-                  {list.recipientCount === 1 ? '1 destinatario' : `${list.recipientCount} destinatarios`}
+                  {(list.recipientCount ?? 0) === 1
+                    ? '1 destinatario'
+                    : `${list.recipientCount ?? 0} destinatarios`}
                 </AppText>
               </View>
             ))
