@@ -9,6 +9,18 @@ import { EmptyState } from '../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { RecipientMemberRow } from '../../../components/molecules/RecipientMemberRow';
 import { useRecipientListDetail } from '../../../features/recipients/useRecipientListDetail';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type RecipientListsStackParamList = {
+  List: undefined;
+  New: undefined;
+  Details: { listId: string };
+  Edit: { listId: string };
+  Feedback: { listId: string };
+  BulkUpload: { listId: string };
+};
+
 
 type LabelRecipientListsDetailsScreenProps = StaticScreenProps<{ listId: string }>;
 
@@ -18,6 +30,7 @@ type LabelRecipientListsDetailsScreenProps = StaticScreenProps<{ listId: string 
  * los botones están visibles pero deshabilitados, siguiendo el mismo criterio que List.
  */
 export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsDetailsScreenProps) {
+    const navigation = useNavigation<NativeStackNavigationProp<RecipientListsStackParamList>>();
   const state = useRecipientListDetail(route.params.listId);
 
   if (state.status === 'loading') {
@@ -50,12 +63,13 @@ export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsD
             ))}
           </View>
         )}
+      
+<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+  <Button label="Agregar destinatario" variant="secondary" disabled onPress={() => {}} />
+  <Button label="Editar lista" variant="secondary" disabled onPress={() => {}}/>
+  <Button label="Cargar CSV" variant="secondary" onPress={() => navigation.navigate('BulkUpload', { listId: route.params.listId,})} />
+</View>
 
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-          <Button label="Agregar destinatario" variant="secondary" disabled onPress={() => {}} />
-          <Button label="Editar lista" variant="secondary" disabled onPress={() => {}} />
-          <Button label="Cargar CSV" variant="secondary" disabled onPress={() => {}} />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

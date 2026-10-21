@@ -34,4 +34,44 @@ export async function fetchRecipientListMembers(listId: string): Promise<Recipie
     throw await readApiError(response, 'No se pudieron cargar los destinatarios de la lista');
   }
   return response.json() as Promise<RecipientListMember[]>;
+
+}
+
+export type RecipientBatchItem = {
+  email: string;
+  display_name?: string;
+};
+
+export type AddRecipientsBatchResponse = {
+  added: RecipientListMember[];
+  skipped: number;
+};
+
+/**
+ * POST /recipient-lists/:listId/recipients/batch
+ * Agrega varios destinatarios a una lista.
+ */
+export async function addRecipientsBatch(
+  listId: string,
+  recipients: RecipientBatchItem[],
+): Promise<AddRecipientsBatchResponse> {
+  const response = await apiClient(
+    `/recipient-lists/${encodeURIComponent(listId)}/recipients/batch`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ recipients }),
+    },
+  );
+
+  if (!response.ok) {
+    throw await readApiError(
+      response,
+      'No se pudieron agregar los destinatarios',
+    );
+  }
+
+  return response.json() as Promise<AddRecipientsBatchResponse>;
 }
