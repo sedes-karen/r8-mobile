@@ -19,3 +19,21 @@ export type ArtistProfile = {
   createdAt: string;
   updatedAt: string;
 };
+
+/**
+ * Input del PUT /artists/me (UpdateArtistDto), todos opcionales (ver
+ * docs/DTOs_Y_CUERPOS_HTTP.md §4). Campos editables de texto/redes en camelCase
+ * como en el resto de la app; el mapeo a snake_case del request (first_name,
+ * last_name, artist_name) lo hace artistApi. No incluye profileImagePath:
+ * la imagen se gestiona vía flujo presign de /artists/me/profile-image.
+ */
+export type UpdateArtistProfileInput = {
+  firstName?: string;
+  lastName?: string;
+  artistName?: string;
+  bio?: string;
+  instagramUrl?: string;
+  soundcloudUrl?: string;
+  bandcampUrl?: string;
+  twitterUrl?: string;
+};
