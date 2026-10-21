@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert,ScrollView, StyleSheet } from 'react-native';
+import { Alert, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { colors, spacing } from '../../../constants/design';
@@ -17,14 +17,30 @@ import { fetchLabelMe } from '../../../services/api/labelsApi';
 
 export function LabelProfileEditScreen() {
   const profile = useLabelProfile();
-  const { submit: saveProfile, loading: saving, error: saveError } = useUpdateLabelProfile();
-  const { uploadImage, loading: uploading, error: uploadError } = useLabelImage();
-  const { changePassword, loading: changingPassword, error: passwordError } = useChangePassword();
+
+  const {
+    submit: saveProfile,
+    loading: saving,
+    error: saveError,
+  } = useUpdateLabelProfile();
+
+  const {
+    uploadImage,
+    loading: uploading,
+    error: uploadError,
+  } = useLabelImage();
+
+  const {
+    changePassword,
+    loading: changingPassword,
+    error: passwordError,
+  } = useChangePassword();
+
   const { logout } = useAuthActions();
 
-
- const[confirmedImageUrl, setConfirmedImageUrl]= useState<string | null>(null);
- const [refreshingImage, setRefreshingImage]=useState(false);
+  const [confirmedImageUrl, setConfirmedImageUrl] = useState<string | null>(null);
+  const [refreshingImage, setRefreshingImage] = useState(false);
+  const [imageSaved, setImageSaved] = useState(false);
 
   if (profile.status === 'loading') {
     return <LoadingBlock label="Cargando perfil..." />;
@@ -37,61 +53,82 @@ export function LabelProfileEditScreen() {
   const data = profile.data;
 
   const handlePickImage = async () => {
-    try{
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.7,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.7,
+      });
 
-    if (result.canceled) return;
+      if (result.canceled) return;
 
-    const asset = result.assets[0];
-    if(!asset) return;
+      const asset = result.assets[0];
 
-    const ok = await uploadImage(asset.uri, asset.mimeType ?? 'image/jpeg');
-    
-    if (!ok) return 
+      if (!asset) return;
+
+      setImageSaved(false);
+
+      const ok = await uploadImage(
+        asset.uri,
+        asset.mimeType ?? 'image/jpeg',
+      );
+
+      if (!ok) return;
+
+      setImageSaved(true);
       setRefreshingImage(true);
-      try{
-          const updateProfile= await fetchLabelMe();
 
-          setConfirmedImageUrl(updateProfile.profileImageUrl);
+      try {
+        const updatedProfile = await fetchLabelMe();
 
-          Alert.alert(
-            'imagen actualizada',
-            'Imagen de perfil actualizada correctamente ');
-      }catch{
+        setConfirmedImageUrl(updatedProfile.profileImageUrl);
+      } catch {
         Alert.alert(
           'No se pudo refrescar el avatar',
-          'La imagen se subio , pero no se pudo consultar con el perfil actualizado');
-      }finally{
+          'La imagen se subió, pero no se pudo consultar el perfil actualizado. Volvé a cargar el perfil.',
+        );
+      } finally {
         setRefreshingImage(false);
       }
-    } catch(error){
-      Alert.alert( ' no se pudo actualizar la imagen', error instanceof Error ? error.message : ' ocurrio un error al seleccionar o subir la imagen')
+    } catch (error) {
+      Alert.alert(
+        'No se pudo actualizar la imagen',
+        error instanceof Error
+          ? error.message
+          : 'Ocurrió un error al seleccionar o subir la imagen.',
+      );
     }
   };
 
-  const handleChangePassword = async (currentPassword: string, newPassword: string) => {
-  try{  
-    const ok = await changePassword(currentPassword, newPassword);
-    
-    if(!ok)return;
+  const handleChangePassword = async (
+    currentPassword: string,
+    newPassword: string,
+  ) => {
+    try {
+      const ok = await changePassword(currentPassword, newPassword);
 
-    Alert.alert('contraseña actualizada',
-      'Contraseña cambiada correctamente. Volver a iniciar sesión',[
-        {
-          text: 'Aceptar',
-          onPress: ()=>{
-            logout();
+      if (!ok) return;
+
+      Alert.alert(
+        'Contraseña actualizada',
+        'Tu contraseña se cambió correctamente. Volvé a iniciar sesión.',
+        [
+          {
+            text: 'Aceptar',
+            onPress: () => {
+              logout();
+            },
           },
-        },
-      ],
-      {cancelable:false},
-    );
-  }catch(error){
-    Alert.alert('No se puedo cambiar la contraseña ', error instanceof Error ? error.message: ' Ocurrio un error al cambiar la contraseña .');
-  }
+        ],
+        { cancelable: false },
+      );
+    } catch (error) {
+      Alert.alert(
+        'No se pudo cambiar la contraseña',
+        error instanceof Error
+          ? error.message
+          : 'Ocurrió un error al cambiar la contraseña.',
+      );
+    }
   };
 
   return (
@@ -111,6 +148,7 @@ export function LabelProfileEditScreen() {
           fallbackName={data.name ?? 'Label'}
           uploading={uploading || refreshingImage}
           uploadError={uploadError}
+          imageSaved={imageSaved}
           onPickImage={handlePickImage}
           changingPassword={changingPassword}
           passwordError={passwordError}
