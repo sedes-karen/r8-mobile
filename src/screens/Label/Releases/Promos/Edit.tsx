@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { StaticScreenProps } from '@react-navigation/native';
+import { useNavigation, type StaticScreenProps } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { borderRadius, colors, spacing } from '../../../../constants/design';
 import { AppText } from '../../../../components/atoms/AppText';
 import { Button } from '../../../../components/atoms/Button';
@@ -14,10 +15,18 @@ import { LabeledInput } from '../../../../components/molecules/LabeledInput';
 import { MetaDataRow } from '../../../../components/molecules/MetaDataRow';
 import { usePromoDetail } from '../../../../features/promos/usePromoDetail';
 import { useRecipientLists } from '../../../../features/recipients/useRecipientLists';
+import { updatePromo } from '../../../../services/api/promosApi';
 import type { PromoStatus } from '../../../../types/promos';
 import type { UpdatePromoBody } from '../../../../types/promos/updatePromoBody';
 
 type LabelReleasesPromosEditScreenProps = StaticScreenProps<{ promoId: string }>;
+
+type PromosStackParamList = {
+  List: undefined;
+  New: undefined;
+  Details: { promoId: string };
+  Edit: { promoId: string };
+};
 
 type SendType = NonNullable<UpdatePromoBody['sendType']>;
 
@@ -47,10 +56,10 @@ function formatReleaseDate(value: string): string {
   return `${day}/${month}/${year}`;
 }
 
-
 export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEditScreenProps) {
   const promoState = usePromoDetail(route.params.promoId);
   const recipientListsState = useRecipientLists();
+  const navigation = useNavigation<NativeStackNavigationProp<PromosStackParamList>>();
 
   const [sendType, setSendType] = useState<SendType>('IMMEDIATE');
   const [scheduledAt, setScheduledAt] = useState('');
@@ -59,11 +68,13 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     recipients?: string;
     scheduledAt?: string;
   }>({});
+  const [requestError, setRequestError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [seeded, setSeeded] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const promo = promoState.status === 'success' ? promoState.data : null;
 
-  
   useEffect(() => {
     if (!promo || seeded) return;
     setScheduledAt(promo.scheduledAt ?? '');
@@ -71,6 +82,17 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     setRecipientListIds((promo.recipientLists ?? []).map((list) => list.id));
     setSeeded(true);
   }, [promo, seeded]);
+
+  useEffect(() => {
+    if (!saved) return;
+    const timeout = setTimeout(() => {
+      navigation.reset({
+        index: 1,
+        routes: [{ name: 'List' }, { name: 'Details', params: { promoId: route.params.promoId } }],
+      });
+    }, 1200);
+    return () => clearTimeout(timeout);
+  }, [saved, navigation, route.params.promoId]);
 
   if (promoState.status === 'loading' || recipientListsState.status === 'loading') {
     return <LoadingBlock label="Cargando promo..." />;
@@ -89,6 +111,25 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     return <LoadingBlock label="Cargando promo..." />;
   }
 
+  if (saved) {
+    return (
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: colors.background,
+          justifyContent: 'center',
+          padding: spacing.lg,
+          gap: spacing.lg,
+        }}
+      >
+        <AppText variant="headline-lg">Promo actualizada</AppText>
+        <AppText variant="body-lg" color={colors.onSurface.variant}>
+          Los cambios se guardaron correctamente.
+        </AppText>
+      </SafeAreaView>
+    );
+  }
+
   const recipientLists = recipientListsState.data.lists;
   const releaseSubtitle = [promo.release.artistName, promo.release.labelName].filter(Boolean).join(' · ');
   const sentOn = formatDate(promo.sentAt);
@@ -102,7 +143,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
     setFieldErrors((currentErrors) => ({ ...currentErrors, recipients: undefined }));
   };
 
-  
+
   function validate(): typeof fieldErrors {
     const errors: typeof fieldErrors = {};
     const normalizedScheduledAt = scheduledAt.trim();
@@ -118,6 +159,30 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
       }
     }
     return errors;
+  }
+
+  async function handleSubmit() {
+    const errors = validate();
+    setFieldErrors(errors);
+    setRequestError(null);
+    if (Object.keys(errors).length > 0) return;
+
+    
+    setIsSubmitting(true);
+    try {
+      await updatePromo(route.params.promoId, {
+        sendType,
+        recipientListIds,
+        ...(sendType === 'SCHEDULED'
+          ? { scheduledAt: new Date(scheduledAt.trim()).toISOString() }
+          : {}),
+      });
+      setSaved(true);
+    } catch (error: unknown) {
+      setRequestError(error instanceof Error ? error.message : 'No se pudo guardar la promo');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -179,6 +244,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
             <Button
               label="Inmediato"
               variant={sendType === 'IMMEDIATE' ? 'primary' : 'secondary'}
+              disabled={isSubmitting}
               onPress={() => {
                 setSendType('IMMEDIATE');
                 setScheduledAt('');
@@ -191,6 +257,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
             <Button
               label="Programado"
               variant={sendType === 'SCHEDULED' ? 'primary' : 'secondary'}
+              disabled={isSubmitting}
               onPress={() => setSendType('SCHEDULED')}
             />
           </View>
@@ -208,6 +275,7 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
               }}
               autoCapitalize="none"
               autoCorrect={false}
+              editable={!isSubmitting}
               error={fieldErrors.scheduledAt}
             />
           ) : null}
@@ -230,7 +298,15 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
                 <Checkbox
                   key={list.id}
                   label={`${list.name} · ${recipientLabel}`}
-                  status={isSelected ? 'marked' : 'unmarked'}
+                  status={
+                    isSubmitting
+                      ? isSelected
+                        ? 'disabledMarked'
+                        : 'disabledUnmarked'
+                      : isSelected
+                        ? 'marked'
+                        : 'unmarked'
+                  }
                   onChange={() => toggleRecipientList(list.id)}
                 />
               );
@@ -238,6 +314,10 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
           )}
           {fieldErrors.recipients ? <ErrorMessage message={fieldErrors.recipients} /> : null}
         </View>
+
+        {requestError ? <ErrorMessage message={requestError} /> : null}
+
+        <Button label="Guardar" loading={isSubmitting} onPress={handleSubmit} />
       </ScrollView>
     </SafeAreaView>
   );
