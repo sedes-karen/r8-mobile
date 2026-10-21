@@ -2,6 +2,7 @@ import { apiClient } from './apiClient';
 import { readApiError } from './apiErrors';
 import { getPromoDetails } from './promos';
 import type { PromoDetailForLabel, PromoForLabelItem } from '../../types/promos';
+import type { UpdatePromoBody } from '../../types/promos/updatePromoBody';
 
 /** GET /promos/for-label?labelId= — requiere sesión label (Bearer). */
 export async function fetchPromosForLabel(labelId: string): Promise<PromoForLabelItem[]> {
@@ -19,4 +20,22 @@ export async function fetchPromosForLabel(labelId: string): Promise<PromoForLabe
  */
 export async function fetchPromoById(promoId: string): Promise<PromoDetailForLabel> {
   return getPromoDetails(promoId);
+}
+
+/**
+ * PATCH /promos/:id — edita los campos editables de una promo con `UpdatePromoBody` (todos
+ * opcionales). La API admite editar "típicamente solo DRAFT" (docs/REFERENCIA_API_R8.md §3);
+ * los docs no traen tabla de transiciones, así que qué estados acepta lo decide la pantalla.
+ * No se usa el body de la respuesta: alcanza con que el servidor responda OK.
+ */
+export async function updatePromo(promoId: string, body: UpdatePromoBody): Promise<void> {
+  const response = await apiClient(`/promos/${encodeURIComponent(promoId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo actualizar la promo');
+  }
 }
