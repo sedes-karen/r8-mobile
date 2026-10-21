@@ -1,15 +1,25 @@
+import { useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { StaticScreenProps } from '@react-navigation/native';
-import { colors, spacing } from '../../../../constants/design';
+import { borderRadius, colors, spacing } from '../../../../constants/design';
 import { AppText } from '../../../../components/atoms/AppText';
+import { Button } from '../../../../components/atoms/Button';
+import { Checkbox } from '../../../../components/atoms/CheckBox';
+import { ErrorMessage } from '../../../../components/atoms/ErrorMessage';
 import { LoadingBlock } from '../../../../components/atoms/LoadingBlock';
+import { EmptyState } from '../../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../../components/molecules/ErrorState';
+import { LabeledInput } from '../../../../components/molecules/LabeledInput';
 import { MetaDataRow } from '../../../../components/molecules/MetaDataRow';
 import { usePromoDetail } from '../../../../features/promos/usePromoDetail';
+import { useRecipientLists } from '../../../../features/recipients/useRecipientLists';
 import type { PromoStatus } from '../../../../types/promos';
+import type { UpdatePromoBody } from '../../../../types/promos/updatePromoBody';
 
 type LabelReleasesPromosEditScreenProps = StaticScreenProps<{ promoId: string }>;
+
+type SendType = NonNullable<UpdatePromoBody['sendType']>;
 
 // Mismo mapa que PromoRow y Details (privados de cada pantalla: se duplica acá hasta que se
 // extraiga a constants en un PR dedicado).
@@ -37,43 +47,94 @@ function formatReleaseDate(value: string): string {
   return `${day}/${month}/${year}`;
 }
 
-/**
- * Edición de una promo del label. Por ahora solo lectura (resumen de la promo); el formulario
- * de edición (sendType, scheduledAt, recipientListIds) y las acciones enviar/cancelar quedan
- * para los próximos pasos de esta tarea.
- */
-export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEditScreenProps) {
-  const state = usePromoDetail(route.params.promoId);
 
-  if (state.status === 'loading') {
+export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEditScreenProps) {
+  const promoState = usePromoDetail(route.params.promoId);
+  const recipientListsState = useRecipientLists();
+
+  const [sendType, setSendType] = useState<SendType>('IMMEDIATE');
+  const [scheduledAt, setScheduledAt] = useState('');
+  const [recipientListIds, setRecipientListIds] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<{
+    recipients?: string;
+    scheduledAt?: string;
+  }>({});
+  const [seeded, setSeeded] = useState(false);
+
+  const promo = promoState.status === 'success' ? promoState.data : null;
+
+  
+  useEffect(() => {
+    if (!promo || seeded) return;
+    setScheduledAt(promo.scheduledAt ?? '');
+    setSendType(promo.scheduledAt ? 'SCHEDULED' : 'IMMEDIATE');
+    setRecipientListIds((promo.recipientLists ?? []).map((list) => list.id));
+    setSeeded(true);
+  }, [promo, seeded]);
+
+  if (promoState.status === 'loading' || recipientListsState.status === 'loading') {
     return <LoadingBlock label="Cargando promo..." />;
   }
 
-  if (state.status === 'error') {
-    return <ErrorState message={state.message} onRetry={state.reload} />;
+  if (promoState.status === 'error') {
+    return <ErrorState message={promoState.message} onRetry={promoState.reload} />;
   }
 
-  const promo = state.data;
+  if (recipientListsState.status === 'error') {
+    return <ErrorState message={recipientListsState.message} onRetry={recipientListsState.reload} />;
+  }
+
+  // Todavía no se sembraron los campos desde el promo: evita un flash de formulario vacío.
+  if (!promo || !seeded) {
+    return <LoadingBlock label="Cargando promo..." />;
+  }
+
+  const recipientLists = recipientListsState.data.lists;
   const releaseSubtitle = [promo.release.artistName, promo.release.labelName].filter(Boolean).join(' · ');
-  const scheduledOn = formatDate(promo.scheduledAt);
   const sentOn = formatDate(promo.sentAt);
+
+  const toggleRecipientList = (listId: string) => {
+    setRecipientListIds((currentIds) =>
+      currentIds.includes(listId)
+        ? currentIds.filter((currentId) => currentId !== listId)
+        : [...currentIds, listId],
+    );
+    setFieldErrors((currentErrors) => ({ ...currentErrors, recipients: undefined }));
+  };
+
+  
+  function validate(): typeof fieldErrors {
+    const errors: typeof fieldErrors = {};
+    const normalizedScheduledAt = scheduledAt.trim();
+
+    if (recipientListIds.length === 0) {
+      errors.recipients = 'Seleccioná al menos una lista de destinatarios.';
+    }
+    if (sendType === 'SCHEDULED') {
+      if (!normalizedScheduledAt) {
+        errors.scheduledAt = 'Ingresá la fecha programada.';
+      } else if (Number.isNaN(Date.parse(normalizedScheduledAt))) {
+        errors.scheduledAt = 'Usá una fecha ISO válida.';
+      }
+    }
+    return errors;
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
+      <ScrollView
+        contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={{ gap: spacing.xs }}>
           <AppText variant="headline-lg">Editar promo</AppText>
-          <AppText variant="body-lg">{promo.release.title}</AppText>
-          {releaseSubtitle ? (
-            <AppText variant="body-sm" color={colors.onSurface.variant}>
-              {releaseSubtitle}
-            </AppText>
-          ) : null}
+          <AppText variant="body-sm" color={colors.onSurface.variant}>
+            Ajustá el envío y las listas que van a recibirla.
+          </AppText>
         </View>
 
         <View>
           <MetaDataRow label="Estado" value={STATUS_LABEL[promo.status]} />
-          <MetaDataRow label="Programada para" value={scheduledOn ?? 'Sin programar'} />
           <MetaDataRow label="Enviada el" value={sentOn ?? 'Sin enviar'} />
           {promo.release.catalogNumber ? (
             <MetaDataRow label="Catálogo" value={promo.release.catalogNumber} />
@@ -82,6 +143,100 @@ export function LabelReleasesPromosEditScreen({ route }: LabelReleasesPromosEdit
           {promo.release.releaseDate ? (
             <MetaDataRow label="Fecha de lanzamiento" value={formatReleaseDate(promo.release.releaseDate)} />
           ) : null}
+        </View>
+
+        <View style={{ gap: spacing.sm }}>
+          <AppText variant="label-caps" color={colors.onSurface.variant}>
+            Release (solo lectura)
+          </AppText>
+          <View
+            style={{
+              padding: spacing.md,
+              gap: spacing.xs,
+              backgroundColor: colors.surface.container,
+              borderWidth: 1,
+              borderColor: colors.surface.border,
+              borderRadius: borderRadius.md,
+            }}
+          >
+            <AppText variant="body-lg">{promo.release.title}</AppText>
+            {releaseSubtitle ? (
+              <AppText variant="body-sm" color={colors.onSurface.variant}>
+                {releaseSubtitle}
+              </AppText>
+            ) : null}
+          </View>
+          <AppText variant="body-sm" color={colors.onSurface.variant}>
+            El release de una promo no se puede cambiar.
+          </AppText>
+        </View>
+
+        <View style={{ gap: spacing.sm }}>
+          <AppText variant="label-caps" color={colors.onSurface.variant}>
+            Tipo de envío
+          </AppText>
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            <Button
+              label="Inmediato"
+              variant={sendType === 'IMMEDIATE' ? 'primary' : 'secondary'}
+              onPress={() => {
+                setSendType('IMMEDIATE');
+                setScheduledAt('');
+                setFieldErrors((currentErrors) => ({
+                  ...currentErrors,
+                  scheduledAt: undefined,
+                }));
+              }}
+            />
+            <Button
+              label="Programado"
+              variant={sendType === 'SCHEDULED' ? 'primary' : 'secondary'}
+              onPress={() => setSendType('SCHEDULED')}
+            />
+          </View>
+          {sendType === 'SCHEDULED' ? (
+            <LabeledInput
+              label="Fecha programada"
+              placeholder="2026-10-20T15:00:00-03:00"
+              value={scheduledAt}
+              onChangeText={(value) => {
+                setScheduledAt(value);
+                setFieldErrors((currentErrors) => ({
+                  ...currentErrors,
+                  scheduledAt: undefined,
+                }));
+              }}
+              autoCapitalize="none"
+              autoCorrect={false}
+              error={fieldErrors.scheduledAt}
+            />
+          ) : null}
+        </View>
+
+        <View style={{ gap: spacing.xs }}>
+          <AppText variant="label-caps" color={colors.onSurface.variant}>
+            Listas de destinatarios
+          </AppText>
+          {recipientLists.length === 0 ? (
+            <EmptyState message="Necesitás crear una lista de destinatarios antes de editar una promo." />
+          ) : (
+            recipientLists.map((list) => {
+              const isSelected = recipientListIds.includes(list.id);
+              const recipientLabel =
+                list.recipientCount === 1
+                  ? '1 destinatario'
+                  : `${list.recipientCount} destinatarios`;
+              return (
+                <Checkbox
+                  key={list.id}
+                  label={`${list.name} · ${recipientLabel}`}
+                  status={isSelected ? 'marked' : 'unmarked'}
+                  onChange={() => toggleRecipientList(list.id)}
+                />
+              );
+            })
+          )}
+          {fieldErrors.recipients ? <ErrorMessage message={fieldErrors.recipients} /> : null}
         </View>
       </ScrollView>
     </SafeAreaView>
