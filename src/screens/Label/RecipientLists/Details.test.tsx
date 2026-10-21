@@ -8,6 +8,12 @@ import type { RecipientListDetailData } from '../../../features/recipients/useRe
 jest.mock('../../../features/recipients/useRecipientListDetail');
 jest.mock('../../../features/recipients/useManageMembers');
 
+// El botón "Editar lista" es un LinkButton (useLinkProps), que necesita un NavigationContainer;
+// acá no se prueba la navegación, así que se reemplaza por sus hijos (mismo criterio que Login.test).
+jest.mock('../../../components/atoms/LinkButton', () => ({
+  LinkButton: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 const DETAIL_DATA: RecipientListDetailData = {
   list: {
     id: 'list-1',
