@@ -3,6 +3,7 @@ import { type ReactNode } from 'react';
 import { colors, spacing } from '../../constants/design';
 import { AppText } from '../atoms/AppText';
 import { Button } from '../atoms/Button';
+import { LucideIcon } from '../atoms/LucideIcon';
 
 
 type ModalProps = {
@@ -43,7 +44,7 @@ export function Modal({ title, children, visible, onClose, onCancel, onConfirm, 
         >
 
           <Pressable onPress={onClose}>
-            <AppText variant="title-md">x</AppText>
+            <LucideIcon name="x" variant='title-md' />
           </Pressable>
 
           <AppText variant="title-md">
