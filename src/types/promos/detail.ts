@@ -5,6 +5,8 @@ export type PromoDetailRelease = {
   id: string;
   title: string;
   artistName: string | null;
+  labelName?: string | null;
+  artwork?: string | null;
   catalogNumber: string | null;
   releaseDate: string | null;
   type: 'EP' | 'VA' | 'ALBUM';

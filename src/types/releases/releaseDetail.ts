@@ -13,6 +13,7 @@ export type ReleaseDetail = {
   title: string;
   artist: string | null;
   coverUrl: string | null;
+  notes?: string | null;
   releaseDate: string | null;
   tracks: TrackDetail[];
 };
