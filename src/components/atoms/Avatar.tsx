@@ -22,14 +22,9 @@ export function Avatar({ imageUrl, fallbackName, size = 64 }: AvatarProps) {
   const style = { width: size, height: size, borderRadius: size / 2 };
 
   if (imageUrl) {
-   return (
-    <Image
-      source={{ uri: imageUrl }}
-      style={style}
-      accessibilityLabel={fallbackName}
-      />
-    );
-}
+    return <Image source={{ uri: imageUrl }} style={style} accessibilityLabel={fallbackName} />;
+  }
+
   return (
     <View
       style={[
