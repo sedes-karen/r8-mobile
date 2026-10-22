@@ -5,7 +5,6 @@ import { AppText } from '../atoms/AppText';
 import { Button } from '../atoms/Button';
 import { LucideIcon } from '../atoms/LucideIcon';
 
-
 type ModalProps = {
   title: string;
   children: ReactNode;
@@ -27,7 +26,6 @@ export function Modal({ title, children, visible, onClose, onCancel, onConfirm, 
         {/* Fondo oscuro que ocupa toda la pantalla */}
       <View
         style={{
-          
           flex: 1,
           justifyContent: 'center',
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
