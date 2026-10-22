@@ -1,4 +1,5 @@
 import { fireEvent, render } from '@testing-library/react-native';
+import * as React from 'react';
 import { ArtistProfileViewScreen } from './View';
 import * as useArtistProfileModule from '../../../features/artist/useArtistProfile';
 import * as authInfoModule from '../../../features/auth/info';
@@ -6,6 +7,10 @@ import type { ArtistProfile } from '../../../types/artist';
 
 jest.mock('../../../features/artist/useArtistProfile');
 jest.mock('../../../features/auth/info');
+// El LinkButton necesita NavigationContainer (lo resuelve el stack real, no el test)
+jest.mock('../../../components/atoms/LinkButton', () => ({
+  LinkButton: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 const ARTIST: ArtistProfile = {
   id: 'artist-1',
@@ -57,6 +62,12 @@ describe('ArtistProfileViewScreen', () => {
     const { getByText } = await render(<ArtistProfileViewScreen />);
     expect(getByText('Rpruebas Artist')).toBeTruthy();
     expect(getByText('Bio de prueba')).toBeTruthy();
+  });
+
+  it('muestra el acceso a la edición del perfil', async () => {
+    mockState({ status: 'success', data: ARTIST, reload: jest.fn() });
+    const { getByText } = await render(<ArtistProfileViewScreen />);
+    expect(getByText('Editar')).toBeTruthy();
   });
 
   it('llama a logout al tocar Cerrar sesión', async () => {

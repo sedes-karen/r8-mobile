@@ -26,14 +26,16 @@ export type ArtistProfile = {
  * como en el resto de la app; el mapeo a snake_case del request (first_name,
  * last_name, artist_name) lo hace artistApi. No incluye profileImagePath:
  * la imagen se gestiona vía flujo presign de /artists/me/profile-image.
+ * Bio y redes conservan null como ya lo enviaba el formulario del #99;
+ * su aceptación para borrar campos en el PUT requiere validación con backend.
  */
 export type UpdateArtistProfileInput = {
   firstName?: string;
   lastName?: string;
   artistName?: string;
-  bio?: string;
-  instagramUrl?: string;
-  soundcloudUrl?: string;
-  bandcampUrl?: string;
-  twitterUrl?: string;
+  bio?: string | null;
+  instagramUrl?: string | null;
+  soundcloudUrl?: string | null;
+  bandcampUrl?: string | null;
+  twitterUrl?: string | null;
 };

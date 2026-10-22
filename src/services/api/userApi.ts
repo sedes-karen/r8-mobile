@@ -14,6 +14,37 @@ export async function fetchUsersMe(): Promise<UserMeProfile> {
   return response.json() as Promise<UserMeProfile>;
 }
 
+export type ChangePasswordInput = {
+  currentPassword: string;
+  newPassword: string;
+};
+
+export type ChangePasswordResponse = {
+  message: string;
+};
+
+/**
+ * POST /users/me/change-password — requiere Bearer válido.
+ * El servidor revoca el refresh token: hay que volver a loguearse después.
+ */
+export async function changePassword(
+  data: ChangePasswordInput,
+): Promise<ChangePasswordResponse> {
+  const response = await apiClient('/users/me/change-password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo cambiar la contraseña');
+  }
+
+  return response.json() as Promise<ChangePasswordResponse>;
+}
+
 /**
  * POST /auth/validate — alternativa explícita de validación del JWT (mismo criterio que el web).
  */
