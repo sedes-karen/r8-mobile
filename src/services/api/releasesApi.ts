@@ -7,6 +7,7 @@ import type {
   ReleaseListItem,
   ReleaseType,
   ReleasesListResponse,
+  UpdateReleaseBody,
 } from '../../types/releases';
 
 /** Subconjunto de CreateReleaseUnderLabelDto que usa la pantalla de alta (sin tracks ni archivos). */
@@ -105,4 +106,33 @@ export async function createRelease(input: CreateReleaseInput): Promise<ReleaseL
   }
 
   return (await response.json()) as ReleaseListItem;
+}
+
+/**
+ * PATCH /releases/:releaseId — solo campos editables del release (title, artist, type, releaseDate).
+ * Requiere sesión label (Bearer + perfil revalidado).
+ */
+export async function updateRelease(
+  releaseId: string,
+  body: UpdateReleaseBody,
+): Promise<ReleaseDetail> {
+  if (apiConfig.useMock) {
+    await wait(apiConfig.mockDelayMs);
+    const found = MOCK_RELEASES.find((release) => release.id === releaseId);
+    if (!found) {
+      throw new Error('No se encontró el release');
+    }
+    return { ...found, ...body, status: 'CREATED', tracks: [] };
+  }
+
+  const response = await apiClient(`/releases/${releaseId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo actualizar el release');
+  }
+
+  return (await response.json()) as ReleaseDetail;
 }

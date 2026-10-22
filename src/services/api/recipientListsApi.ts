@@ -107,3 +107,37 @@ export async function removeRecipientFromList(
   }
 }
 
+
+/**
+ * PUT /recipient-lists/:listId — renombra la lista.
+ * No se lee el cuerpo de la respuesta: la doc solo dice "Actualizada" sin detallar la forma, y la
+ * pantalla vuelve a pedir la lista igual al salir de la edición.
+ */
+export async function updateRecipientList(listId: string, name: string): Promise<void> {
+  const response = await apiClient(`/recipient-lists/${encodeURIComponent(listId)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo actualizar la lista');
+  }
+}
+
+/**
+ * DELETE /recipient-lists/:listId — elimina la lista (204 sin cuerpo).
+ * El 409 significa que la lista está en uso por una promo: se traduce a un mensaje entendible en
+ * vez de mostrar el error genérico de la API. Va antes del `!response.ok` porque 409 también es
+ * "no ok".
+ */
+export async function deleteRecipientList(listId: string): Promise<void> {
+  const response = await apiClient(`/recipient-lists/${encodeURIComponent(listId)}`, {
+    method: 'DELETE',
+  });
+  if (response.status === 409) {
+    throw new Error('No se puede eliminar: la lista está siendo usada por una promo.');
+  }
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo eliminar la lista');
+  }
+}

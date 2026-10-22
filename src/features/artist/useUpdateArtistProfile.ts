@@ -1,27 +1,39 @@
-import { useCallback, useState } from 'react';
-import { updateArtistMe, type UpdateArtistProfileInput } from '../../services/api/artistApi';
+import { useCallback, useRef, useState } from 'react';
+import { updateArtistProfile } from '../../services/api/artistApi';
+import type { UpdateArtistProfileInput } from '../../types/artist';
 
 /**
- * PUT /artists/me — mismo contrato que useUpdateLabelProfile: `submit` resuelve true si el
- * servidor guardó bien y false si no (en cuyo caso queda el mensaje real del backend en `error`).
+ * Guardado del perfil de artista — PUT /artists/me.
+ * Firma acordada (igual que useUpdateLabelProfile): resuelve true si se guardó
+ * bien, false si no, y expone loading/error. El error viene interpretado con
+ * readApiError en la capa de servicios; acá solo se expone su mensaje.
  */
 export function useUpdateArtistProfile() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inFlightRef = useRef(false);
 
-  const submit = useCallback(async (input: UpdateArtistProfileInput): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
-    try {
-      await updateArtistMe(input);
-      return true;
-    } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'No se pudo guardar el perfil');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const submit = useCallback(
+    async (input: UpdateArtistProfileInput): Promise<boolean> => {
+      if (inFlightRef.current) {
+        return false;
+      }
+      inFlightRef.current = true;
+      setLoading(true);
+      setError(null);
+      try {
+        await updateArtistProfile(input);
+        return true;
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'No se pudo actualizar el perfil');
+        return false;
+      } finally {
+        inFlightRef.current = false;
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   return { submit, loading, error };
 }
