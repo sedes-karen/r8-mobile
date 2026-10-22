@@ -48,3 +48,58 @@ export async function updateArtistProfile(
   }
   return response.json() as Promise<ArtistProfile>;
 }
+
+
+export type CreateArtistImageUploadInput = {
+  contentType: string;
+};
+
+export type CreateArtistImageUploadResponse = {
+  uploadUrl: string;
+  expiresIn: number;
+  path: string;
+};
+
+export type ConfirmArtistImageInput = {
+  path: string;
+};
+
+export async function createArtistImageUpload(
+  data: CreateArtistImageUploadInput,
+): Promise<CreateArtistImageUploadResponse> {
+  const response = await apiClient('/artists/me/profile-image', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw await readApiError(
+      response,
+      'No se pudo preparar la subida de la imagen',
+    );
+  }
+
+  return response.json() as Promise<CreateArtistImageUploadResponse>;
+}
+
+export async function confirmArtistImage(
+  data: ConfirmArtistImageInput,
+): Promise<void> {
+  const response = await apiClient('/artists/me/profile-image/confirm', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw await readApiError(
+      response,
+      'No se pudo confirmar la imagen del artista',
+    );
+  }
+}

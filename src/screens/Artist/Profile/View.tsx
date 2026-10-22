@@ -9,10 +9,12 @@ import { ErrorState } from '../../../components/molecules/ErrorState';
 import { ProfileField } from '../../../components/molecules/ProfileField';
 import { useArtistProfile } from '../../../features/artist/useArtistProfile';
 import { useAuthActions } from '../../../features/auth/info';
+import { useNavigation } from '@react-navigation/native';
 
 /** Perfil de artista — solo lectura. La edición queda para el Equipo 1 (botón visible, sin acción). */
 export function ArtistProfileViewScreen() {
   const state = useArtistProfile();
+  const navigation = useNavigation<any>();
   const { logout } = useAuthActions();
 
   if (state.status === 'loading') {
@@ -25,7 +27,6 @@ export function ArtistProfileViewScreen() {
 
   const artist = state.data;
   const displayName = artist.artistName || `${artist.firstName} ${artist.lastName}`;
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
@@ -41,7 +42,11 @@ export function ArtistProfileViewScreen() {
           <ProfileField label="Bandcamp" value={artist.bandcampUrl} />
         </View>
 
-        <Button label="Editar" variant="secondary" disabled onPress={() => {}} />
+        <Button
+        label="Editar"
+        variant="secondary"
+        onPress={() => navigation.navigate('Edit')}
+        />
         <Button label="Cerrar sesión" variant="secondary" onPress={logout} />
       </ScrollView>
     </SafeAreaView>
