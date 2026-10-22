@@ -11,7 +11,8 @@ import { LabeledInput } from '../../../components/molecules/LabeledInput';
 import { SuccessNotice } from '../../../components/molecules/SuccessNotice';
 import { useArtistProfile } from '../../../features/artist/useArtistProfile';
 import { useUpdateArtistProfile } from '../../../features/artist/useUpdateArtistProfile';
-import type { ArtistProfile, UpdateArtistProfileInput } from '../../../types/artist';
+import type { UpdateArtistProfileInput } from '../../../services/api/artistApi';
+import type { ArtistProfile } from '../../../types/artist';
 
 /** Tope de la biografía: es regla de la pantalla, el contrato de la API no lo fija. */
 const BIO_MAX_LENGTH = 300;
@@ -65,14 +66,14 @@ function validate(values: FormValues): FieldErrors {
 }
 
 /**
- * Los nombres se envían en camelCase al servicio, que los adapta al DTO HTTP.
- * Se conserva el envío de null para campos vacíos; su efecto en el PUT requiere validación con backend.
+ * UpdateArtistDto es parcial: `undefined` omite el campo (queda como estaba) y `null` lo limpia,
+ * que es como la API representa "sin bio / sin red social" en la respuesta de GET /artists/me.
  */
 function toInput(values: FormValues): UpdateArtistProfileInput {
   return {
-    firstName: trimmed(values.firstName) || undefined,
-    lastName: trimmed(values.lastName) || undefined,
-    artistName: trimmed(values.artistName),
+    first_name: trimmed(values.firstName) || undefined,
+    last_name: trimmed(values.lastName) || undefined,
+    artist_name: trimmed(values.artistName),
     bio: trimmed(values.bio) || null,
     instagramUrl: trimmed(values.instagramUrl) || null,
     soundcloudUrl: trimmed(values.soundcloudUrl) || null,

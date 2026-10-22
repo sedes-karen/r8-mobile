@@ -19,19 +19,3 @@ export type ArtistProfile = {
   createdAt: string;
   updatedAt: string;
 };
-
-/**
- * Campos editables del perfil en camelCase; artistApi convierte los nombres a snake_case.
- * Se conserva null para bio y redes como ya lo envía el formulario de edición;
- * la respuesta nullable del GET no garantiza que el PUT permita borrarlos con null.
- */
-export type UpdateArtistProfileInput = {
-  firstName?: string;
-  lastName?: string;
-  artistName?: string;
-  bio?: string | null;
-  instagramUrl?: string | null;
-  soundcloudUrl?: string | null;
-  bandcampUrl?: string | null;
-  twitterUrl?: string | null;
-};
