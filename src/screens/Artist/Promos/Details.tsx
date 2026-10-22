@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View, ScrollView, StyleSheet, Alert, Pressable } from 'react-native';
+import { View, ScrollView, StyleSheet, Image, Pressable, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAudioPlayer } from 'expo-audio';
@@ -10,12 +10,14 @@ import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { Button } from '../../../components/atoms/Button';
 import { LinkButton } from '../../../components/atoms/LinkButton';
+import { Modal } from '../../../components/molecules/Modal';
+import { PromoTrackRow } from '../../../components/molecules/PromoTrackRow';
 
 import { getPromoDetail, getReleaseWithTracks, dismissPromo } from '../../../services/api/promoDetailApi';
 import type { PromoDetail } from '../../../types/promos/detail';
-import type { ReleaseDetail } from '../../../types/releases';
+import type { ReleaseDetail } from '../../../types/releases/releaseDetail';
 
-// --- Estado ---
+// --- Categoría: Tipos y Estado ---
 
 type DetailsState = {
   promo: PromoDetail | null;
@@ -37,16 +39,7 @@ const initialState: DetailsState = {
   isPlaying: false,
 };
 
-// --- Utilidades ---
-
-function formatDuration(seconds: number | null): string {
-  if (seconds === null) return '--:--';
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
-// --- Pantalla ---
+// --- Categoría: Componente Principal ---
 
 export function ArtistPromosDetailsScreen() {
   const route = useRoute();
@@ -54,6 +47,8 @@ export function ArtistPromosDetailsScreen() {
   const { promoId } = route.params as { promoId: string };
 
   const [state, setState] = useState<DetailsState>(initialState);
+  const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
+  const [likedTrackIds, setLikedTrackIds] = useState<string[]>([]);
 
   const currentTrack = state.release?.tracks[state.currentTrackIndex] ?? null;
   const player = useAudioPlayer(
@@ -61,7 +56,9 @@ export function ArtistPromosDetailsScreen() {
   );
 
   useEffect(() => {
-    return () => { player.remove(); };
+    return () => {
+      player.remove();
+    };
   }, [player]);
 
   const load = useCallback(async () => {
@@ -70,40 +67,37 @@ export function ArtistPromosDetailsScreen() {
       const promo = await getPromoDetail(promoId);
       const release = await getReleaseWithTracks(promo.release.id);
       release.tracks.sort((a, b) => a.trackNumber - b.trackNumber);
-      setState((prev) => ({ ...prev, promo, release, loading: false, error: null, dismissing: false }));
+      setState((prev) => ({
+        ...prev,
+        promo,
+        release,
+        loading: false,
+        error: null,
+        dismissing: false,
+      }));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'No se pudo cargar la promo.';
       setState((prev) => ({ ...prev, loading: false, error: message }));
     }
   }, [promoId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  // --- Handlers ---
+  // --- Categoría: Handlers de Acciones ---
 
-  function handleDismiss() {
-    Alert.alert(
-      '¿Descartar esta promo?',
-      'La promo dejará de aparecer en tu bandeja.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Descartar',
-          style: 'destructive',
-          onPress: async () => {
-            setState((prev) => ({ ...prev, dismissing: true }));
-            try {
-              await dismissPromo(promoId);
-              navigation.goBack();
-            } catch (err) {
-              const message = err instanceof Error ? err.message : 'No se pudo descartar.';
-              Alert.alert('Error', message);
-              setState((prev) => ({ ...prev, dismissing: false }));
-            }
-          },
-        },
-      ]
-    );
+  async function handleConfirmDismiss() {
+    setState((prev) => ({ ...prev, dismissing: true }));
+    try {
+      await dismissPromo(promoId);
+      setIsDismissModalOpen(false);
+      navigation.goBack();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'No se pudo descartar.';
+      Alert.alert('Error', message);
+      setState((prev) => ({ ...prev, dismissing: false }));
+    }
   }
 
   function playOrPause() {
@@ -133,7 +127,24 @@ export function ArtistPromosDetailsScreen() {
     }));
   }
 
-  // --- Renders condicionales ---
+  function toggleLike(trackId: string) {
+    setLikedTrackIds((prev) =>
+      prev.includes(trackId) ? prev.filter((id) => id !== trackId) : [...prev, trackId]
+    );
+  }
+
+  function handleLikeAll() {
+    if (!state.release) return;
+    const allIds = state.release.tracks.map((t) => t.id);
+    const areAllLiked = allIds.every((id) => likedTrackIds.includes(id));
+    setLikedTrackIds(areAllLiked ? [] : allIds);
+  }
+
+  function handleDownloadAll() {
+    // Punto de integración para descarga por lote
+  }
+
+  // --- Categoría: Renders Condicionales de Carga y Error ---
 
   if (state.loading) {
     return <LoadingBlock label="Cargando promo..." />;
@@ -145,24 +156,65 @@ export function ArtistPromosDetailsScreen() {
 
   const { promo, release } = state;
   const isInactive = !promo.isActive || promo.status === 'EXPIRED';
+  const coverUrl = promo.release.artwork ?? release.coverUrl;
+  const releaseNotes = release.notes ?? promo.release.notes;
 
-  // --- Render principal ---
+  // --- Categoría: Render Principal ---
 
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView contentContainerStyle={styles.content}>
 
-        {/* Cabecera: título, artista, catálogo y aviso si la promo vencio */}
+        {/* Cabecera: Portada, Metadatos y Botones de acción superior */}
         <View style={styles.headerBlock}>
-          <AppText variant="headline-lg">{release.title}</AppText>
-          {release.artist ? (
-            <AppText variant="body-sm">{release.artist}</AppText>
-          ) : null}
-          {promo.release.catalogNumber ? (
-            <AppText variant="body-sm" color={colors.onSurface.variant}>
-              Catálogo: {promo.release.catalogNumber}
-            </AppText>
-          ) : null}
+          <View style={styles.headerTopRow}>
+            {coverUrl ? (
+              <Image source={{ uri: coverUrl }} style={styles.coverImage} resizeMode="cover" />
+            ) : (
+              <View style={styles.coverPlaceholder}>
+                <AppText variant="headline-lg">🎵</AppText>
+              </View>
+            )}
+
+            <View style={styles.headerInfo}>
+              <AppText variant="headline-lg" numberOfLines={2}>
+                {release.title}
+              </AppText>
+              {release.artist ? (
+                <AppText variant="body-lg" color={colors.onSurface.default}>
+                  {release.artist}
+                </AppText>
+              ) : null}
+              {promo.release.labelName ? (
+                <AppText variant="body-sm" color={colors.onSurface.variant}>
+                  Label: {promo.release.labelName}
+                </AppText>
+              ) : null}
+              {promo.release.catalogNumber ? (
+                <AppText variant="body-sm" color={colors.onSurface.variant}>
+                  Catálogo: {promo.release.catalogNumber}
+                </AppText>
+              ) : null}
+            </View>
+
+            <View style={styles.headerActions}>
+              <LinkButton screen="Feedback" params={{ promoId }}>
+                <View style={styles.iconButton}>
+                  <AppText variant="title-md">💬</AppText>
+                </View>
+              </LinkButton>
+              <Pressable
+                onPress={() => setIsDismissModalOpen(true)}
+                style={styles.iconButton}
+                disabled={state.dismissing}
+                hitSlop={8}
+              >
+                <AppText variant="title-md">🗑️</AppText>
+              </Pressable>
+            </View>
+          </View>
+
+          {/* Aviso si la promo venció o está inactiva */}
           {isInactive ? (
             <View style={styles.inactiveBanner}>
               <AppText variant="label-caps" color={colors.error.default}>
@@ -170,29 +222,53 @@ export function ArtistPromosDetailsScreen() {
               </AppText>
             </View>
           ) : null}
+
+          {/* Notas del release: desaparece si no hay notas */}
+          {releaseNotes ? (
+            <View style={styles.notesBlock}>
+              <AppText variant="body-sm" color={colors.onSurface.variant}>
+                Notas: {releaseNotes}
+              </AppText>
+            </View>
+          ) : null}
         </View>
 
-        {/* Lista de pistas — tocar una fila la carga en el reproductor */}
+        {/* Acciones en lote */}
+        <View style={styles.batchActionsRow}>
+          <Button
+            label="Favorito a todos"
+            variant="secondary"
+            onPress={handleLikeAll}
+          />
+          <Button
+            label="Descarga todo"
+            variant="secondary"
+            onPress={handleDownloadAll}
+          />
+        </View>
+
+        {/* Lista de pistas */}
         <View style={styles.tracksBlock}>
-          <AppText variant="title-md" style={styles.tracksTitle}>Pistas</AppText>
+          <AppText variant="title-md" style={styles.tracksTitle}>
+            Pistas ({release.tracks.length})
+          </AppText>
           {release.tracks.map((track, index) => {
             const isActive = state.currentTrackIndex === index;
+            const isLiked = likedTrackIds.includes(track.id);
             return (
-              <Pressable
+              <PromoTrackRow
                 key={track.id}
-                onPress={() => setState((prev) => ({ ...prev, currentTrackIndex: index, isPlaying: false }))}
-                style={[styles.trackRow, isActive && styles.trackRowActive]}
-              >
-                <AppText variant="body-sm" color={colors.onSurface.variant}>
-                  {track.trackNumber}.
-                </AppText>
-                <AppText variant="body-lg" style={{ flex: 1 }}>
-                  {track.title}
-                </AppText>
-                <AppText variant="body-sm" color={colors.onSurface.variant}>
-                  {formatDuration(track.duration)}
-                </AppText>
-              </Pressable>
+                trackNumber={track.trackNumber}
+                title={track.title}
+                duration={track.duration}
+                isActive={isActive}
+                isLiked={isLiked}
+                onSelectTrack={() =>
+                  setState((prev) => ({ ...prev, currentTrackIndex: index, isPlaying: false }))
+                }
+                onToggleLike={() => toggleLike(track.id)}
+                onDownload={() => {}}
+              />
             );
           })}
         </View>
@@ -234,29 +310,29 @@ export function ArtistPromosDetailsScreen() {
           </View>
         </View>
 
-        {/* Acciones de la promo: feedback y descarte */}
-        <View style={styles.actionsBlock}>
-          <LinkButton screen="Feedback" params={{ promoId }}>
-            <Button
-              label="Enviar feedback"
-              variant="primary"
-              disabled={state.dismissing || isInactive}
-            />
-          </LinkButton>
-          <Button
-            label="Descartar promo"
-            variant="secondary"
-            loading={state.dismissing}
-            onPress={handleDismiss}
-          />
-        </View>
-
       </ScrollView>
+
+      {/* Modal de confirmación de descarte */}
+      {isDismissModalOpen ? (
+        <View style={styles.modalOverlay}>
+          <Modal
+            title="¿Descartar esta promo?"
+            onClose={() => setIsDismissModalOpen(false)}
+            onCancel={() => setIsDismissModalOpen(false)}
+            onConfirm={handleConfirmDismiss}
+            confirmLabel={state.dismissing ? 'Descartando...' : 'Descartar'}
+          >
+            <AppText variant="body-sm" color={colors.onSurface.variant}>
+              La promo dejará de aparecer en tu bandeja de entrada.
+            </AppText>
+          </Modal>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
 
-// --- Estilos ---
+// --- Categoría: Estilos ---
 
 const styles = StyleSheet.create({
   screen: {
@@ -268,31 +344,63 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
   },
   headerBlock: {
+    gap: spacing.sm,
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    alignItems: 'flex-start',
+  },
+  coverImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 4,
+    backgroundColor: colors.surface.containerLow,
+  },
+  coverPlaceholder: {
+    width: 90,
+    height: 90,
+    borderRadius: 4,
+    backgroundColor: colors.surface.containerLow,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerInfo: {
+    flex: 1,
     gap: spacing.xs,
   },
+  headerActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    alignItems: 'center',
+  },
+  iconButton: {
+    padding: spacing.xs,
+    backgroundColor: colors.surface.containerHigh,
+    borderRadius: 4,
+  },
+  notesBlock: {
+    padding: spacing.sm,
+    backgroundColor: colors.surface.containerLow,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.primary.default,
+  },
   inactiveBanner: {
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
     padding: spacing.sm,
     borderWidth: 1,
     borderColor: colors.error.container,
     backgroundColor: 'rgba(147, 0, 10, 0.1)',
+  },
+  batchActionsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
   },
   tracksBlock: {
     gap: spacing.sm,
   },
   tracksTitle: {
     marginBottom: spacing.xs,
-  },
-  trackRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.surface.border,
-  },
-  trackRowActive: {
-    backgroundColor: colors.surface.containerHigh,
   },
   playerContainer: {
     paddingVertical: spacing.md,
@@ -309,8 +417,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  actionsBlock: {
-    gap: spacing.md,
-    marginTop: spacing.sm,
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
   },
 });
