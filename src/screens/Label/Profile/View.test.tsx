@@ -69,10 +69,24 @@ describe('LabelProfileViewScreen', () => {
     expect(getAllByText('—')).toHaveLength(2);
   });
 
-  it('llama a logout al tocar Cerrar sesión', async () => {
+
+  it('no llama a logout al cancelar el cierre de sesión', async () => {
     mockState({ status: 'success', data: LABEL, reload: jest.fn() });
     const { getByText } = await render(<LabelProfileViewScreen />);
     await fireEvent.press(getByText('Cerrar sesión'));
+    expect(
+      getByText('¿Estás seguro de que querés cerrar sesión?'),
+    ).toBeTruthy();
+    await fireEvent.press(getByText('Cancelar'));
+    expect(logout).not.toHaveBeenCalled();
+  });
+
+  it('llama a logout al confirmar el cierre de sesión', async () => {
+    mockState({ status: 'success', data: LABEL, reload: jest.fn() });
+    const { getByText } = await render(<LabelProfileViewScreen />);
+    await fireEvent.press(getByText('Cerrar sesión'));
+    await fireEvent.press(getByText('Confirmar'));
     expect(logout).toHaveBeenCalledTimes(1);
   });
+
 });
