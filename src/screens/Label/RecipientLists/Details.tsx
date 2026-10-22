@@ -22,8 +22,20 @@ import { Modal } from '../../../components/molecules/Modal';
 import { RecipientMemberRow } from '../../../components/molecules/RecipientMemberRow';
 import { SearchField } from '../../../components/molecules/SearchField';
 import { useRecipientListDetail } from '../../../features/recipients/useRecipientListDetail';
+
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useManageMembers } from '../../../features/recipients/useManageMembers';
 import type { RecipientListMember } from '../../../types/recipients';
+
+type RecipientListsStackParamList = {
+  List: undefined;
+  New: undefined;
+  Details: { listId: string };
+  Edit: { listId: string };
+  Feedback: { listId: string };
+  BulkUpload: { listId: string };
+};
 
 type LabelRecipientListsDetailsScreenProps = StaticScreenProps<{ listId: string }>;
 
@@ -32,6 +44,10 @@ type LabelRecipientListsDetailsScreenProps = StaticScreenProps<{ listId: string 
  * Permite visualizar miembros, agregar nuevos contactos (por email o desde el pool) y quitar miembros.
  */
 export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsDetailsScreenProps) {
+
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RecipientListsStackParamList>>();
+
   const listId = route.params.listId;
   const state = useRecipientListDetail(listId);
 
@@ -187,16 +203,27 @@ export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsD
             ))}
           </View>
         )}
+      
+<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+  <Button label="Agregar destinatario" variant="secondary" disabled onPress={() => {}} />
+  <Button label="Editar lista" variant="secondary" disabled onPress={() => {}}/>
+  <Button label="Cargar CSV" variant="secondary" onPress={() => navigation.navigate('BulkUpload', { listId: route.params.listId,})} />
+</View>
 
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+             <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: spacing.sm,
+          }}
+        >
           <Button
             label="Agregar destinatario"
             variant="secondary"
             disabled={isRemoving}
             onPress={handleOpenAddModal}
           />
-          {/* LinkButton con el mismo aspecto que un Button secondary: un Button adentro de un
-              LinkButton no sirve porque el Pressable de adentro se queda con el toque. */}
+
           <LinkButton
             screen="Edit"
             params={{ listId, name: list.name }}
@@ -213,8 +240,17 @@ export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsD
           >
             <AppText variant="title-md">Editar lista</AppText>
           </LinkButton>
-          <Button label="Cargar CSV" variant="secondary" disabled onPress={() => {}} />
+
+          <Button
+            label="Cargar CSV"
+            variant="secondary"
+            disabled={loading}
+            onPress={() => {
+              navigation.navigate('BulkUpload', { listId });
+            }}
+          />
         </View>
+        
       </ScrollView>
 
       <RNModal
