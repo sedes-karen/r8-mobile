@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet } from 'react-native';
+import { Alert,ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { colors, spacing } from '../../../constants/design';
@@ -13,7 +13,7 @@ import { useUpdateLabelProfile } from '../../../features/label/useUpdateLabelPro
 import { useLabelImage } from '../../../features/label/useLabelImage';
 import { useChangePassword } from '../../../features/label/useChangePassword';
 import { useAuthActions } from '../../../features/auth/info';
-import { fetchLabelMe } from '../../../services/api/labelsApi';
+import { fetchLabelMe, getLabelProfileImage } from '../../../services/api/labelsApi';
 
 export function LabelProfileEditScreen() {
   const profile = useLabelProfile();
@@ -24,10 +24,10 @@ export function LabelProfileEditScreen() {
     error: saveError,
   } = useUpdateLabelProfile();
 
-  const {
-    uploadImage,
-    loading: uploading,
-    error: uploadError,
+  const{
+      uploadImage,
+      loading: uploading,
+      error: uploadError,
   } = useLabelImage();
 
   const {
@@ -53,51 +53,59 @@ export function LabelProfileEditScreen() {
   const data = profile.data;
 
   const handlePickImage = async () => {
+  try {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.7,
+    });
+
+    if (result.canceled) return;
+
+    const asset = result.assets[0];
+
+    if (!asset) return;
+
+    setImageSaved(false);
+
+    const ok = await uploadImage(
+      asset.uri,
+      asset.mimeType ?? 'image/jpeg',
+    );
+
+    if (!ok) return;
+
+    setImageSaved(true);
+    setRefreshingImage(true);
+
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        quality: 0.7,
-      });
+      const updatedProfile = await fetchLabelMe();
 
-      if (result.canceled) return;
+      let imageUrl = updatedProfile.profileImageUrl;
 
-      const asset = result.assets[0];
-
-      if (!asset) return;
-
-      setImageSaved(false);
-
-      const ok = await uploadImage(
-        asset.uri,
-        asset.mimeType ?? 'image/jpeg',
-      );
-
-      if (!ok) return;
-
-      setImageSaved(true);
-      setRefreshingImage(true);
-
-      try {
-        const updatedProfile = await fetchLabelMe();
-
-        setConfirmedImageUrl(updatedProfile.profileImageUrl);
-      } catch {
-        Alert.alert(
-          'No se pudo refrescar el avatar',
-          'La imagen se subió, pero no se pudo consultar el perfil actualizado. Volvé a cargar el perfil.',
-        );
-      } finally {
-        setRefreshingImage(false);
+      // Si el perfil no incluye la URL, consultar la imagen.
+      if (!imageUrl) {
+        const imageResponse = await getLabelProfileImage();
+        imageUrl = imageResponse.url;
       }
-    } catch (error) {
+      // Si no hay URL, el avatar conserva las iniciales.
+      setConfirmedImageUrl(imageUrl ?? null);
+    } catch {
       Alert.alert(
-        'No se pudo actualizar la imagen',
-        error instanceof Error
-          ? error.message
-          : 'Ocurrió un error al seleccionar o subir la imagen.',
+        'No se pudo refrescar el avatar',
+        'La imagen se subió, pero no se pudo consultar la imagen actualizada. Volvé a cargar el perfil.',
       );
+    } finally {
+      setRefreshingImage(false);
     }
-  };
+  } catch (error: unknown) {
+    Alert.alert(
+      'No se pudo actualizar la imagen',
+      error instanceof Error
+        ? error.message
+        : 'Ocurrió un error al seleccionar o subir la imagen.',
+    );
+  }
+};
 
   const handleChangePassword = async (
     currentPassword: string,
