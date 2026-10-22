@@ -39,30 +39,33 @@ export function Modal({ title, children, visible, onClose, onCancel, onConfirm, 
           style={{
             backgroundColor: colors.surface.container,
             padding: spacing.lg,
-            gap: spacing.md,
+            gap: spacing.lg,
           }}
         >
 
-          <Pressable onPress={onClose}>
-            <LucideIcon name="x" variant='title-md' />
-          </Pressable>
+          <View style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
+            <AppText variant="headline-lg">{title}</AppText>
+            <Pressable onPress={onClose} style={{marginLeft: 'auto'}}>
+              <LucideIcon name="x" variant="title-md" color={colors.surface.bright}  />
+            </Pressable>
+          </View>
 
-          <AppText variant="title-md">
-            {title}
-          </AppText>
 
           {children}
 
-          <Button
-            label="Cancelar"
-            variant="secondary"
-            onPress={onCancel}
-          />
+          <View style={{display: 'flex', flexDirection: 'row', gap: 5, width: '100%'}}>
+            <View style={{flex: 3}} />
+            <Button
+              label="Cancelar"
+              variant="secondary"
+              onPress={onCancel}
+            />
 
-          <Button
-            label={confirmLabel}
-            onPress={onConfirm}
-          />
+            <Button
+              label={confirmLabel}
+              onPress={onConfirm}
+            />
+          </View>
         </View>
       </View>
     </NativeModal>
