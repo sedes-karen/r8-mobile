@@ -61,6 +61,7 @@ Objetivo: cubrir lectura completa y luego creación/edición con mínima fricci�
 - Ruta web origen: `/promo`
 - Requests:
   - `GET /promos/for-label?labelId=<labelId>` — listado de promos del label (**no** usar `GET /promos` global, reservado a admin)
+  - Este listado es el que trae **`feedbackCount` / `averageRating`** y `recipientListIds`. También trae `sentAt` (el detalle también).
 - Criterio:
   - búsqueda/filtro/orden básico en cliente.
 
@@ -68,9 +69,12 @@ Objetivo: cubrir lectura completa y luego creación/edición con mínima fricci�
 
 - Ruta web origen: `/promo/:id` (stacks de edición en rutas hijas)
 - Requests:
-  - `GET /promos/:promoId` — suficiente para el detalle (validación de acceso en API)
+  - `GET /promos/:promoId` — **el mismo** que Artist/Promos/Details (Equipo 3). No hay un detalle “de label” en otra ruta. Validación de acceso en la API.
+  - Trae `sentAt`, `labelId`, `releaseId`, `recipientLists`, `errorMessage?` y, si el JWT es dueño del sello, `credit`. Release slim (sin tracks).
+  - **No** trae `feedbackCount` / `averageRating`: si la UI de Details los quiere, o se omiten, o se reusan del ítem de `for-label` (no re-fetch inventando campos).
+  - En el cliente: usar `getPromoDetails` (o el alias que ya delega). No un segundo GET ni un tipo que exija stats que el detalle no manda. Ver [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md) §6.
 - Criterio:
-  - tabs de resumen y estados visibles.
+  - tabs de resumen y estados visibles; “enviada el” sale de `sentAt` de este GET.
 
 ### 2.5 Crear/Editar release
 
@@ -98,6 +102,7 @@ Objetivo: cubrir lectura completa y luego creación/edición con mínima fricci�
 
 - Depende de contratos de recipient lists (Equipo 5) para seleccionar listas al crear promo.
 - Debe reutilizar componentes visuales de formularios compartidos.
+- **Detalle de promo compartido con Equipo 3:** `GET /promos/:id` es uno solo. Coordinar el tipo (`PromoDetail` + extras opcionales). No duplicar `getPromoDetails`.
 
 ---
 

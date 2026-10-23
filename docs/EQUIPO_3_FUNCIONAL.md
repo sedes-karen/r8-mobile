@@ -40,9 +40,10 @@ Objetivo: consolidar experiencia core del usuario receptor/artista.
 - Requests:
   - `GET /promos/inbox` (query `token=` si el usuario entra sin sesión Bearer)
   - `GET /promos/inbox/pending-count`
-  - `GET /promos/:id` — detalle con release embebido (puede venir **slim**, sin URLs de audio)
+  - `GET /promos/:id` — **el mismo detalle** que usa el Equipo 4 en Label/Releases/Promos/Details (no hay GET aparte). Release embebido **slim**, sin tracks/audio. Sí trae `sentAt`, `labelId`, `releaseId`, `recipientLists`. No trae `feedbackCount` / `averageRating` (eso es el listado `for-label` del label).
   - Enlace público (sin JWT de contacto): `GET /promos/:id/public` y, con sesión artist/label/guest, `POST /promos/:id/public-access` → `{ ok: true }`
-  - **Reproductor:** tomar `release.id` del detalle de promo y llamar **`GET /releases/:releaseId?token=`** para `tracks[].audioUrl` y `coverUrl` (no asumir que un solo GET de promo alcanza)
+  - **Reproductor:** tomar `release.id` del detalle y llamar **`GET /releases/:releaseId?token=`** para `tracks[].audioUrl` y `coverUrl` (un solo GET de promo no alcanza para audio)
+  - En el cliente: reutilizar `getPromoDetails` / `usePromoDetails`. No duplicar el fetch con otro nombre “de label”.
 - Criterio:
   - lista inbox, detalle promo y reproducción básica funcionando.
 
@@ -58,7 +59,7 @@ Objetivo: consolidar experiencia core del usuario receptor/artista.
 
 - Ruta web origen: `/promo/:id/feedback`
 - Requests:
-  - `GET /promos/:id` (carga promo y contexto)
+  - `GET /promos/:id` (carga promo y contexto; mismo endpoint que 2.1 y que el detalle del Equipo 4)
 - Criterio:
   - pantalla carga promo y formulario.
 
@@ -87,6 +88,7 @@ Objetivo: consolidar experiencia core del usuario receptor/artista.
 
 - Requiere autenticación/token de Equipo 1.
 - Debe coordinar modelo `Feedback` con equipos 2 y 4.
+- **Detalle de promo compartido con Equipo 4:** ambos stacks llaman `GET /promos/:id`. Un fetch, un tipo base (`PromoDetail`). Los campos extra del dueño (`credit`) son opcionales; no inventar un segundo cliente ni esperar en el detalle las stats de `GET /promos/for-label`. Contrato: [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md) §6.
 
 ---
 
