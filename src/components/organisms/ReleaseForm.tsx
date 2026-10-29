@@ -57,6 +57,7 @@ export function ReleaseForm({
     <View style={styles.form}>
       <LabeledInput
         label="Título"
+        accessibilityLabel="Título del release"
         value={title}
         onChangeText={onChangeTitle}
         error={errors?.title}
@@ -64,6 +65,7 @@ export function ReleaseForm({
       />
       <LabeledInput
         label="Artista"
+        accessibilityLabel="Artista del release"
         value={artist}
         onChangeText={onChangeArtist}
         error={errors?.artist}
@@ -78,6 +80,7 @@ export function ReleaseForm({
       />
       <LabeledInput
         label="Fecha de release"
+        accessibilityLabel="Fecha de release"
         value={releaseDate}
         onChangeText={onChangeReleaseDate}
         error={errors?.releaseDate}
