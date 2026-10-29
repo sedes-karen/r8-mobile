@@ -5,6 +5,7 @@ import { Button } from '../atoms/Button';
 import { ErrorMessage } from '../atoms/ErrorMessage';
 import { LabeledInput } from '../molecules/LabeledInput';
 import { ReleaseTypeSelector } from '../molecules/ReleaseTypeSelector';
+import { SuccessNotice } from '../molecules/SuccessNotice';
 
 const RELEASE_TYPES: readonly ReleaseType[] = ['EP', 'VA', 'ALBUM'];
 
@@ -90,7 +91,7 @@ export function ReleaseForm({
         editable={!loading}
       />
       {errorMessage ? <ErrorMessage message={errorMessage} /> : null}
-      {successMessage ? <ErrorMessage message={successMessage} /> : null}
+      {successMessage ? <SuccessNotice title={successMessage} /> : null}
       <Button
         label={submitLabel}
         onPress={onSubmit}

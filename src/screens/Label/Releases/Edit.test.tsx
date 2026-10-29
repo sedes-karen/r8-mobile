@@ -57,10 +57,12 @@ describe('LabelReleasesEditScreen', () => {
   it('muestra la confirmación y vuelve atrás al guardar', async () => {
     jest.useFakeTimers();
     try {
-      const { getByDisplayValue, getByText } = await render(<LabelReleasesEditScreen route={route} />);
+      const { getByDisplayValue, getByText, queryByRole } = await render(<LabelReleasesEditScreen route={route} />);
       await waitFor(() => expect(getByDisplayValue('EP Demo')).toBeTruthy());
       await fireEvent.press(getByText('Guardar cambios'));
       await waitFor(() => expect(getByText('Cambios guardados')).toBeTruthy());
+      // El éxito ya no se muestra como error (ErrorMessage usa accessibilityRole="alert").
+      expect(queryByRole('alert')).toBeNull();
       act(() => {
         jest.advanceTimersByTime(1200);
       });

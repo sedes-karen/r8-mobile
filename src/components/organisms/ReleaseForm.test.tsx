@@ -52,4 +52,10 @@ describe('ReleaseForm', () => {
 
     expect(props.onSubmit).toHaveBeenCalledTimes(1);
   });
+
+  it('muestra el aviso de éxito con SuccessNotice', async () => {
+    await render(<ReleaseForm {...props} successMessage="Cambios guardados" />);
+
+    expect(screen.getByText('Cambios guardados')).toBeTruthy();
+  });
 });
