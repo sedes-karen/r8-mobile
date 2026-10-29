@@ -64,7 +64,7 @@ Objetivo: cubrir gestión de destinatarios/listas y explotación de feedback par
   - `GET /feedback/pending-count`
   - `GET /feedback/analytics?dateFrom=&dateTo=` — usar **ambos** query params para el rango de analytics
   - (Opcional) `GET /feedback/geo-density` — mapa de densidad
-  - Para contexto de promos (estadísticas cruzadas en la UI web): `GET /promos/for-label?labelId=`
+  - Para contexto de promos (estadísticas cruzadas en la UI web): `GET /promos/for-label?labelId=` (listado con `feedbackCount` / `averageRating`; el detalle de una promo es `GET /promos/:id`, sin esas stats — DTOs §6)
 - Criterio:
   - KPIs y listado de feedback visibles.
 

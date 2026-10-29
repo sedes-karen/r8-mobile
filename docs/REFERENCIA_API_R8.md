@@ -1,6 +1,6 @@
 # Referencia HTTP — alineación con r8-site y r8-api
 
-**Versión:** 2026-09-24  
+**Versión:** 2026-10-23  
 **Sincronizado con:** `r8-api` (`docs/MODULES.md` v1.7, rutas Express actuales) y cliente web `r8-site` (`src/api/`).  
 **Propósito:** La app móvil debe ofrecer las **mismas capacidades funcionales** que **r8-site** (`src/app/router.tsx`), consumiendo **r8-api** (Express). El contrato vigente usa **prefijos por dominio**; el **tenant (label / usuario)** lo resuelve el **JWT** (y en flujos de destinatario, `?token=`), no rutas anidadas del estilo `/labels/:labelId/releases`.
 
@@ -118,8 +118,8 @@ Auth, usuarios, labels, artists, releases (+ artwork/tracks), promos (label + in
 | `GET` | `/users/me` | Bearer | Perfil enriquecido (`labels`, `artist`, URLs firmadas) |
 | `PUT` | `/users/me` | Bearer | Actualizar perfil usuario |
 | `POST` | `/users/me/change-password` | Bearer | Cambio de contraseña logueado — revoca cookies refresh |
-| `POST` | `/users/password/request-reset` | — | Paso 1 reset por email |
-| `POST` | `/users/password/reset` | — | Paso 2 reset (PIN + nueva contraseña); devuelve `accessToken` |
+| `POST` | `/users/password/request-reset` | — | Paso 1: pide PIN. Respuesta genérica **sin** `accessToken` |
+| `POST` | `/users/password/reset` | — | Paso 2: PIN + nueva contraseña. **200** `{ message, accessToken }` + cookie; deja al usuario logueado |
 | `GET` | `/users/me/recipient` | Bearer | Vista recipient del usuario |
 | `POST` | `/users/me/activate-profile` | Bearer | Activar el **segundo** perfil (`label` o `artist`) sobre la misma cuenta → **201** + `GET /users/me` |
 | `GET` | `/users/recipient-by-token?token=` | — | Contacto promo por token (sin Bearer) |
@@ -130,6 +130,8 @@ Auth, usuarios, labels, artists, releases (+ artwork/tracks), promos (label + in
 **Registro abierto (label/artist):** `POST /users/register` → **201** `{ success, requiresEmailVerification: true, email }` (usuario queda `EMAIL_NOT_VERIFIED`, **sin** `accessToken`) → el usuario ingresa el PIN del email → `POST /users/verify-email` → **200** con `accessToken` + cookie → `GET /users/me`. Reenvío: `POST /users/resend-verification`.
 
 **Completar cuenta promo:** `POST /users/register?token=` sigue emitiendo sesión al instante (**sin** paso PIN).
+
+**Reset de contraseña:** `POST /users/password/request-reset` **no** abre sesión. `POST /users/password/reset` sí: revoca refresh previos, emite `accessToken` + cookie (igual que `verify-email`) y no hace falta un `POST /auth/login` extra. Después, `GET /users/me` para el rol. En RN usar el Bearer del JSON; la cookie no se da por sentada.
 
 **Login con email sin verificar:** contraseña correcta pero status `EMAIL_NOT_VERIFIED` → **403** `"Email verification required"` → redirigir a pantalla de PIN / `verify-email`.
 
@@ -207,7 +209,7 @@ React Native **no** persiste cookies httpOnly como el navegador. El curso adopta
 | `GET` | `/promos/dashboard/:labelId` | Label o artist (Bearer) | Variante dashboard (artista ve sus promos recibidas) |
 | `GET` | `/promos/inbox` | Artist/guest | Inbox receptor; `?token=`, `?no-feedback-only=true` |
 | `GET` | `/promos/inbox/pending-count` | Artist/guest | `{ count }` |
-| `GET` | `/promos/:id` | Artist/label/guest | Detalle; `?token=`; payload **slim** (sin tracks en detalle estándar — ver DTOs) |
+| `GET` | `/promos/:id` | Artist/label/guest | **Mismo detalle** para Artist y Label Details. `?token=` si es contacto. Trae `sentAt`, `labelId`, `releaseId`, `recipientLists`. Release **slim** (sin tracks). `credit` solo si el JWT es dueño del sello. Stats (`feedbackCount`) **no** vienen acá — están en `for-label`. Ver DTOs §6 |
 | `GET` | `/promos/:id/public` | — | Vista pública (gate nombre/email); sin sesión |
 | `POST` | `/promos/:id/public-access` | Artist/label/guest | Asociar al visitante del enlace público (`{ ok: true }`); rate-limited |
 | `POST` | `/promos` | Label* | Crear — *la ruta admite `artist`, pero el servidor exige ownership del label del release → artista sin label propio recibe **403** |
@@ -292,7 +294,9 @@ Tenant por JWT; **sin** `:labelId` en la URL.
 
 ### 5.1 Promos (label)
 
-- Listado operativo: **`GET /promos/for-label?labelId=<uuid>`** (mismo origen que `promosService.getDashboard` en r8-site).
+- Listado operativo: **`GET /promos/for-label?labelId=<uuid>`** (mismo origen que `promosService.getDashboard` en r8-site). Acá vienen `sentAt`, `recipientListIds`, `feedbackCount` y `averageRating`.
+- Detalle (Label/Releases/Promos/Details **y** Artist/Promos/Details): **`GET /promos/:id`**. Es el **mismo** GET, no hay uno “de label”. También manda `sentAt`. No manda `feedbackCount` / `averageRating`.
+- En mobile: una función de fetch (`getPromoDetails`). Un alias (`fetchPromoById` / `usePromoDetail`) no cambia la ruta.
 - Crear: **`POST /promos`** con `releaseId`, `sendType`, `recipientListIds`, `scheduledAt` si aplica.
 - Eliminar: solo en estados permitidos; tras delete la promo desaparece de listados.
 
@@ -302,7 +306,7 @@ Tenant por JWT; **sin** `:labelId` en la URL.
 - Cada ítem puede traer `release.tracks[].src` para audio en inbox.
 - Pending: **`GET /promos/inbox/pending-count`**.
 - Dismiss: **`POST /promos/:id/dismiss`** → **204** (rol guest / token).
-- Detalle para reproductor: **`GET /promos/:id`**; para tracks completos con audio suele usarse **`GET /releases/:releaseId?token=`** tras resolver `release.id` desde la promo.
+- Detalle para reproductor o feedback: **`GET /promos/:id`** (mismo body que ve el label, **sin** `credit`). Para tracks/audio: **`GET /releases/:releaseId?token=`** con el `release.id` de la promo. `sentAt` viene en este GET; no usen `for-label` desde el stack artista.
 
 ### 5.3 Feedback (receptor)
 
