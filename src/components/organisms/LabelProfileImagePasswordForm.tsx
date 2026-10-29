@@ -6,12 +6,14 @@ import { Avatar } from '../atoms/Avatar';
 import { Button } from '../atoms/Button';
 import { ErrorMessage } from '../atoms/ErrorMessage';
 import { LabeledInput } from '../molecules/LabeledInput';
+import { SuccessNotice } from '../molecules/SuccessNotice';
 
 type Props = {
   imageUrl: string | null;
   fallbackName: string;
   uploading: boolean;
   uploadError: string | null;
+  imageSaved: boolean;
   onPickImage: () => void;
   changingPassword: boolean;
   passwordError: string | null;
@@ -26,6 +28,7 @@ export function LabelProfileImagePasswordForm({
   fallbackName,
   uploading,
   uploadError,
+  imageSaved,
   onPickImage,
   changingPassword,
   passwordError,
@@ -64,6 +67,7 @@ export function LabelProfileImagePasswordForm({
           />
         </View>
         {uploadError ? <ErrorMessage message={uploadError} /> : null}
+        {imageSaved ? <SuccessNotice title="Imagen actualizada" /> : null}
       </View>
 
       <View style={styles.section}>
