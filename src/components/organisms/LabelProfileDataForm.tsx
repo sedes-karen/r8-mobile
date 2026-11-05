@@ -40,9 +40,15 @@ const URL_FIELDS: ReadonlyArray<LabelProfileFormField> = [
   'twitterUrl',
 ];
 
-const URL_PATTERN = /^https?:\/\/[^\s/$.?#][^\s]*$/i;
+const URL_PATTERN = /^https?:\/\/[^\s/$.?#]+(\.[^\s/$.?#]+)+([/?#]\S*)?$/i;
 
 const optional = (value: string): string | undefined => (value ? value : undefined);
+
+export function normalizeUrl(value: string): string {
+  const trimmed = value.trim();
+  if (trimmed === '') return '';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
 
 export function validateLabelProfileForm(values: LabelProfileFormValues): LabelProfileFormErrors {
   const errors: LabelProfileFormErrors = {};
@@ -51,9 +57,9 @@ export function validateLabelProfileForm(values: LabelProfileFormValues): LabelP
     errors.name = 'El nombre no puede estar vacío.';
   }
   for (const field of URL_FIELDS) {
-    const value = values[field].trim();
+    const value = normalizeUrl(values[field]);
     if (value !== '' && !URL_PATTERN.test(value)) {
-      errors[field] = 'Ingresá una URL válida que empiece con http:// o https://.';
+      errors[field] = 'Ingresá una URL válida.';
     }
   }
 
@@ -64,10 +70,10 @@ export function toUpdateLabelProfileInput(values: LabelProfileFormValues): Updat
   return {
     name: values.name.trim(),
     description: optional(values.description.trim()),
-    instagramUrl: optional(values.instagramUrl.trim()),
-    soundcloudUrl: optional(values.soundcloudUrl.trim()),
-    bandcampUrl: optional(values.bandcampUrl.trim()),
-    twitterUrl: optional(values.twitterUrl.trim()),
+    instagramUrl: optional(normalizeUrl(values.instagramUrl)),
+    soundcloudUrl: optional(normalizeUrl(values.soundcloudUrl)),
+    bandcampUrl: optional(normalizeUrl(values.bandcampUrl)),
+    twitterUrl: optional(normalizeUrl(values.twitterUrl)),
   };
 }
 
@@ -82,7 +88,6 @@ export function LabelProfileDataForm({ initial, onSubmit, saving, errorMessage }
   }));
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [saved, setSaved] = useState(false);
-  /** Evita dos PUT si se toca "Guardar" dos veces antes de que `saving` llegue a true. */
   const submitting = useRef(false);
 
   const allErrors = validateLabelProfileForm(values);
