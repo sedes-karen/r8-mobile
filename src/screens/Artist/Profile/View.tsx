@@ -1,4 +1,5 @@
-import { ScrollView, View } from 'react-native';
+import { useState } from 'react';
+import { Modal as NativeModal, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinkButton } from '../../../components/atoms/LinkButton';
 import { borderRadius, colors, spacing } from '../../../constants/design';
@@ -7,6 +8,7 @@ import { Avatar } from '../../../components/atoms/Avatar';
 import { Button } from '../../../components/atoms/Button';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { ErrorState } from '../../../components/molecules/ErrorState';
+import { Modal as ConfirmationModal } from '../../../components/molecules/Modal';
 import { ProfileField } from '../../../components/molecules/ProfileField';
 import { useArtistProfile } from '../../../features/artist/useArtistProfile';
 import { useAuthActions } from '../../../features/auth/info';
@@ -15,6 +17,7 @@ import { useAuthActions } from '../../../features/auth/info';
 export function ArtistProfileViewScreen() {
   const state = useArtistProfile();
   const { logout } = useAuthActions();
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
   if (state.status === 'loading') {
     return <LoadingBlock label="Cargando perfil..." />;
@@ -59,8 +62,30 @@ export function ArtistProfileViewScreen() {
         >
           <AppText variant="title-md" color={colors.onSurface.default}>Editar</AppText>
         </LinkButton>
-        <Button label="Cerrar sesión" variant="secondary" onPress={logout} />
+        <Button label="Cerrar sesión" variant="secondary" onPress={() => setIsLogoutModalVisible(true)} />
       </ScrollView>
+      <NativeModal
+        testID="logout-confirmation-modal"
+        visible={isLogoutModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsLogoutModalVisible(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', padding: spacing.lg, backgroundColor: `${colors.background}80` }}>
+          <ConfirmationModal
+            title="Cerrar sesión"
+            confirmLabel="Confirmar"
+            onClose={() => setIsLogoutModalVisible(false)}
+            onCancel={() => setIsLogoutModalVisible(false)}
+            onConfirm={() => {
+              setIsLogoutModalVisible(false);
+              logout();
+            }}
+          >
+            <AppText variant="body-lg">¿Estás seguro de que querés cerrar sesión?</AppText>
+          </ConfirmationModal>
+        </View>
+      </NativeModal>
     </SafeAreaView>
   );
 }
