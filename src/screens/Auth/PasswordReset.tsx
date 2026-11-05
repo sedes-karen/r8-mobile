@@ -10,7 +10,7 @@ import { usePasswordReset } from '../../features/auth/usePasswordReset';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type ResetStep = 'request' | 'confirm' | 'complete';
+type ResetStep = 'request' | 'confirm';
 
 export function AuthPasswordResetScreen() {
   const [step, setStep] = useState<ResetStep>('request');
@@ -37,15 +37,12 @@ export function AuthPasswordResetScreen() {
   };
 
   const handleReset = async () => {
-    const wasReset = await submitReset({
+    await submitReset({
       email,
       pin: pin.trim(),
       newPassword,
       confirmPassword,
     });
-    if (wasReset) {
-      setStep('complete');
-    }
   };
 
   return (
@@ -53,7 +50,7 @@ export function AuthPasswordResetScreen() {
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: spacing.lg }}>
         <View style={{ gap: spacing.xl }}>
           <AppText variant="headline-lg">
-            {step === 'complete' ? 'Contraseña actualizada' : 'Recuperar contraseña'}
+            Recuperar contraseña
           </AppText>
 
           {step === 'request' ? (
@@ -82,12 +79,6 @@ export function AuthPasswordResetScreen() {
               error={error}
               successMessage={successMessage}
             />
-          ) : null}
-
-          {step === 'complete' ? (
-            <AppText variant="body-sm" color={colors.secondary.default}>
-              {successMessage || 'La contraseña se actualizó correctamente. Ya podés iniciar sesión.'}
-            </AppText>
           ) : null}
 
           <LinkButton

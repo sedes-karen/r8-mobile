@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { establishSession } from '../../services/api/sessionService';
 import {
   requestPasswordReset,
   resetPassword,
   type ResetPasswordBody,
 } from '../../services/api/userAuthApi';
+import { useAuthActions } from './info';
 
 export function usePasswordReset() {
+  const { applySession } = useAuthActions();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -30,12 +33,23 @@ export function usePasswordReset() {
     setLoading(true);
     setError(null);
     setSuccessMessage(null);
+    let passwordWasReset = false;
     try {
-      await resetPassword(body);
-      setSuccessMessage('Contraseña actualizada.');
+      const response = await resetPassword(body);
+      if (!response.accessToken) {
+        throw new Error('La respuesta no incluyó un token de acceso.');
+      }
+
+      passwordWasReset = true;
+      const session = await establishSession(response.accessToken);
+      applySession(session.accessToken, session.role, session.user);
       return true;
     } catch {
-      setError('No se pudo cambiar la contraseña.');
+      setError(
+        passwordWasReset
+          ? 'La contraseña se actualizó, pero no se pudo iniciar la sesión. Ingresá con la nueva contraseña.'
+          : 'No se pudo cambiar la contraseña.',
+      );
       return false;
     } finally {
       setLoading(false);
