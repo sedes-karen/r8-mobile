@@ -2,6 +2,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '../../../components/atoms/AppText';
+import { Badge } from '../../../components/atoms/Badge';
 import { LoadingBlock } from '../../../components/atoms/LoadingBlock';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { LinkButton } from '../../../components/atoms/LinkButton';
@@ -28,6 +29,7 @@ export function ArtistPromosDetailsScreen({ route }: ScreenProps) {
   }
 
   const promo = state.data;
+  const isExpired = promo.status === 'EXPIRED';
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -40,6 +42,8 @@ export function ArtistPromosDetailsScreen({ route }: ScreenProps) {
           <AppText variant="title-md">
             Información de la promo
           </AppText>
+
+          {isExpired ? <Badge label="Expirada" /> : null}
 
           <AppText>ID: {promo.id}</AppText>
           <AppText>Estado: {promo.status}</AppText>
