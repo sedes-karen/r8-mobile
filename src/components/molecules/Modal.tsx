@@ -1,48 +1,71 @@
-import { Pressable, View } from 'react-native';
+import { Modal as NativeModal, Pressable, View } from 'react-native';
 import { type ReactNode } from 'react';
 import { colors, spacing } from '../../constants/design';
 import { AppText } from '../atoms/AppText';
 import { Button } from '../atoms/Button';
-
+import { LucideIcon } from '../atoms/LucideIcon';
 
 type ModalProps = {
   title: string;
   children: ReactNode;
+  visible: boolean;
   onClose: () => void;
   onCancel: () => void;
   onConfirm: () => void;
   confirmLabel?: string;
 };
 
-export function Modal({ title, children, onClose, onCancel, onConfirm, confirmLabel = 'Confirmar' }: ModalProps) {
+export function Modal({ title, children, visible, onClose, onCancel, onConfirm, confirmLabel = 'Confirmar' }: ModalProps) {
   return (
-    <View
-      style={{
-        backgroundColor: colors.surface.container,
-        padding: spacing.lg,
-        gap: spacing.md,
-      }}
+    <NativeModal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
     >
-      <Pressable onPress={onClose}>
-        <AppText variant="title-md">x</AppText>
-      </Pressable>
+        {/* Fondo oscuro que ocupa toda la pantalla */}
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          padding: spacing.lg,
+        }}
+      >
+        {/* Tarjeta del modal */}
+        <View
+          style={{
+            backgroundColor: colors.surface.container,
+            padding: spacing.lg,
+            gap: spacing.lg,
+          }}
+        >
 
-      <AppText variant="title-md">
-        {title}
-      </AppText>
+          <View style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
+            <AppText variant="headline-lg">{title}</AppText>
+            <Pressable onPress={onClose} style={{marginLeft: 'auto'}}>
+              <LucideIcon name="x" variant="title-md" color={colors.surface.bright}  />
+            </Pressable>
+          </View>
 
-      {children}
 
-      <Button
-        label="Cancelar"
-        variant="secondary"
-        onPress={onCancel}
-      />
+          {children}
 
-      <Button
-        label={confirmLabel}
-        onPress={onConfirm}
-      />
-    </View>
+          <View style={{display: 'flex', flexDirection: 'row', gap: 5, width: '100%'}}>
+            <View style={{flex: 3}} />
+            <Button
+              label="Cancelar"
+              variant="secondary"
+              onPress={onCancel}
+            />
+
+            <Button
+              label={confirmLabel}
+              onPress={onConfirm}
+            />
+          </View>
+        </View>
+      </View>
+    </NativeModal>
   );
 }
