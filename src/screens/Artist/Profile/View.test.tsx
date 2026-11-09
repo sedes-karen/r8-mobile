@@ -59,8 +59,8 @@ describe('ArtistProfileViewScreen', () => {
 
   it('muestra el nombre y la bio del artista', async () => {
     mockState({ status: 'success', data: ARTIST, reload: jest.fn() });
-    const { getByText } = await render(<ArtistProfileViewScreen />);
-    expect(getByText('Rpruebas Artist')).toBeTruthy();
+    const { getAllByText, getByText } = await render(<ArtistProfileViewScreen />);
+    expect(getAllByText('Rpruebas Artist')).toHaveLength(2);
     expect(getByText('Bio de prueba')).toBeTruthy();
   });
 

@@ -54,6 +54,7 @@ beforeEach(() => {
     error: null,
   });
   jest.spyOn(useChangePasswordModule, 'useChangePassword').mockReturnValue({
+    submit: changePassword,
     changePassword,
     loading: false,
     error: null,
