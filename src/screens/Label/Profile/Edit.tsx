@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { Alert, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { colors, spacing } from '../../../constants/design';
@@ -14,7 +14,6 @@ import { useLabelImage } from '../../../features/label/useLabelImage';
 import { useChangePassword } from '../../../features/label/useChangePassword';
 import { useAuthActions } from '../../../features/auth/info';
 
-
 export function LabelProfileEditScreen() {
   const profile = useLabelProfile();
   const { submit: saveProfile, loading: saving, error: saveError } = useUpdateLabelProfile();
@@ -22,8 +21,8 @@ export function LabelProfileEditScreen() {
   const { changePassword, loading: changingPassword, error: passwordError } = useChangePassword();
   const { logout } = useAuthActions();
 
-
   const [pickedImageUri, setPickedImageUri] = useState<string | null>(null);
+  const [imageSaved, setImageSaved] = useState(false);
 
   if (profile.status === 'loading') {
     return <LoadingBlock label="Cargando perfil..." />;
@@ -36,22 +35,37 @@ export function LabelProfileEditScreen() {
   const data = profile.data;
 
   const handlePickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      quality: 0.7,
-    });
-    if (result.canceled) return;
-    const asset = result.assets[0];
-    const ok = await uploadImage(asset.uri, asset.mimeType ?? 'image/jpeg');
-    if (ok) {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 0.7,
+      });
+      if (result.canceled) return;
+      const asset = result.assets[0];
+      if (!asset) return;
+
+      setImageSaved(false);
+      const ok = await uploadImage(asset.uri, asset.mimeType ?? 'image/jpeg');
+      if (!ok) return;
+
       setPickedImageUri(asset.uri);
+      setImageSaved(true);
+      // El confirm no devuelve la URL: refrescamos el perfil para traer profileImageUrl.
+      profile.reload();
+    } catch (error: unknown) {
+      Alert.alert(
+        'No se pudo actualizar la imagen',
+        error instanceof Error ? error.message : 'Ocurrió un error al seleccionar la imagen.',
+      );
     }
   };
 
   const handleChangePassword = async (currentPassword: string, newPassword: string) => {
     const ok = await changePassword(currentPassword, newPassword);
     if (ok) {
-      logout();
+      Alert.alert('Contraseña actualizada', 'Iniciá sesión nuevamente.', [
+        { text: 'OK', onPress: logout },
+      ]);
     }
   };
 
@@ -72,6 +86,7 @@ export function LabelProfileEditScreen() {
           fallbackName={data.name ?? 'Label'}
           uploading={uploading}
           uploadError={uploadError}
+          imageSaved={imageSaved}
           onPickImage={handlePickImage}
           changingPassword={changingPassword}
           passwordError={passwordError}
