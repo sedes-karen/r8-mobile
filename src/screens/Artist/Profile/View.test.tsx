@@ -87,6 +87,8 @@ describe('ArtistProfileViewScreen', () => {
     await fireEvent.press(screen.getByText('Cerrar sesión'));
     if (action === 'android') {
       await fireEvent(screen.getByTestId('logout-confirmation-modal'), 'requestClose');
+    } else if (action === 'x') {
+      await fireEvent.press(screen.getByTestId('modal-close-button'));
     } else {
       await fireEvent.press(screen.getByText(action));
     }

@@ -72,25 +72,23 @@ export function LabelRecipientListsEditScreen({ route }: LabelRecipientListsEdit
 
         <Button label="Guardar" loading={loading} disabled={!canSave} onPress={handleSave} />
 
-        {showConfirm ? (
-          <Modal
-            title="Eliminar lista"
-            onClose={() => setShowConfirm(false)}
-            onCancel={() => setShowConfirm(false)}
-            onConfirm={handleDelete}
-            confirmLabel="Eliminar"
-          >
-            <AppText>¿Seguro que querés eliminar esta lista? No se puede deshacer.</AppText>
-          </Modal>
-        ) : (
-          <Button
-            label="Eliminar lista"
-            variant="secondary"
-            disabled={loading}
-            onPress={() => setShowConfirm(true)}
-          />
-        )}
+        <Button
+          label="Eliminar lista"
+          variant="secondary"
+          disabled={loading}
+          onPress={() => setShowConfirm(true)}
+        />
       </View>
+      <Modal
+        visible={showConfirm}
+        title="Eliminar lista"
+        onClose={() => setShowConfirm(false)}
+        onCancel={() => setShowConfirm(false)}
+        onConfirm={handleDelete}
+        confirmLabel="Eliminar"
+      >
+        <AppText>¿Seguro que querés eliminar esta lista? No se puede deshacer.</AppText>
+      </Modal>
     </SafeAreaView>
   );
 }

@@ -217,165 +217,150 @@ export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsD
         </View>
       </ScrollView>
 
-      <RNModal
+      <Modal
         visible={isAddModalOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={isAdding ? () => {} : handleCloseAddModal}
+        title="Agregar destinatario"
+        onClose={isAdding ? () => {} : handleCloseAddModal}
+        onCancel={isAdding ? () => {} : handleCloseAddModal}
+        onConfirm={isSubmitDisabled ? () => {} : handleConfirmAdd}
+        confirmLabel={confirmLabel}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            justifyContent: 'center',
-            padding: spacing.lg,
-          }}
-        >
-          <Modal
-            title="Agregar destinatario"
-            onClose={isAdding ? () => {} : handleCloseAddModal}
-            onCancel={isAdding ? () => {} : handleCloseAddModal}
-            onConfirm={isSubmitDisabled ? () => {} : handleConfirmAdd}
-            confirmLabel={confirmLabel}
-          >
-            <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.xs }}>
-              <Button
-                label="Por email"
-                variant={addMode === 'email' ? 'primary' : 'secondary'}
-                disabled={isAdding}
-                onPress={() => {
-                  if (isAdding) return;
-                  setAddMode('email');
-                  clearError();
-                }}
-              />
-              <Button
-                label="Desde el pool"
-                variant={addMode === 'pool' ? 'primary' : 'secondary'}
-                disabled={isAdding}
-                onPress={() => {
-                  if (isAdding) return;
-                  setAddMode('pool');
-                  clearError();
-                  if (!pool && !isPoolLoading) {
-                    loadPool();
-                  }
-                }}
-              />
-            </View>
-
-            {addMode === 'email' ? (
-              <View style={{ gap: spacing.sm }}>
-                <LabeledInput
-                  label="Email del destinatario"
-                  placeholder="persona@ejemplo.com"
-                  value={emailInput}
-                  onChangeText={(text) => {
-                    setEmailInput(text);
-                    if (mutationError) clearError();
-                  }}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  editable={!isAdding}
-                  error={mutationError ?? undefined}
-                />
-              </View>
-            ) : (
-              <View style={{ gap: spacing.sm }}>
-                <SearchField
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  placeholder="Buscar en el pool..."
-                  editable={!isAdding}
-                />
-                {isPoolLoading ? (
-                  <ActivityIndicator color={colors.primary.default} style={{ marginVertical: spacing.md }} />
-                ) : poolError ? (
-                  <ErrorMessage message={poolError} />
-                ) : (
-                  <>
-                    {!selectedPoolId && filteredPool.length > 0 ? (
-                      <AppText variant="body-sm" color={colors.onSurface.variant}>
-                        Seleccioná un contacto de la lista para agregarlo.
-                      </AppText>
-                    ) : null}
-                    <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
-                      {filteredPool.length === 0 ? (
-                        <AppText
-                          variant="body-sm"
-                          color={colors.onSurface.variant}
-                          style={{ paddingVertical: spacing.sm }}
-                        >
-                          No se encontraron destinatarios en el pool.
-                        </AppText>
-                      ) : (
-                        filteredPool.map((contact) => {
-                          const isMember = members.some(
-                            (m) =>
-                              m.id === contact.id ||
-                              m.email.toLowerCase().trim() === contact.email.toLowerCase().trim(),
-                          );
-                          const isSelected = selectedPoolId === contact.id;
-                          return (
-                            <Pressable
-                              key={contact.id}
-                              disabled={isMember || isAdding}
-                              accessibilityRole="button"
-                              accessibilityState={{
-                                disabled: isMember || isAdding,
-                                selected: isSelected,
-                              }}
-                              onPress={() => {
-                                if (isMember || isAdding) return;
-                                setSelectedPoolId(contact.id);
-                                if (mutationError) clearError();
-                              }}
-                              style={{
-                                paddingVertical: spacing.sm,
-                                paddingHorizontal: spacing.sm,
-                                borderBottomWidth: 1,
-                                borderBottomColor: colors.surface.border,
-                                backgroundColor: isSelected
-                                  ? colors.surface.containerHigh
-                                  : 'transparent',
-                                opacity: isMember ? 0.5 : 1,
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <View style={{ flex: 1, marginRight: spacing.xs }}>
-                                <AppText variant="body-lg">
-                                  {contact.display_name ?? contact.email}
-                                </AppText>
-                                {contact.display_name ? (
-                                  <AppText variant="body-sm" color={colors.onSurface.variant}>
-                                    {contact.email}
-                                  </AppText>
-                                ) : null}
-                              </View>
-                              {isMember ? (
-                                <AppText variant="label-micro" color={colors.onSurface.variant}>
-                                  En lista
-                                </AppText>
-                              ) : isSelected ? (
-                                <AppText variant="label-micro" color={colors.primary.default}>
-                                  ✓ Seleccionado
-                                </AppText>
-                              ) : null}
-                            </Pressable>
-                          );
-                        })
-                      )}
-                    </ScrollView>
-                  </>
-                )}
-                {mutationError ? <ErrorMessage message={mutationError} /> : null}
-              </View>
-            )}
-          </Modal>
+        <View style={{ flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.xs }}>
+          <Button
+            label="Por email"
+            variant={addMode === 'email' ? 'primary' : 'secondary'}
+            disabled={isAdding}
+            onPress={() => {
+              if (isAdding) return;
+              setAddMode('email');
+              clearError();
+            }}
+          />
+          <Button
+            label="Desde el pool"
+            variant={addMode === 'pool' ? 'primary' : 'secondary'}
+            disabled={isAdding}
+            onPress={() => {
+              if (isAdding) return;
+              setAddMode('pool');
+              clearError();
+              if (!pool && !isPoolLoading) {
+                loadPool();
+              }
+            }}
+          />
         </View>
-      </RNModal>
+
+        {addMode === 'email' ? (
+          <View style={{ gap: spacing.sm }}>
+            <LabeledInput
+              label="Email del destinatario"
+              placeholder="persona@ejemplo.com"
+              value={emailInput}
+              onChangeText={(text) => {
+                setEmailInput(text);
+                if (mutationError) clearError();
+              }}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              editable={!isAdding}
+              error={mutationError ?? undefined}
+            />
+          </View>
+        ) : (
+          <View style={{ gap: spacing.sm }}>
+            <SearchField
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Buscar en el pool..."
+              editable={!isAdding}
+            />
+            {isPoolLoading ? (
+              <ActivityIndicator color={colors.primary.default} style={{ marginVertical: spacing.md }} />
+            ) : poolError ? (
+              <ErrorMessage message={poolError} />
+            ) : (
+              <>
+                {!selectedPoolId && filteredPool.length > 0 ? (
+                  <AppText variant="body-sm" color={colors.onSurface.variant}>
+                    Seleccioná un contacto de la lista para agregarlo.
+                  </AppText>
+                ) : null}
+                <ScrollView style={{ maxHeight: 200 }} nestedScrollEnabled>
+                  {filteredPool.length === 0 ? (
+                    <AppText
+                      variant="body-sm"
+                      color={colors.onSurface.variant}
+                      style={{ paddingVertical: spacing.sm }}
+                    >
+                      No se encontraron destinatarios en el pool.
+                    </AppText>
+                  ) : (
+                    filteredPool.map((contact) => {
+                      const isMember = members.some(
+                        (m) =>
+                          m.id === contact.id ||
+                          m.email.toLowerCase().trim() === contact.email.toLowerCase().trim(),
+                      );
+                      const isSelected = selectedPoolId === contact.id;
+                      return (
+                        <Pressable
+                          key={contact.id}
+                          disabled={isMember || isAdding}
+                          accessibilityRole="button"
+                          accessibilityState={{
+                            disabled: isMember || isAdding,
+                            selected: isSelected,
+                          }}
+                          onPress={() => {
+                            if (isMember || isAdding) return;
+                            setSelectedPoolId(contact.id);
+                            if (mutationError) clearError();
+                          }}
+                          style={{
+                            paddingVertical: spacing.sm,
+                            paddingHorizontal: spacing.sm,
+                            borderBottomWidth: 1,
+                            borderBottomColor: colors.surface.border,
+                            backgroundColor: isSelected
+                              ? colors.surface.containerHigh
+                              : 'transparent',
+                            opacity: isMember ? 0.5 : 1,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <View style={{ flex: 1, marginRight: spacing.xs }}>
+                            <AppText variant="body-lg">
+                              {contact.display_name ?? contact.email}
+                            </AppText>
+                            {contact.display_name ? (
+                              <AppText variant="body-sm" color={colors.onSurface.variant}>
+                                {contact.email}
+                              </AppText>
+                            ) : null}
+                          </View>
+                          {isMember ? (
+                            <AppText variant="label-micro" color={colors.onSurface.variant}>
+                              En lista
+                            </AppText>
+                          ) : isSelected ? (
+                            <AppText variant="label-micro" color={colors.primary.default}>
+                              ✓ Seleccionado
+                            </AppText>
+                          ) : null}
+                        </Pressable>
+                      );
+                    })
+                  )}
+                </ScrollView>
+              </>
+            )}
+            {mutationError ? <ErrorMessage message={mutationError} /> : null}
+          </View>
+        )}
+      </Modal>
     </SafeAreaView>
   );
 }

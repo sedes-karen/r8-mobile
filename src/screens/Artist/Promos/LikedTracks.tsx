@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal as RNModal, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing } from '../../../constants/design';
 import { AppText } from '../../../components/atoms/AppText';
@@ -66,33 +66,18 @@ export function ArtistPromosLikedTracksScreen() {
           ))
         )}
       </ScrollView>
-            <RNModal
+      <Modal
         visible={trackToRemove !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setTrackToRemove(null)}
+        title="Quitar de favoritos"
+        onClose={() => setTrackToRemove(null)}
+        onCancel={() => setTrackToRemove(null)}
+        onConfirm={handleConfirmUnlike}
+        confirmLabel="Quitar"
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            justifyContent: 'center',
-            padding: spacing.lg,
-          }}
-        >
-          <Modal
-            title="Quitar de favoritos"
-            onClose={() => setTrackToRemove(null)}
-            onCancel={() => setTrackToRemove(null)}
-            onConfirm={handleConfirmUnlike}
-            confirmLabel="Quitar"
-          >
-            <AppText variant="body-sm">
-              ¿Estás seguro de que querés quitar este tema de tus favoritos?
-            </AppText>
-          </Modal>
-        </View>
-      </RNModal>
+        <AppText variant="body-sm">
+          ¿Estás seguro de que querés quitar este tema de tus favoritos?
+        </AppText>
+      </Modal>
     </SafeAreaView>
   );
 }
