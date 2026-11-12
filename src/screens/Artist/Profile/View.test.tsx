@@ -59,8 +59,8 @@ describe('ArtistProfileViewScreen', () => {
 
   it('muestra el nombre y la bio del artista', async () => {
     mockState({ status: 'success', data: ARTIST, reload: jest.fn() });
-    const { getByText } = await render(<ArtistProfileViewScreen />);
-    expect(getByText('Rpruebas Artist')).toBeTruthy();
+    const { getAllByText, getByText } = await render(<ArtistProfileViewScreen />);
+    expect(getAllByText('Rpruebas Artist')).toHaveLength(2);
     expect(getByText('Bio de prueba')).toBeTruthy();
   });
 
@@ -70,10 +70,30 @@ describe('ArtistProfileViewScreen', () => {
     expect(getByText('Editar')).toBeTruthy();
   });
 
-  it('llama a logout al tocar Cerrar sesión', async () => {
+  it('abre la confirmación y cierra sesión solo al confirmar', async () => {
     mockState({ status: 'success', data: ARTIST, reload: jest.fn() });
-    const { getByText } = await render(<ArtistProfileViewScreen />);
-    await fireEvent.press(getByText('Cerrar sesión'));
+    const screen = await render(<ArtistProfileViewScreen />);
+    expect(screen.queryByText('¿Estás seguro de que querés cerrar sesión?')).toBeNull();
+    await fireEvent.press(screen.getByText('Cerrar sesión'));
+    expect(screen.getByText('¿Estás seguro de que querés cerrar sesión?')).toBeTruthy();
+    expect(logout).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByText('Confirmar'));
     expect(logout).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['Cancelar', 'x', 'android'])('cierra la confirmación con %s y permite reabrirla', async (action) => {
+    mockState({ status: 'success', data: ARTIST, reload: jest.fn() });
+    const screen = await render(<ArtistProfileViewScreen />);
+    await fireEvent.press(screen.getByText('Cerrar sesión'));
+    if (action === 'android') {
+      await fireEvent(screen.getByTestId('logout-confirmation-modal'), 'requestClose');
+    } else {
+      await fireEvent.press(screen.getByText(action));
+    }
+    expect(screen.queryByText('¿Estás seguro de que querés cerrar sesión?')).toBeNull();
+    expect(logout).not.toHaveBeenCalled();
+    await fireEvent.press(screen.getByText('Cerrar sesión'));
+    expect(screen.getByText('¿Estás seguro de que querés cerrar sesión?')).toBeTruthy();
+    expect(logout).not.toHaveBeenCalled();
   });
 });

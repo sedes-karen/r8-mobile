@@ -8,6 +8,7 @@ import { EmptyState } from '../../../components/molecules/EmptyState';
 import { ErrorState } from '../../../components/molecules/ErrorState';
 import { RecipientListRow } from '../../../components/molecules/RecipientListRow';
 import { useRecipientLists } from '../../../features/recipients/useRecipientLists';
+import { LinkButton } from '../../../components/atoms/LinkButton';
 
 /**
  * Recipient Lists — solo lectura. "Nueva lista" y "Cargar CSV" quedan para el Equipo 5
@@ -38,7 +39,14 @@ export function LabelRecipientListsListScreen() {
         )}
 
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-          <Button label="Nueva lista" variant="secondary" disabled onPress={() => {}} />
+          <LinkButton screen="New" params={{}}>
+            <Button
+              label="Nueva lista"
+              variant="secondary"
+              pointerEvents="none"
+              accessible={false}
+            />
+          </LinkButton>
           <Button label="Cargar CSV" variant="secondary" disabled onPress={() => {}} />
         </View>
       </ScrollView>

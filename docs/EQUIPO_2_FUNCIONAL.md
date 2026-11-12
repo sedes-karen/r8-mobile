@@ -40,7 +40,7 @@ Objetivo: priorizar visualización de datos de label antes de CRUD avanzado.
 - Ruta web origen: `/dashboard`
 - Requests:
   - `GET /users/me` (incluye `labelId` cuando aplica)
-  - `GET /promos/for-label?labelId=<labelId>` — listado de promos del label (mismo endpoint que usa el listado de `/promo` en el web; ver `usePromos` / `promosService.getDashboard` en r8-site)
+  - `GET /promos/for-label?labelId=<labelId>` — listado de promos del label (mismo endpoint que usa el listado de `/promo` en el web; ver `usePromos` / `promosService.getDashboard` en r8-site). Es **listado**, no detalle: acá vienen `feedbackCount` / `averageRating`. El detalle de una promo (Artist o Label) es siempre `GET /promos/:id` — ver [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md) §6.
 - Criterio:
   - muestra datos de bienvenida y promos recientes.
 

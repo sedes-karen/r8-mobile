@@ -85,11 +85,16 @@ Objetivo: dejar completo el flujo de entrada y el perfil del artista, asegurando
 ### 2.5 Recuperación de contraseña
 
 - Ruta web origen: `/password-reset`
-- Requests:
-  - `POST /users/password/request-reset`
-  - `POST /users/password/reset`
+- Requests (dos pasos; el token **no** viene en el primero):
+  1. `POST /users/password/request-reset` con `{ email }` → **200** `{ message: "If an account exists..." }`. **Sin** `accessToken`. La respuesta es genérica a propósito (no confirma si el mail existe).
+  2. `POST /users/password/reset` con **ResetPasswordDto** (`email`, `pin` de 4 caracteres, `newPassword` ≥ 6, `confirmPassword`) → **200** `{ message, accessToken }` **y** cookie de refresh. El API revoca los refresh anteriores y abre sesión nueva (`issueUserSession`), igual que `POST /users/verify-email`.
+  3. `GET /users/me` (tras el reset, con el Bearer) para resolver rol y entrar al stack.
 - Criterio:
-  - flujo en dos pasos funcional y validado (mismo contrato que `r8-site/src/api/user.ts`).
+  - paso 1: pedir PIN; no guardar sesión ni tratar el `message` como “el mail existe”.
+  - paso 2: si el PIN es válido, **dejar al usuario logueado** con el `accessToken` del JSON (mismo patrón que login / verify-email: `tokenStore` + `applySession`). No hace falta un login extra.
+  - PIN inválido/expirado → **400**; no hay sesión.
+  - En RN la cookie de refresh no se da por sentada (ver [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md) § Autenticación en React Native); el Bearer del body sí.
+  - Cuerpos: [DTOs_Y_CUERPOS_HTTP.md](./DTOs_Y_CUERPOS_HTTP.md) §2 (`ResetPasswordDto`).
 
 ### 2.6 Perfil artista (edición + imagen)
 

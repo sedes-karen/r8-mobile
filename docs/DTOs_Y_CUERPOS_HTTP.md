@@ -1,6 +1,6 @@
 # DTOs y cuerpos HTTP — API Stage (r8-api)
 
-**Versión:** 2026-09-24  
+**Versión:** 2026-10-23  
 **Audiencia:** alumnos **sin acceso al código** de r8-api; consumirán la API en **stage**.  
 **URL base:** `https://api.stage.r8.audio`  
 **Mapa de rutas y flujos:** [REFERENCIA_API_R8.md](./REFERENCIA_API_R8.md)
@@ -147,12 +147,16 @@ Todos opcionales (al menos uno): `fullName`, `bandcampUrl`, `soundcloudUrl`, `in
 
 ### ResetPasswordDto (`POST /users/password/reset`)
 
+Paso 2 del reset. El paso 1 (`POST /users/password/request-reset`) **no** emite sesión: solo `{ message }` genérico.
+
 | Campo | Tipo | Notas |
 |-------|------|--------|
 | `email` | string | |
 | `pin` | string | **4 caracteres** (PIN del email) |
 | `newPassword` | string | mínimo **6** caracteres |
 | `confirmPassword` | string | debe coincidir con `newPassword` |
+
+Respuesta **200:** `{ "message": "Password has been reset successfully.", "accessToken": string }` + cookie refresh. El API revoca refresh previos y deja al usuario logueado (mismo patrón que `verify-email`). PIN inválido/expirado → **400**. En mobile usar el `accessToken` del JSON; no hace falta un `POST /auth/login` extra.
 
 ---
 
@@ -349,7 +353,7 @@ Opcionales: `title`, `artist`, `artistId`, `artistEmail`, `releaseDate`, `type` 
 | `GET` | `/promos/dashboard/:labelId` | — | Dashboard (label o artist según rol) |
 | `GET` | `/promos/inbox` | `?token=`, `?no-feedback-only=true` | **PromoInboxItemDto[]** |
 | `GET` | `/promos/inbox/pending-count` | `?token=` | `{ "count": number }` |
-| `GET` | `/promos/:id` | `?token=` | **PromoDetailDto** (slim) |
+| `GET` | `/promos/:id` | Bearer y/o `?token=` | **PromoDetailDto** — **el mismo** para Artist/Promos/Details y Label/Releases/Promos/Details |
 | `GET` | `/promos/:id/public` | — | **PublicPromoDto** (sin sesión) |
 | `POST` | `/promos/:id/public-access` | — (Bearer artist/label/guest) | `{ "ok": true }` |
 | `POST` | `/promos` | **CreatePromoDto** | **201** |
@@ -398,14 +402,84 @@ Opcionales: `scheduledAt`, `useCuratedDb`, `sendType`, `recipientListIds`, `expi
 }
 ```
 
+`feedbackCount` y `averageRating` son **solo de este listado** (agregados por `releaseId`). El detalle `GET /promos/:id` no los manda. El listado usa `release.coverUrl`; el detalle usa `release.artwork`. Los dos mandan `sentAt`.
+
 ### PromoInboxItemDto (resumen `GET /promos/inbox`)
 
 Campos habituales: `id`, `labelId`, `labelName`, `release` (con `tracks[].src` para audio), `feedback?`, `status`, `isActive`, `sentAt?`, `expiresAt?`.
 
-### PromoDetailDto (resumen `GET /promos/:id`)
+### PromoDetailDto (`GET /promos/:id`) — Artist **y** Label Details
 
-Incluye: `id`, `release` (slim: `id`, `title`, `artistName`, `labelName`, `catalogNumber`, `artwork`, `releaseDate`, `type`, `notes`), `scheduledAt` (**`string \| null`**), `status`, `isActive`, `useCuratedDb`, `recipientLists`, `createdAt`, `updatedAt`, `errorMessage?`.  
-**No** incluye: `labelId`, `releaseId`, `recipientListIds`, `release.tracks` (para audio usar `GET /releases/:releaseId`).
+**Un solo request.** Equipo 3 (Artist/Promos/Details, feedback) y Equipo 4 (Label/Releases/Promos/Details, Edit) pegan acá. No hay un GET de detalle “de label” aparte. `GET /promos/for-label` es **solo el listado**.
+
+Auth: Bearer (artista receptor o dueño del sello) o `?token=` (contacto promo). El servidor elige vista: si el JWT es dueño del label, `ownerView` y agrega `credit`; si no, el mismo body **sin** `credit`.
+
+El release va **slim**: no trae `tracks` ni URLs de audio. Para reproducir: `release.id` → `GET /releases/:releaseId` (con `?token=` si aplica).
+
+```json
+{
+  "id": "uuid",
+  "labelId": "uuid",
+  "labelName": "string",
+  "releaseId": "uuid",
+  "release": {
+    "id": "uuid",
+    "title": "string",
+    "artistName": "string | null",
+    "labelName": "string",
+    "labelId": "uuid",
+    "catalogNumber": "string | null",
+    "artwork": "url-firmada",
+    "releaseDate": "YYYY-MM-DD",
+    "type": "EP",
+    "notes": "string | null"
+  },
+  "scheduledAt": "ISO | null",
+  "sentAt": "ISO | null",
+  "status": "SENT",
+  "isActive": true,
+  "expired": false,
+  "useCuratedDb": false,
+  "recipientLists": [
+    { "id": "uuid", "name": "string", "recipientCount": 0, "hasNonValidMailRecipients": false }
+  ],
+  "createdAt": "ISO",
+  "updatedAt": "ISO",
+  "errorMessage": "string",
+  "credit": {
+    "type": "own",
+    "state": "CONSUMED",
+    "lotExpiresAt": "ISO"
+  }
+}
+```
+
+- `sentAt` **sí viene** (ISO o `null`). No hace falta `for-label` para pintar “enviada el”.
+- `labelId` y `releaseId` **sí vienen** (planos, además del `release` embebido).
+- `artwork` es URL firmada; si no hay arte, la clave puede **omitirse** (no mandar `null`).
+- `errorMessage` solo si hubo fallo; si no, se omite.
+- `credit` **solo si el caller es dueño del sello**. El artista/guest no lo recibe. Shape: `type` → `own` \| `curated`; `state` → `RESERVED` \| `CONSUMED` \| `RELEASED`.
+- `expired` es atajo de `status === "EXPIRED"` (además de `isActive`).
+
+**No** incluye (no los tipen en el detalle; no van a llegar):
+
+| Campo | Dónde sí está |
+|-------|----------------|
+| `release.tracks` / audio | `GET /releases/:releaseId` |
+| `recipientListIds` | `GET /promos/for-label` (el detalle trae `recipientLists` embebidas) |
+| `feedbackCount`, `averageRating` | **solo** `GET /promos/for-label` |
+| `release.coverUrl` | listado (`for-label`); el detalle usa `release.artwork` |
+| `release.artistEmail` | listado (`for-label`) |
+
+En el cliente mobile: **una** función (`getPromoDetails`). `fetchPromoById` / `usePromoDetail` no son otro endpoint: delegan y recastean el tipo. No esperen `feedbackCount` en ese tipo.
+
+### Qué pide cada pantalla (mismo GET vs listado)
+
+| Pantalla | Request | Para `sentAt` | Para rating/cantidad de feedback |
+|----------|---------|---------------|----------------------------------|
+| Artist/Promos/Details | `GET /promos/:id` | el mismo GET | no aplica |
+| Label/Releases/Promos/Details | `GET /promos/:id` | el mismo GET | no viene; está en el listado |
+| Label/Releases/Promos/List | `GET /promos/for-label?labelId=` | el listado | `feedbackCount` / `averageRating` |
 
 ### PublicPromoDto (`GET /promos/:id/public`)
 

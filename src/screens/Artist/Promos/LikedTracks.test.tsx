@@ -44,13 +44,22 @@ describe('ArtistPromosLikedTracksScreen', () => {
     expect(getByText('Todavía no marcaste ningún track como favorito.')).toBeTruthy();
   });
 
-  it('llama a unlikeTrack con release/feedback/track al tocar Quitar', async () => {
+  it('llama a unlikeTrack con release/feedback/track al confirmar Quitar', async () => {
     const unlikeTrack = jest.fn();
     mockState({ items: [RELEASE], unlikeTrack });
 
-    const { getByText } = await render(<ArtistPromosLikedTracksScreen />);
+    const { getByText, getAllByText } = await render(<ArtistPromosLikedTracksScreen />);
+
     expect(getByText('Rpruebas Track 1')).toBeTruthy();
+
     await fireEvent.press(getByText('Quitar'));
+
+    expect(
+      getByText('¿Estás seguro de que querés quitar este tema de tus favoritos?')
+    ).toBeTruthy();
+
+    const botonesQuitar = getAllByText('Quitar');
+    await fireEvent.press(botonesQuitar[botonesQuitar.length - 1]);
 
     expect(unlikeTrack).toHaveBeenCalledWith('release-1', 'feedback-1', 'track-1');
   });
