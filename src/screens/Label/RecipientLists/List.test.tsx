@@ -1,9 +1,14 @@
 import { render } from '@testing-library/react-native';
+import * as React from 'react';
 import { LabelRecipientListsListScreen } from './List';
 import * as useRecipientListsModule from '../../../features/recipients/useRecipientLists';
 import type { RecipientListsIndexResponse } from '../../../types/recipients';
 
 jest.mock('../../../features/recipients/useRecipientLists');
+
+jest.mock('../../../components/atoms/LinkButton', () => ({
+  LinkButton: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 const RESPONSE: RecipientListsIndexResponse = {
   lists: [
