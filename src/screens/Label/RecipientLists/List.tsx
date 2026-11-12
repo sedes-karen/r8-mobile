@@ -35,7 +35,11 @@ export function LabelRecipientListsListScreen() {
         {lists.length === 0 ? (
           <EmptyState message="Todavía no creaste ninguna lista de destinatarios." />
         ) : (
-          lists.map((list) => <RecipientListRow key={list.id} list={list} />)
+          lists.map((list) => (
+            <LinkButton key={list.id} screen="Details" params={{ listId: list.id }}>
+              <RecipientListRow list={list} />
+            </LinkButton>
+          ))
         )}
 
         <View style={{ flexDirection: 'row', gap: spacing.sm }}>
