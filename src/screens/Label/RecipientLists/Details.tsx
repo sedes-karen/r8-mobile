@@ -23,8 +23,6 @@ import { RecipientMemberRow } from '../../../components/molecules/RecipientMembe
 import { SearchField } from '../../../components/molecules/SearchField';
 import { useRecipientListDetail } from '../../../features/recipients/useRecipientListDetail';
 
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useManageMembers } from '../../../features/recipients/useManageMembers';
 import type { RecipientListMember } from '../../../types/recipients';
 
@@ -44,9 +42,6 @@ type LabelRecipientListsDetailsScreenProps = StaticScreenProps<{ listId: string 
  * Permite visualizar miembros, agregar nuevos contactos (por email o desde el pool) y quitar miembros.
  */
 export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsDetailsScreenProps) {
-
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RecipientListsStackParamList>>();
 
   const listId = route.params.listId;
   const state = useRecipientListDetail(listId);
@@ -204,12 +199,6 @@ export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsD
           </View>
         )}
       
-<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-  <Button label="Agregar destinatario" variant="secondary" disabled onPress={() => {}} />
-  <Button label="Editar lista" variant="secondary" disabled onPress={() => {}}/>
-  <Button label="Cargar CSV" variant="secondary" onPress={() => navigation.navigate('BulkUpload', { listId: route.params.listId,})} />
-</View>
-
              <View
           style={{
             flexDirection: 'row',
@@ -241,14 +230,22 @@ export function LabelRecipientListsDetailsScreen({ route }: LabelRecipientListsD
             <AppText variant="title-md">Editar lista</AppText>
           </LinkButton>
 
-          <Button
-            label="Cargar CSV"
-            variant="secondary"
-            disabled={loading}
-            onPress={() => {
-              navigation.navigate('BulkUpload', { listId });
-            }}
-          />
+          <LinkButton
+            screen="BulkUpload"
+            params={{ listId }}
+            style={({ pressed }) => ({
+              backgroundColor: colors.surface.containerHigh,
+              opacity: pressed ? 0.6 : 1,
+              paddingVertical: spacing.sm,
+              paddingHorizontal: spacing.lg,
+              borderRadius: borderRadius.full,
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 44,
+            })}
+          >
+            <AppText variant="title-md">Cargar CSV</AppText>
+          </LinkButton>
         </View>
         
       </ScrollView>
