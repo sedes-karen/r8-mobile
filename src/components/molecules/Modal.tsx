@@ -13,15 +13,17 @@ type ModalProps = {
   onCancel: () => void;
   onConfirm: () => void;
   confirmLabel?: string;
+  testID?: string;
 };
 
-export function Modal({ title, children, visible, onClose, onCancel, onConfirm, confirmLabel = 'Confirmar' }: ModalProps) {
+export function Modal({ title, children, visible, onClose, onCancel, onConfirm, confirmLabel = 'Confirmar', testID }: ModalProps) {
   return (
     <NativeModal
       visible={visible}
       transparent
       animationType="fade"
       onRequestClose={onClose}
+      testID={testID}
     >
         {/* Fondo oscuro que ocupa toda la pantalla */}
       <View
@@ -43,7 +45,7 @@ export function Modal({ title, children, visible, onClose, onCancel, onConfirm, 
 
           <View style={{width: '100%', display: 'flex', flexDirection: 'row'}}>
             <AppText variant="headline-lg">{title}</AppText>
-            <Pressable onPress={onClose} style={{marginLeft: 'auto'}}>
+            <Pressable onPress={onClose} style={{marginLeft: 'auto'}} testID="modal-close-button">
               <LucideIcon name="x" variant="title-md" color={colors.surface.bright}  />
             </Pressable>
           </View>

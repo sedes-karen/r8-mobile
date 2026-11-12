@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal as NativeModal, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinkButton } from '../../../components/atoms/LinkButton';
 import { borderRadius, colors, spacing } from '../../../constants/design';
@@ -76,28 +76,20 @@ export function ArtistProfileViewScreen() {
         </LinkButton>
         <Button label="Cerrar sesión" variant="secondary" onPress={() => setIsLogoutModalVisible(true)} />
       </ScrollView>
-      <NativeModal
+      <ConfirmationModal
         testID="logout-confirmation-modal"
         visible={isLogoutModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setIsLogoutModalVisible(false)}
+        title="Cerrar sesión"
+        confirmLabel="Confirmar"
+        onClose={() => setIsLogoutModalVisible(false)}
+        onCancel={() => setIsLogoutModalVisible(false)}
+        onConfirm={() => {
+          setIsLogoutModalVisible(false);
+          logout();
+        }}
       >
-        <View style={{ flex: 1, justifyContent: 'center', padding: spacing.lg, backgroundColor: `${colors.background}80` }}>
-          <ConfirmationModal
-            title="Cerrar sesión"
-            confirmLabel="Confirmar"
-            onClose={() => setIsLogoutModalVisible(false)}
-            onCancel={() => setIsLogoutModalVisible(false)}
-            onConfirm={() => {
-              setIsLogoutModalVisible(false);
-              logout();
-            }}
-          >
-            <AppText variant="body-lg">¿Estás seguro de que querés cerrar sesión?</AppText>
-          </ConfirmationModal>
-        </View>
-      </NativeModal>
+        <AppText variant="body-lg">¿Estás seguro de que querés cerrar sesión?</AppText>
+      </ConfirmationModal>
     </SafeAreaView>
   );
 }
