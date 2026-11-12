@@ -10,8 +10,8 @@ export type { PromoStatus };
 export type PromoRecipientList = {
   id: string;
   name: string;
-  recipientCount: number;
-  hasNonValidMailRecipients: boolean;
+  recipientCount?: number;
+  hasNonValidMailRecipients?: boolean;
 };
 
 /**

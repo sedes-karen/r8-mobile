@@ -6,6 +6,7 @@ import type {
   TrackStatsDelta,
   UpdateFeedbackBody,
 } from '../../types/feedback/form';
+import type { LabelFeedbackListResponse, PendingFeedbackCount } from '../../types/feedback/labelFeedback';
 
 /**
  * Feedback del receptor (scope `/releases/:releaseId/feedback`, ver DTOs §8.2). El "me gusta" de
@@ -105,4 +106,26 @@ export async function markTracksDownloaded(batch: DownloadedBatchItem[]): Promis
     throw await readApiError(response, 'No se pudo registrar la descarga');
   }
   return response.json() as Promise<FeedbackEntity[]>;
+}
+
+/**
+ * GET /feedback — todo el feedback que recibió el label (tenant por JWT). Devuelve un objeto
+ * `{ feedback, total }`, no un array. No se le mandan `dateFrom`/`dateTo`: el rango de fechas que
+ * usa la pantalla solo aplica a /feedback/analytics.
+ */
+export async function fetchLabelFeedback(): Promise<LabelFeedbackListResponse> {
+  const response = await apiClient('/feedback');
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo cargar el feedback');
+  }
+  return response.json() as Promise<LabelFeedbackListResponse>;
+}
+
+/** GET /feedback/pending-count — cantidad de feedback pendiente de gestionar por el label. */
+export async function fetchPendingFeedbackCount(): Promise<PendingFeedbackCount> {
+  const response = await apiClient('/feedback/pending-count');
+  if (!response.ok) {
+    throw await readApiError(response, 'No se pudo cargar el feedback pendiente');
+  }
+  return response.json() as Promise<PendingFeedbackCount>;
 }

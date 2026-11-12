@@ -10,10 +10,13 @@ import { ErrorState } from '../../../components/molecules/ErrorState';
 import { ProfileField } from '../../../components/molecules/ProfileField';
 import { useLabelProfile } from '../../../features/label/useLabelProfile';
 import { useAuthActions } from '../../../features/auth/info';
+import { useState } from 'react';
+import { Modal } from '../../../components/molecules/Modal';
 
 export function LabelProfileViewScreen() {
   const state = useLabelProfile();
   const { logout } = useAuthActions();
+  const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
 
   if (state.status === 'loading') {
     return <LoadingBlock label="Cargando perfil..." />;
@@ -58,8 +61,24 @@ export function LabelProfileViewScreen() {
         >
           <AppText variant="title-md" color={colors.onSurface.default}>Editar</AppText>
         </LinkButton>
-        <Button label="Cerrar sesión" variant="secondary" onPress={logout} />
+
+        <Button label="Cerrar sesión" variant="secondary" onPress={() => setIsLogoutModalVisible(true)}/>
       </ScrollView>
+      <Modal
+        visible={isLogoutModalVisible}
+        title="Cerrar sesión"
+        confirmLabel="Confirmar"
+        onClose={() => setIsLogoutModalVisible(false)}
+        onCancel={() => setIsLogoutModalVisible(false)}
+        onConfirm={() => {
+          setIsLogoutModalVisible(false);
+          logout();
+        }}
+      >
+        <AppText variant="body-lg">
+          ¿Estás seguro de que querés cerrar sesión?
+        </AppText>
+      </Modal>
     </SafeAreaView>
   );
 }

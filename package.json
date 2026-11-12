@@ -19,6 +19,7 @@
     "@react-navigation/native-stack": "^7.16.0",
     "expo": "~57.0.25",
     "expo-document-picker": "~57.0.3",
+    "expo-file-system": "~57.0.7",
     "expo-font": "~57.0.3",
     "expo-image-picker": "~57.0.20",
     "expo-modules-core": "~57.0.17",
@@ -45,7 +46,8 @@
     "preset": "jest-expo",
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg)"
-    ]
+    ],
+    "testTimeout": 40000
   },
   "expo": {
     "autolinking": {

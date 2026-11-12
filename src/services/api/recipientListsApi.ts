@@ -6,6 +6,7 @@ import type {
   RecipientListMember,
   RecipientListsIndexResponse,
   RecipientPoolItem,
+  RecipientListSummary,
 } from '../../types/recipients';
 
 /** GET /recipient-lists — requiere sesión label (Bearer). Sin paginado en este batch. */
@@ -110,7 +111,7 @@ export async function addRecipientToListByEmail(
 }
 
 /**
- * POST /recipient-lists/:listId/recipients — agrega un destinatario por su ID (ya existente en el pool).
+ * POST /recipient-lists/:listId/recipients — agrega un destinatario por su ID.
  * Envía exactamente `{ recipientId }`.
  */
 export async function addRecipientToListById(
@@ -129,8 +130,8 @@ export async function addRecipientToListById(
 }
 
 /**
- * DELETE /recipient-lists/:listId/recipients/:recipientId — quita un destinatario de la lista.
- * Responde 204 No Content en caso exitoso (sin cuerpo JSON).
+ * DELETE /recipient-lists/:listId/recipients/:recipientId.
+ * Quita un destinatario de la lista.
  */
 export async function removeRecipientFromList(
   listId: string,
@@ -147,11 +148,8 @@ export async function removeRecipientFromList(
   }
 }
 
-
 /**
  * PUT /recipient-lists/:listId — renombra la lista.
- * No se lee el cuerpo de la respuesta: la doc solo dice "Actualizada" sin detallar la forma, y la
- * pantalla vuelve a pedir la lista igual al salir de la edición.
  */
 export async function updateRecipientList(listId: string, name: string): Promise<void> {
   const response = await apiClient(`/recipient-lists/${encodeURIComponent(listId)}`, {
@@ -165,10 +163,8 @@ export async function updateRecipientList(listId: string, name: string): Promise
 }
 
 /**
- * DELETE /recipient-lists/:listId — elimina la lista (204 sin cuerpo).
- * El 409 significa que la lista está en uso por una promo: se traduce a un mensaje entendible en
- * vez de mostrar el error genérico de la API. Va antes del `!response.ok` porque 409 también es
- * "no ok".
+ * DELETE /recipient-lists/:listId — elimina la lista.
+ * El 409 significa que la lista está siendo usada por una promo.
  */
 export async function deleteRecipientList(listId: string): Promise<void> {
   const response = await apiClient(`/recipient-lists/${encodeURIComponent(listId)}`, {
@@ -180,4 +176,24 @@ export async function deleteRecipientList(listId: string): Promise<void> {
   if (!response.ok) {
     throw await readApiError(response, 'No se pudo eliminar la lista');
   }
+}
+
+/** POST /recipient-lists — crea una lista vacía. */
+export async function createRecipientList(
+  name: string,
+): Promise<RecipientListSummary> {
+  const response = await apiClient('/recipient-lists', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    throw await readApiError(
+      response,
+      'No se pudo crear la lista',
+    );
+  }
+
+  return response.json() as Promise<RecipientListSummary>;
 }

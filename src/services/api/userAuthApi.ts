@@ -35,6 +35,11 @@ export type MessageResponse = {
   accessToken?: string;
 };
 
+export type ResetPasswordResponse = {
+  message: string;
+  accessToken: string;
+};
+
 async function postJson<T>(path: string, body: unknown, includeCookies = false): Promise<T> {
   const response = await apiClient(path, {
     method: 'POST',
@@ -72,6 +77,6 @@ export function requestPasswordReset(email: string): Promise<MessageResponse> {
 }
 
 /** Reemplaza la contraseña después de validar el PIN de recuperación. */
-export function resetPassword(body: ResetPasswordBody): Promise<MessageResponse> {
+export function resetPassword(body: ResetPasswordBody): Promise<ResetPasswordResponse> {
   return postJson('/users/password/reset', body);
 }

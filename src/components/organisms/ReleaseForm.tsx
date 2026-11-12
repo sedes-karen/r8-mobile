@@ -5,6 +5,7 @@ import { Button } from '../atoms/Button';
 import { ErrorMessage } from '../atoms/ErrorMessage';
 import { LabeledInput } from '../molecules/LabeledInput';
 import { ReleaseTypeSelector } from '../molecules/ReleaseTypeSelector';
+import { SuccessNotice } from '../molecules/SuccessNotice';
 
 const RELEASE_TYPES: readonly ReleaseType[] = ['EP', 'VA', 'ALBUM'];
 
@@ -57,6 +58,7 @@ export function ReleaseForm({
     <View style={styles.form}>
       <LabeledInput
         label="Título"
+        accessibilityLabel="Título del release"
         value={title}
         onChangeText={onChangeTitle}
         error={errors?.title}
@@ -64,6 +66,7 @@ export function ReleaseForm({
       />
       <LabeledInput
         label="Artista"
+        accessibilityLabel="Artista del release"
         value={artist}
         onChangeText={onChangeArtist}
         error={errors?.artist}
@@ -78,6 +81,7 @@ export function ReleaseForm({
       />
       <LabeledInput
         label="Fecha de release"
+        accessibilityLabel="Fecha de release"
         value={releaseDate}
         onChangeText={onChangeReleaseDate}
         error={errors?.releaseDate}
@@ -87,7 +91,7 @@ export function ReleaseForm({
         editable={!loading}
       />
       {errorMessage ? <ErrorMessage message={errorMessage} /> : null}
-      {successMessage ? <ErrorMessage message={successMessage} /> : null}
+      {successMessage ? <SuccessNotice title={successMessage} /> : null}
       <Button
         label={submitLabel}
         onPress={onSubmit}
